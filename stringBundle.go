@@ -1,16 +1,19 @@
 package valigo
 
-import "github.com/insei/fmap/v3"
+import (
+	"context"
+
+	"github.com/insei/fmap/v3"
+)
 
 type stringBundle struct {
-	h        Helper
-	appendFn func(field fmap.Field, fn func(h Helper, v any) []error)
+	appendFn func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error)
 	storage  fmap.Storage
 	obj      any
 }
 
-func newStringBundle(obj any, h Helper, appendFn func(field fmap.Field, fn func(h Helper, v any) []error), fields fmap.Storage) *stringBundle {
-	return &stringBundle{appendFn: appendFn, storage: fields, h: h, obj: obj}
+func newStringBundle(obj any, appendFn func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error), fields fmap.Storage) *stringBundle {
+	return &stringBundle{appendFn: appendFn, storage: fields, obj: obj}
 }
 
 func (s *stringBundle) String(field *string) StringBuilder[string] {
@@ -19,7 +22,6 @@ func (s *stringBundle) String(field *string) StringBuilder[string] {
 		panic(err)
 	}
 	return &stringBuilder[string]{
-		h:        s.h,
 		field:    fmapField,
 		appendFn: s.appendFn,
 	}
@@ -31,7 +33,6 @@ func (s *stringBundle) StringPtr(field **string) StringBuilder[*string] {
 		panic(err)
 	}
 	return &stringBuilder[*string]{
-		h:        s.h,
 		field:    fmapField,
 		appendFn: s.appendFn,
 	}

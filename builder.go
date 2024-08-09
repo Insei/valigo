@@ -6,20 +6,18 @@ import (
 
 type builder[T any] struct {
 	*stringBundle
-	obj     any
-	storage *storage
+	obj any
+	v   *Validator
 }
 
 func (b *builder[T]) When(fn func(obj *T) bool) Builder[T] {
-	return configure[T](b.obj, func(obj any) bool {
+	return configure[T](b.v, b.obj, func(obj any) bool {
 		return fn(obj.(*T))
-	}, b.storage)
+	})
 }
 
-func configure[T any](obj any, enabler func(obj any) bool, storage *storage) Builder[T] {
+func configure[T any](v *Validator, obj any, enabler func(obj any) bool) Builder[T] {
 	fieldsStorage, _ := fmap.GetFrom(obj)
-	sb := newStringBundle(obj, helper, storage.new(obj, enabler), fieldsStorage)
-	return &builder[T]{stringBundle: sb, obj: obj, storage: storage}
+	sb := newStringBundle(obj, v.storage.new(obj, enabler), fieldsStorage)
+	return &builder[T]{stringBundle: sb, obj: obj, v: v}
 }
-
-var helper Helper

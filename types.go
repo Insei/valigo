@@ -4,10 +4,6 @@ import (
 	"context"
 )
 
-type Helper interface {
-	Context()
-}
-
 type Translator interface {
 	ErrorT(ctx context.Context, format string, args ...any) error
 	T(ctx context.Context, format string, args ...any) string
@@ -16,8 +12,8 @@ type StringBuilder[T string | *string] interface {
 	Trim() StringBuilder[T]
 	Required() StringBuilder[T]
 	AnyOf(vals ...string) StringBuilder[T]
-	Custom(f func(h Helper, value *T) []error) StringBuilder[T]
-	When(f func(value *T) bool) StringBuilder[T]
+	Custom(f func(ctx context.Context, h *Helper, value *T) []error) StringBuilder[T]
+	When(f func(ctx context.Context, value *T) bool) StringBuilder[T]
 }
 
 type NumberBuilder[T ~int | int8 | int16 | int32 | int64 | *int | *int8 | *int16 | *int32 | *int64 |
@@ -25,7 +21,7 @@ type NumberBuilder[T ~int | int8 | int16 | int32 | int64 | *int | *int8 | *int16
 	float64 | float32 | *float64 | *float32] interface {
 	Max(T) NumberBuilder[T]
 	Min(T) NumberBuilder[T]
-	Custom(func(h Helper, value *T) []error) NumberBuilder[T]
+	Custom(func(h *Helper, value *T) []error) NumberBuilder[T]
 	When(func(value *T) bool) NumberBuilder[T]
 }
 

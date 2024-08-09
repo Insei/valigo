@@ -1,6 +1,7 @@
 package valigo
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -9,15 +10,14 @@ import (
 )
 
 type stringBuilder[T string | *string] struct {
-	h        Helper
 	field    fmap.Field
-	appendFn func(field fmap.Field, fn func(h Helper, v any) []error)
-	enabler  func(value *T) bool
+	appendFn func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error)
+	enabler  func(ctx context.Context, value *T) bool
 }
 
 func (s *stringBuilder[T]) Trim() StringBuilder[T] {
-	s.appendFn(s.field, func(h Helper, value any) []error {
-		if s.enabler != nil && !s.enabler(value.(*T)) {
+	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
 		switch strVal := value.(type) {
@@ -34,8 +34,8 @@ func (s *stringBuilder[T]) Trim() StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) Required() StringBuilder[T] {
-	s.appendFn(s.field, func(h Helper, value any) []error {
-		if s.enabler != nil && !s.enabler(value.(*T)) {
+	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
 		switch strVal := value.(type) {
@@ -54,8 +54,8 @@ func (s *stringBuilder[T]) Required() StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) AnyOf(vals ...string) StringBuilder[T] {
-	s.appendFn(s.field, func(h Helper, value any) []error {
-		if s.enabler != nil && !s.enabler(value.(*T)) {
+	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
 		switch strVal := value.(type) {
@@ -78,22 +78,22 @@ func (s *stringBuilder[T]) AnyOf(vals ...string) StringBuilder[T] {
 	return s
 }
 
-func (s *stringBuilder[T]) Custom(f func(h Helper, value *T) []error) StringBuilder[T] {
-	s.appendFn(s.field, func(h Helper, value any) []error {
-		if s.enabler != nil && !s.enabler(value.(*T)) {
+func (s *stringBuilder[T]) Custom(f func(ctx context.Context, h *Helper, value *T) []error) StringBuilder[T] {
+	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
-		return f(h, value.(*T))
+		return f(ctx, h, value.(*T))
 	})
 	return s
 }
 
-func (s *stringBuilder[T]) When(f func(value *T) bool) StringBuilder[T] {
+func (s *stringBuilder[T]) When(f func(ctx context.Context, value *T) bool) StringBuilder[T] {
 	fn := f
 	if s.enabler != nil {
-		fn = func(value *T) bool {
-			if s.enabler(value) {
-				return f(value)
+		fn = func(ctx context.Context, value *T) bool {
+			if s.enabler(ctx, value) {
+				return f(ctx, value)
 			}
 			return false
 		}

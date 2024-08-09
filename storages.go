@@ -1,12 +1,13 @@
 package valigo
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/insei/fmap/v3"
 )
 
-type validatorFn func(h Helper, obj, v any) []error
+type validatorFn func(ctx context.Context, h *Helper, obj, v any) []error
 
 type cached struct {
 	field fmap.Field
@@ -32,14 +33,14 @@ func (s *storage) getCache(objTypeOf reflect.Type) ([]cached, bool) {
 	return cache, ok
 }
 
-func (s *storage) new(temp any, enabler func(any) bool) func(field fmap.Field, fn func(h Helper, v any) []error) {
+func (s *storage) new(temp any, enabler func(any) bool) func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error) {
 	t := reflect.TypeOf(temp)
-	return func(field fmap.Field, fn func(h Helper, v any) []error) {
-		fnNew := func(h Helper, obj, v any) []error {
+	return func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error) {
+		fnNew := func(ctx context.Context, h *Helper, obj, v any) []error {
 			if enabler != nil && !enabler(obj) {
 				return nil
 			}
-			return fn(h, v)
+			return fn(ctx, h, v)
 		}
 		_, ok := s.data[t]
 		if !ok {
