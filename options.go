@@ -5,5 +5,21 @@ type Options struct {
 }
 
 type Option interface {
-	apply(*Validator)
+	apply(v *Validator)
+}
+
+type translatorOption struct {
+	t Translator
+}
+
+func (t translatorOption) apply(v *Validator) {
+	if t.t != nil {
+		v.helper.Translator = t.t
+	}
+}
+
+func WithTranslator(t Translator) Option {
+	return &translatorOption{
+		t: t,
+	}
 }

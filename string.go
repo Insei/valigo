@@ -2,7 +2,6 @@ package valigo
 
 import (
 	"context"
-	"fmt"
 	"slices"
 	"strings"
 
@@ -41,11 +40,11 @@ func (s *stringBuilder[T]) Required() StringBuilder[T] {
 		switch strVal := value.(type) {
 		case *string:
 			if len(*strVal) < 1 {
-				return []error{fmt.Errorf("")}
+				return []error{h.ErrorT(ctx, "")}
 			}
 		case **string:
 			if *strVal == nil || len(**strVal) < 1 {
-				return []error{fmt.Errorf("")}
+				return []error{h.ErrorT(ctx, "")}
 			}
 		}
 		return nil
@@ -62,15 +61,15 @@ func (s *stringBuilder[T]) AnyOf(vals ...string) StringBuilder[T] {
 		case *string:
 			contains := slices.Contains(vals, *strVal)
 			if !contains {
-				return []error{fmt.Errorf("")}
+				return []error{h.ErrorT(ctx, "")}
 			}
 		case **string:
 			if *strVal == nil {
-				return []error{fmt.Errorf("")}
+				return []error{h.ErrorT(ctx, "")}
 			}
 			contains := slices.Contains(vals, **strVal)
 			if !contains {
-				return []error{fmt.Errorf("")}
+				return []error{h.ErrorT(ctx, "")}
 			}
 		}
 		return nil
