@@ -2,12 +2,27 @@ package valigo
 
 import (
 	"context"
+	"fmt"
 )
+
+type Error struct {
+	Message  string
+	Location string
+	Value    any
+}
+
+func (e *Error) Error() string {
+	if e.Location == "" && e.Value == nil {
+		return e.Message
+	}
+	return fmt.Sprintf("%s (%s: %v)", e.Message, e.Location, e.Value)
+}
 
 type Translator interface {
 	ErrorT(ctx context.Context, format string, args ...any) error
 	T(ctx context.Context, format string, args ...any) string
 }
+
 type StringBuilder[T string | *string] interface {
 	Trim() StringBuilder[T]
 	Required() StringBuilder[T]
@@ -21,8 +36,8 @@ type NumberBuilder[T ~int | int8 | int16 | int32 | int64 | *int | *int8 | *int16
 	float64 | float32 | *float64 | *float32] interface {
 	Max(T) NumberBuilder[T]
 	Min(T) NumberBuilder[T]
-	Custom(func(h *Helper, value *T) []error) NumberBuilder[T]
-	When(func(value *T) bool) NumberBuilder[T]
+	Custom(func(ctx context.Context, h *Helper, value *T) []error) NumberBuilder[T]
+	When(func(ctx context.Context, value *T) bool) NumberBuilder[T]
 }
 
 type NumbersBundleBuilder interface {
@@ -70,7 +85,8 @@ type SlicesBundleBuilder interface {
 type Builder[T any] interface {
 	//NumbersBundleBuilder
 	StringsBundleBuilder
-	When(func(obj *T) bool) Builder[T]
+	When(func(ctx context.Context, obj *T) bool) Builder[T]
+	Custom(fn func(ctx context.Context, h *Helper, obj *T) []*Error)
 	//Custom(func(obj *T) []error) Builder[T]
 	//SlicesBundleBuilder
 }

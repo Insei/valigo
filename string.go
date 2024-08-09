@@ -33,6 +33,7 @@ func (s *stringBuilder[T]) Trim() StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) Required() StringBuilder[T] {
+	tagRequiredFormatKey := "validation:Field should be fulfilled"
 	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
@@ -40,11 +41,11 @@ func (s *stringBuilder[T]) Required() StringBuilder[T] {
 		switch strVal := value.(type) {
 		case *string:
 			if len(*strVal) < 1 {
-				return []error{h.ErrorT(ctx, "")}
+				return []error{h.ErrorT(ctx, tagRequiredFormatKey)}
 			}
 		case **string:
 			if *strVal == nil || len(**strVal) < 1 {
-				return []error{h.ErrorT(ctx, "")}
+				return []error{h.ErrorT(ctx, tagRequiredFormatKey)}
 			}
 		}
 		return nil

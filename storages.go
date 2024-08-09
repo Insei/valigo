@@ -9,51 +9,48 @@ import (
 
 type validatorFn func(ctx context.Context, h *Helper, obj, v any) []error
 
-type cached struct {
-	field fmap.Field
-	fn    validatorFn
-}
-
 type storage struct {
-	data  map[reflect.Type]map[fmap.Field][]validatorFn
-	cache map[reflect.Type][]cached
+	validators map[reflect.Type][]func(ctx context.Context, h *Helper, obj any) []error
 }
 
-func (s *storage) toCache(objTypeOf reflect.Type) {
-	for field, validators := range s.get(objTypeOf) {
-		for _, validator := range validators {
-			s.cache[objTypeOf] = append(s.cache[objTypeOf], cached{field: field, fn: validator})
+func (s *storage) newOnStruct(temp any, enabler func(context.Context, any) bool, fn func(ctx context.Context, h *Helper, obj any) []*Error) {
+	t := reflect.TypeOf(temp)
+	fnNew := func(ctx context.Context, h *Helper, obj any) []error {
+		if enabler != nil && !enabler(ctx, obj) {
+			return nil
 		}
+		errsTyped := fn(ctx, h, obj)
+		errs := make([]error, len(errsTyped))
+		for i, err := range errsTyped {
+			errs[i] = err
+		}
+		return errs
 	}
-	s.data = make(map[reflect.Type]map[fmap.Field][]validatorFn)
+	s.validators[t] = append(s.validators[t], fnNew)
 }
 
-func (s *storage) getCache(objTypeOf reflect.Type) ([]cached, bool) {
-	cache, ok := s.cache[objTypeOf]
-	return cache, ok
-}
-
-func (s *storage) new(temp any, enabler func(any) bool) func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error) {
+func (s *storage) newOnField(temp any, enabler func(context.Context, any) bool) func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error) {
 	t := reflect.TypeOf(temp)
 	return func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error) {
 		fnNew := func(ctx context.Context, h *Helper, obj, v any) []error {
-			if enabler != nil && !enabler(obj) {
+			if enabler != nil && !enabler(ctx, obj) {
 				return nil
 			}
 			return fn(ctx, h, v)
 		}
-		_, ok := s.data[t]
+		_, ok := s.validators[t]
 		if !ok {
-			s.data[t] = make(map[fmap.Field][]validatorFn)
+			s.validators[t] = make([]func(ctx context.Context, h *Helper, obj any) []error, 0)
 		}
-		s.data[t][field] = append(s.data[t][field], fnNew)
+		structValidatorFn := func(ctx context.Context, h *Helper, obj any) []error {
+			return fnNew(ctx, h, obj, field.GetPtr(obj))
+		}
+		s.validators[t] = append(s.validators[t], structValidatorFn)
 	}
 }
 
-func (s *storage) get(objType reflect.Type) map[fmap.Field][]validatorFn {
-	return s.data[objType]
-}
-
 func newStorage() *storage {
-	return &storage{data: make(map[reflect.Type]map[fmap.Field][]validatorFn), cache: make(map[reflect.Type][]cached)}
+	return &storage{
+		validators: make(map[reflect.Type][]func(ctx context.Context, h *Helper, obj any) []error),
+	}
 }

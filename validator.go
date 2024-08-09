@@ -11,13 +11,13 @@ type Validator struct {
 }
 
 func (v *Validator) Validate(ctx context.Context, obj any) []error {
-	cache, ok := v.storage.getCache(reflect.TypeOf(obj))
+	validators, ok := v.storage.validators[reflect.TypeOf(obj)]
 	if !ok {
 		return nil
 	}
-	var errs []error = nil
-	for _, ch := range cache {
-		errs = append(errs, ch.fn(ctx, v.helper, obj, ch.field.GetPtr(obj))...)
+	var errs []error
+	for _, validator := range validators {
+		errs = append(errs, validator(ctx, v.helper, obj)...)
 	}
 	return errs
 }
@@ -40,6 +40,4 @@ func Configure[T any](v *Validator, fn func(builder Builder[T], temp *T)) {
 	b := configure[T](v, obj, nil)
 	// Append users validators
 	fn(b, obj)
-	// save validators functions to cache
-	v.storage.toCache(reflect.TypeOf(obj))
 }

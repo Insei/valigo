@@ -41,7 +41,10 @@ func benchValidateInit() {
 	}
 	initialized = true
 	Configure[Sender](validator, func(builder Builder[Sender], temp *Sender) {
-		smtpValidator := builder.When(func(obj *Sender) bool {
+		builder.Custom(func(ctx context.Context, h *Helper, obj *Sender) []*Error {
+			return nil
+		})
+		smtpValidator := builder.When(func(_ context.Context, obj *Sender) bool {
 			return obj.Type == "SMTP"
 		})
 		smtpValidator.String(&temp.SMTPHost).Trim().Required()
@@ -49,7 +52,7 @@ func benchValidateInit() {
 
 		builder.StringPtr(&temp.PtrString).Trim().Required()
 
-		httpValidator := builder.When(func(temp *Sender) bool {
+		httpValidator := builder.When(func(_ context.Context, temp *Sender) bool {
 			return temp.Type == "HTTP"
 		})
 		httpValidator.String(&temp.HTTPAddress).Trim().Required()
