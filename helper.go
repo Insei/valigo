@@ -1,29 +1,11 @@
 package valigo
 
-import (
-	"context"
-	"fmt"
-)
+import "github.com/insei/valigo/translator"
 
 type Helper struct {
-	Translator
+	translator.Translator
 }
 
 func newHelper() *Helper {
-	return &Helper{newNoopTranslator()}
-}
-
-type translator struct {
-}
-
-func (t *translator) ErrorT(_ context.Context, format string, args ...any) error {
-	return fmt.Errorf(format, args...)
-}
-
-func (t *translator) T(_ context.Context, format string, args ...any) string {
-	return fmt.Sprintf(format, args...)
-}
-
-func newNoopTranslator() Translator {
-	return &translator{}
+	return &Helper{translator.New()}
 }

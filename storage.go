@@ -7,8 +7,6 @@ import (
 	"github.com/insei/fmap/v3"
 )
 
-type validatorFn func(ctx context.Context, h *Helper, obj, v any) []error
-
 type storage struct {
 	validators map[reflect.Type][]func(ctx context.Context, h *Helper, obj any) []error
 }

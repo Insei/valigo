@@ -18,16 +18,13 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("%s (%s: %v)", e.Message, e.Location, e.Value)
 }
 
-type Translator interface {
-	ErrorT(ctx context.Context, format string, args ...any) error
-	T(ctx context.Context, format string, args ...any) string
-}
-
 type StringBuilder[T string | *string] interface {
 	Trim() StringBuilder[T]
 	Required() StringBuilder[T]
 	AnyOf(vals ...string) StringBuilder[T]
 	Custom(f func(ctx context.Context, h *Helper, value *T) []error) StringBuilder[T]
+	//MaxLen(uint) StringBuilder[T]
+	//MinLen(uint) StringBuilder[T]
 	When(f func(ctx context.Context, value *T) bool) StringBuilder[T]
 }
 

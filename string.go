@@ -32,6 +32,44 @@ func (s *stringBuilder[T]) Trim() StringBuilder[T] {
 	return s
 }
 
+func (s *stringBuilder[T]) MaxLen(maxLen uint) StringBuilder[T] {
+	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
+			return nil
+		}
+		switch strVal := value.(type) {
+		case *string:
+			*strVal = strings.TrimSpace(*strVal)
+		case **string:
+			if *strVal != nil {
+				**strVal = strings.TrimSpace(**strVal)
+			}
+		}
+		return nil
+	})
+	return s
+}
+
+func (s *stringBuilder[T]) MinLen(minLen int) StringBuilder[T] {
+	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
+			return nil
+		}
+		switch strVal := value.(type) {
+		case *string:
+			if len(*strVal) < minLen {
+
+			}
+		case **string:
+			if *strVal != nil {
+				**strVal = strings.TrimSpace(**strVal)
+			}
+		}
+		return nil
+	})
+	return s
+}
+
 func (s *stringBuilder[T]) Required() StringBuilder[T] {
 	tagRequiredFormatKey := "validation:Field should be fulfilled"
 	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {

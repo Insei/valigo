@@ -33,7 +33,7 @@ func New(opts ...Option) *Validator {
 	return v
 }
 
-func Configure[T any](v *Validator, fn func(builder Builder[T], temp *T)) {
+func Configure[T any](v *Validator, fn func(builder Builder[T], obj *T)) {
 	obj := new(T)
 	// allocate all pointers fields values recursively
 	MustZero(obj)

@@ -1,5 +1,7 @@
 package valigo
 
+import "github.com/insei/valigo/translator"
+
 type Options struct {
 	storage storage
 }
@@ -9,7 +11,7 @@ type Option interface {
 }
 
 type translatorOption struct {
-	t Translator
+	t translator.Translator
 }
 
 func (t translatorOption) apply(v *Validator) {
@@ -18,7 +20,7 @@ func (t translatorOption) apply(v *Validator) {
 	}
 }
 
-func WithTranslator(t Translator) Option {
+func WithTranslator(t translator.Translator) Option {
 	return &translatorOption{
 		t: t,
 	}
