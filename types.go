@@ -2,10 +2,6 @@ package valigo
 
 import (
 	"context"
-	"fmt"
-	"reflect"
-
-	"github.com/insei/fmap/v3"
 )
 
 type Helper interface {
@@ -16,6 +12,13 @@ type Translator interface {
 	ErrorT(ctx context.Context, format string, args ...any) error
 	T(ctx context.Context, format string, args ...any) string
 }
+type StringBuilder[T string | *string] interface {
+	Trim() StringBuilder[T]
+	Required() StringBuilder[T]
+	AnyOf(vals ...string) StringBuilder[T]
+	Custom(f func(h Helper, value *T) []error) StringBuilder[T]
+	When(f func(value *T) bool) StringBuilder[T]
+}
 
 type NumberBuilder[T ~int | int8 | int16 | int32 | int64 | *int | *int8 | *int16 | *int32 | *int64 |
 	uint | uint8 | uint16 | uint32 | uint64 | *uint | *uint8 | *uint16 | *uint32 | *uint64 |
@@ -25,14 +28,6 @@ type NumberBuilder[T ~int | int8 | int16 | int32 | int64 | *int | *int8 | *int16
 	Custom(func(h Helper, value *T) []error) NumberBuilder[T]
 	When(func(value *T) bool) NumberBuilder[T]
 }
-
-//type StringBuilder[T string | *string] interface {
-//	Trim() StringBuilder[T]
-//	Required() StringBuilder[T]
-//	AnyOf(vals ...string) StringBuilder[T]
-//	Custom(func(h Helper, value *T) []error) StringBuilder[T]
-//	When(func(value *T) bool) StringBuilder[T]
-//}
 
 type NumbersBundleBuilder interface {
 	Int(field *int) NumberBuilder[int]
@@ -62,14 +57,6 @@ type StringsBundleBuilder interface {
 	StringPtr(field **string) StringBuilder[*string]
 }
 
-type StringBuilder[T string | *string] interface {
-	Trim() StringBuilder[T]
-	Required() StringBuilder[T]
-	AnyOf(vals ...string) StringBuilder[T]
-	Custom(f func(h Helper, value *T) []error) StringBuilder[T]
-	When(f func(value *T) bool) StringBuilder[T]
-}
-
 type StringSliceBuilder[T string | *string] interface {
 	Trim() StringSliceBuilder[T]
 	Max(uint) StringSliceBuilder[T]
@@ -90,25 +77,4 @@ type Builder[T any] interface {
 	When(func(obj *T) bool) Builder[T]
 	//Custom(func(obj *T) []error) Builder[T]
 	//SlicesBundleBuilder
-	//When(func(obj *T) bool) Builder[T]
-	//Custom(func(obj *T) []error) Builder[T]
-}
-
-type stringsBundleBuilder struct {
-	fields        fmap.Storage
-	funcs         map[reflect.Type]any
-	builderStruct any
-}
-
-func (b *stringsBundleBuilder) String(field *string) StringBuilder[string] {
-	fmapField, err := b.fields.GetFieldByPtr(b.builderStruct, field)
-	if err != nil {
-		panic(fmt.Errorf("incorrect ptr to field"))
-	}
-	return &stringBuilder[string]{field: fmapField}
-}
-
-func (b *stringsBundleBuilder) StringPtr(field **string) *StringBuilder[*string] {
-	//TODO implement me
-	panic("implement me")
 }
