@@ -3,11 +3,13 @@ package valigo
 import (
 	"context"
 	"reflect"
+
+	"github.com/insei/valigo/helper"
 )
 
 type Validator struct {
 	storage *storage
-	helper  *Helper
+	helper  *helper.Helper
 }
 
 func (v *Validator) Validate(ctx context.Context, obj any) []error {
@@ -25,7 +27,7 @@ func (v *Validator) Validate(ctx context.Context, obj any) []error {
 func New(opts ...Option) *Validator {
 	v := &Validator{
 		storage: newStorage(),
-		helper:  newHelper(),
+		helper:  helper.NewHelper(),
 	}
 	for _, opt := range opts {
 		opt.apply(v)

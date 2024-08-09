@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/insei/fmap/v3"
+	"github.com/insei/valigo/helper"
+	"github.com/insei/valigo/str"
 )
 
 type builder[T any] struct {
-	*stringBundle
+	*str.StringBundle
 	obj       any
 	v         *Validator
 	enablerFn func(ctx context.Context, obj any) bool
@@ -28,8 +30,8 @@ func (b *builder[T]) When(fn func(ctx context.Context, obj *T) bool) Builder[T] 
 	})
 }
 
-func (b *builder[T]) Custom(fn func(ctx context.Context, h *Helper, obj *T) []*Error) {
-	fnConvert := func(ctx context.Context, h *Helper, objAny any) []*Error {
+func (b *builder[T]) Custom(fn func(ctx context.Context, h *helper.Helper, obj *T) []*Error) {
+	fnConvert := func(ctx context.Context, h *helper.Helper, objAny any) []*Error {
 		return fn(ctx, h, objAny.(*T))
 	}
 	b.v.storage.newOnStruct(b.obj, b.enablerFn, fnConvert)
@@ -37,6 +39,6 @@ func (b *builder[T]) Custom(fn func(ctx context.Context, h *Helper, obj *T) []*E
 
 func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, obj any) bool) Builder[T] {
 	fieldsStorage, _ := fmap.GetFrom(obj)
-	sb := newStringBundle(obj, v.storage.newOnField(obj, enabler), fieldsStorage)
-	return &builder[T]{stringBundle: sb, obj: obj, v: v, enablerFn: enabler}
+	sb := str.NewStringBundle(obj, v.storage.newOnField(obj, enabler), fieldsStorage)
+	return &builder[T]{StringBundle: sb, obj: obj, v: v, enablerFn: enabler}
 }

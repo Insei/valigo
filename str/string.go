@@ -1,4 +1,4 @@
-package valigo
+package str
 
 import (
 	"context"
@@ -6,16 +6,17 @@ import (
 	"strings"
 
 	"github.com/insei/fmap/v3"
+	"github.com/insei/valigo/helper"
 )
 
 type stringBuilder[T string | *string] struct {
 	field    fmap.Field
-	appendFn func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error)
+	appendFn func(field fmap.Field, fn func(ctx context.Context, h *helper.Helper, v any) []error)
 	enabler  func(ctx context.Context, value *T) bool
 }
 
 func (s *stringBuilder[T]) Trim() StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
@@ -33,7 +34,7 @@ func (s *stringBuilder[T]) Trim() StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) MaxLen(maxLen uint) StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
@@ -51,7 +52,7 @@ func (s *stringBuilder[T]) MaxLen(maxLen uint) StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) MinLen(minLen int) StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
@@ -72,7 +73,7 @@ func (s *stringBuilder[T]) MinLen(minLen int) StringBuilder[T] {
 
 func (s *stringBuilder[T]) Required() StringBuilder[T] {
 	tagRequiredFormatKey := "validation:Field should be fulfilled"
-	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
@@ -92,7 +93,7 @@ func (s *stringBuilder[T]) Required() StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) AnyOf(vals ...string) StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
@@ -116,8 +117,8 @@ func (s *stringBuilder[T]) AnyOf(vals ...string) StringBuilder[T] {
 	return s
 }
 
-func (s *stringBuilder[T]) Custom(f func(ctx context.Context, h *Helper, value *T) []error) StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *Helper, value any) []error {
+func (s *stringBuilder[T]) Custom(f func(ctx context.Context, h *helper.Helper, value *T) []error) StringBuilder[T] {
+	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}

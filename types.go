@@ -3,6 +3,9 @@ package valigo
 import (
 	"context"
 	"fmt"
+
+	"github.com/insei/valigo/helper"
+	"github.com/insei/valigo/str"
 )
 
 type Error struct {
@@ -18,22 +21,12 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("%s (%s: %v)", e.Message, e.Location, e.Value)
 }
 
-type StringBuilder[T string | *string] interface {
-	Trim() StringBuilder[T]
-	Required() StringBuilder[T]
-	AnyOf(vals ...string) StringBuilder[T]
-	Custom(f func(ctx context.Context, h *Helper, value *T) []error) StringBuilder[T]
-	//MaxLen(uint) StringBuilder[T]
-	//MinLen(uint) StringBuilder[T]
-	When(f func(ctx context.Context, value *T) bool) StringBuilder[T]
-}
-
 type NumberBuilder[T ~int | int8 | int16 | int32 | int64 | *int | *int8 | *int16 | *int32 | *int64 |
 	uint | uint8 | uint16 | uint32 | uint64 | *uint | *uint8 | *uint16 | *uint32 | *uint64 |
 	float64 | float32 | *float64 | *float32] interface {
 	Max(T) NumberBuilder[T]
 	Min(T) NumberBuilder[T]
-	Custom(func(ctx context.Context, h *Helper, value *T) []error) NumberBuilder[T]
+	Custom(func(ctx context.Context, h *helper.Helper, value *T) []error) NumberBuilder[T]
 	When(func(ctx context.Context, value *T) bool) NumberBuilder[T]
 }
 
@@ -60,11 +53,6 @@ type NumbersBundleBuilder interface {
 	Uint64Ptr(field **uint64) NumberBuilder[*uint64]
 }
 
-type StringsBundleBuilder interface {
-	String(field *string) StringBuilder[string]
-	StringPtr(field **string) StringBuilder[*string]
-}
-
 type StringSliceBuilder[T string | *string] interface {
 	Trim() StringSliceBuilder[T]
 	Max(uint) StringSliceBuilder[T]
@@ -81,9 +69,9 @@ type SlicesBundleBuilder interface {
 
 type Builder[T any] interface {
 	//NumbersBundleBuilder
-	StringsBundleBuilder
+	str.StringsBundleBuilder
 	When(func(ctx context.Context, obj *T) bool) Builder[T]
-	Custom(fn func(ctx context.Context, h *Helper, obj *T) []*Error)
+	Custom(fn func(ctx context.Context, h *helper.Helper, obj *T) []*Error)
 	//Custom(func(obj *T) []error) Builder[T]
 	//SlicesBundleBuilder
 }

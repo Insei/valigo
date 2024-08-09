@@ -5,15 +5,16 @@ import (
 	"reflect"
 
 	"github.com/insei/fmap/v3"
+	"github.com/insei/valigo/helper"
 )
 
 type storage struct {
-	validators map[reflect.Type][]func(ctx context.Context, h *Helper, obj any) []error
+	validators map[reflect.Type][]func(ctx context.Context, h *helper.Helper, obj any) []error
 }
 
-func (s *storage) newOnStruct(temp any, enabler func(context.Context, any) bool, fn func(ctx context.Context, h *Helper, obj any) []*Error) {
+func (s *storage) newOnStruct(temp any, enabler func(context.Context, any) bool, fn func(ctx context.Context, h *helper.Helper, obj any) []*Error) {
 	t := reflect.TypeOf(temp)
-	fnNew := func(ctx context.Context, h *Helper, obj any) []error {
+	fnNew := func(ctx context.Context, h *helper.Helper, obj any) []error {
 		if enabler != nil && !enabler(ctx, obj) {
 			return nil
 		}
@@ -27,10 +28,10 @@ func (s *storage) newOnStruct(temp any, enabler func(context.Context, any) bool,
 	s.validators[t] = append(s.validators[t], fnNew)
 }
 
-func (s *storage) newOnField(temp any, enabler func(context.Context, any) bool) func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error) {
+func (s *storage) newOnField(temp any, enabler func(context.Context, any) bool) func(field fmap.Field, fn func(ctx context.Context, h *helper.Helper, v any) []error) {
 	t := reflect.TypeOf(temp)
-	return func(field fmap.Field, fn func(ctx context.Context, h *Helper, v any) []error) {
-		fnNew := func(ctx context.Context, h *Helper, obj, v any) []error {
+	return func(field fmap.Field, fn func(ctx context.Context, h *helper.Helper, v any) []error) {
+		fnNew := func(ctx context.Context, h *helper.Helper, obj, v any) []error {
 			if enabler != nil && !enabler(ctx, obj) {
 				return nil
 			}
@@ -38,9 +39,9 @@ func (s *storage) newOnField(temp any, enabler func(context.Context, any) bool) 
 		}
 		_, ok := s.validators[t]
 		if !ok {
-			s.validators[t] = make([]func(ctx context.Context, h *Helper, obj any) []error, 0)
+			s.validators[t] = make([]func(ctx context.Context, h *helper.Helper, obj any) []error, 0)
 		}
-		structValidatorFn := func(ctx context.Context, h *Helper, obj any) []error {
+		structValidatorFn := func(ctx context.Context, h *helper.Helper, obj any) []error {
 			return fnNew(ctx, h, obj, field.GetPtr(obj))
 		}
 		s.validators[t] = append(s.validators[t], structValidatorFn)
@@ -49,6 +50,6 @@ func (s *storage) newOnField(temp any, enabler func(context.Context, any) bool) 
 
 func newStorage() *storage {
 	return &storage{
-		validators: make(map[reflect.Type][]func(ctx context.Context, h *Helper, obj any) []error),
+		validators: make(map[reflect.Type][]func(ctx context.Context, h *helper.Helper, obj any) []error),
 	}
 }

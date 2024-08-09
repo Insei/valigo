@@ -1,4 +1,4 @@
-package valigo
+package helper
 
 import "github.com/insei/valigo/translator"
 
@@ -6,6 +6,6 @@ type Helper struct {
 	translator.Translator
 }
 
-func newHelper() *Helper {
+func NewHelper() *Helper {
 	return &Helper{translator.New()}
 }
