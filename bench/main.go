@@ -20,7 +20,7 @@ type Sender struct {
 	HTTPDestParam string
 }
 
-func init() {
+func addValidation() {
 	valigo.AddValidation[Sender](func(builder valigo.Builder[Sender], obj *Sender) {
 		builder.String(&obj.Type).AnyOf("SMTP", "HTTP")
 		smtpValidator := builder.When(func(obj *Sender) bool {
@@ -37,36 +37,34 @@ func init() {
 	})
 }
 
-func iterate(iterations int64) {
+func validate(data []Sender) {
 	start := time.Now()
-	for i := 0; i <= int(iterations); i++ {
-		sender := &Sender{
+	for i, _ := range data {
+		_ = valigo.Validate(&data[i])
+	}
+	elapsed := time.Since(start)
+	log.Printf("ops %d op/ns %d", len(data), elapsed.Nanoseconds()/int64(len(data)))
+}
+
+func createData(iterations int64) []Sender {
+	senders := make([]Sender, 0, iterations)
+	for i := 0; i < int(iterations); i++ {
+		senders = append(senders, Sender{
 			Type:          "SMTP",
 			SMTPHost:      uuid.New().String() + "   ",
 			SMTPPort:      uuid.New().String() + " ",
 			HTTPAddress:   uuid.New().String() + " ",
 			HTTPDestParam: uuid.New().String() + "  ",
-		}
-		//start := time.Now()
-		//if i == 59999999 || i == 0 {
-		//	_ = Validate(sender)
-		//}
-		_ = valigo.Validate(sender)
-		//elapsed := time.Since(start)
-		//fmt.Println(elapsed)
+		})
 	}
-	elapsed := time.Since(start)
-	log.Printf("ops %d op/ns %d", iterations, elapsed.Nanoseconds()/iterations)
+	return senders
 }
 
 func main() {
 	iterations := int64(99999)
-	//diff := int64(10304)
+	addValidation()
 	for i := 0; i < 200000; i++ {
-		//if iterations < diff {
-		//	break
-		//}
-		iterate(iterations)
-		//iterations -= diff
+		senders := createData(iterations)
+		validate(senders)
 	}
 }
