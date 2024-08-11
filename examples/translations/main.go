@@ -41,8 +41,7 @@ func main() {
 	valigo.Configure[Sender](v, func(builder valigo.Builder[Sender], obj *Sender) {
 		builder.String(&obj.Type).Required()
 		builder.String(&obj.SMTPHost).Trim().
-			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey)).
-			AnyOf("TEST", "TEST1")
+			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
 	})
 	sender := &Sender{
 		Type:          "123@123",

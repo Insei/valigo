@@ -30,8 +30,8 @@ func (b *builder[T]) When(fn func(ctx context.Context, obj *T) bool) Builder[T] 
 	})
 }
 
-func (b *builder[T]) Custom(fn func(ctx context.Context, h *shared.Helper, obj *T) []shared.Error) {
-	fnConvert := func(ctx context.Context, h *shared.Helper, objAny any) []shared.Error {
+func (b *builder[T]) Custom(fn func(ctx context.Context, h shared.Helper, obj *T) []shared.Error) {
+	fnConvert := func(ctx context.Context, h shared.Helper, objAny any) []shared.Error {
 		return fn(ctx, h, objAny.(*T))
 	}
 	b.v.storage.newOnStruct(b.obj, b.enablerFn, fnConvert)

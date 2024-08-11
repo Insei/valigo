@@ -9,7 +9,7 @@ import (
 
 type Validator struct {
 	storage *storage
-	helper  *shared.Helper
+	helper  *helper
 }
 
 func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
@@ -36,7 +36,7 @@ func (v *Validator) Validate(ctx context.Context, obj any) []error {
 func New(opts ...Option) *Validator {
 	v := &Validator{
 		storage: newStorage(),
-		helper:  shared.NewHelper(),
+		helper:  newHelper(),
 	}
 	for _, opt := range opts {
 		opt.apply(v)

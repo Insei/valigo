@@ -18,7 +18,7 @@ func (f optionFunc) apply(v *Validator) {
 func WithTranslator(t translator.Translator) Option {
 	return optionFunc(func(v *Validator) {
 		if t != nil {
-			v.helper.Translator = t
+			v.helper.t = t
 		}
 	})
 }
@@ -26,7 +26,7 @@ func WithTranslator(t translator.Translator) Option {
 func WithFieldLocationNamingFn(fn func(field fmap.Field) string) Option {
 	return optionFunc(func(v *Validator) {
 		if fn != nil {
-			v.helper.GetFieldLocation = fn
+			v.helper.getFieldLocation = fn
 		}
 	})
 }

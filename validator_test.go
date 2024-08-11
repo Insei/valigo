@@ -42,7 +42,7 @@ func benchValidateInit() {
 	}
 	initialized = true
 	Configure[Sender](validator, func(builder Builder[Sender], temp *Sender) {
-		builder.Custom(func(ctx context.Context, h *shared.Helper, obj *Sender) []shared.Error {
+		builder.Custom(func(ctx context.Context, h shared.Helper, obj *Sender) []shared.Error {
 			return nil
 		})
 		smtpValidator := builder.When(func(_ context.Context, obj *Sender) bool {

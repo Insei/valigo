@@ -12,4 +12,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/insei/valigo v1.0.0 => ../
+replace github.com/insei/valigo v1.0.0 => ../../

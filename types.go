@@ -57,7 +57,7 @@ type Builder[T any] interface {
 	//NumbersBundleBuilder
 	str.StringsBundleBuilder
 	When(func(ctx context.Context, obj *T) bool) Builder[T]
-	Custom(fn func(ctx context.Context, h *shared.Helper, obj *T) []shared.Error)
+	Custom(fn func(ctx context.Context, h shared.Helper, obj *T) []shared.Error)
 	//Custom(func(obj *T) []error) Builder[T]
 	//SlicesBundleBuilder
 }
