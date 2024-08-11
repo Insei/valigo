@@ -37,7 +37,10 @@ func LocalesFromFS(fsys fs.FS) (map[string]map[string]string, error) {
 	langMap := make(map[string]map[string]string)
 	for _, locale := range rootDir {
 		file, err := fsys.Open(fmt.Sprintf("locales/%s/data.yaml", locale.Name()))
-		if err != nil && !os.IsNotExist(err) {
+		if err != nil && os.IsNotExist(err) {
+			continue
+		}
+		if err != nil {
 			return nil, fmt.Errorf("%w:%s", err, fmt.Sprintf("can't read locales/%s/data.yaml", locale.Name()))
 		}
 		fileBytes, err := io.ReadAll(file)
