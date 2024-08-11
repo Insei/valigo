@@ -29,7 +29,7 @@ func main() {
 		builder.String(&obj.LastName).
 			Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
 				if *value != "Rebecca" {
-					localeKey := "Only Rebecca name is allowed" // you can add translations if you want, see translations example
+					localeKey := "Only \"Rebecca\" is allowed" // you can add translations if you want, see translations example
 					return []shared.Error{h.ErrorT(ctx, value, localeKey)}
 				}
 				return nil

@@ -21,15 +21,11 @@ const (
 type stringBuilder[T string | *string] struct {
 	field    fmap.Field
 	appendFn func(field fmap.Field, fn shared.FieldValidationFn)
-	enabler  func(ctx context.Context, value *T) bool
 	h        shared.Helper
 }
 
 func (s *stringBuilder[T]) Trim() StringBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
-			return nil
-		}
 		switch strVal := value.(type) {
 		case *string:
 			*strVal = strings.TrimSpace(*strVal)
@@ -45,9 +41,6 @@ func (s *stringBuilder[T]) Trim() StringBuilder[T] {
 
 func (s *stringBuilder[T]) MaxLen(maxLen int) StringBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
-			return nil
-		}
 		switch strVal := value.(type) {
 		case *string:
 			if len(*strVal) > maxLen {
@@ -65,9 +58,6 @@ func (s *stringBuilder[T]) MaxLen(maxLen int) StringBuilder[T] {
 
 func (s *stringBuilder[T]) MinLen(minLen int) StringBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
-			return nil
-		}
 		switch strVal := value.(type) {
 		case *string:
 			if len(*strVal) < minLen {
@@ -85,9 +75,6 @@ func (s *stringBuilder[T]) MinLen(minLen int) StringBuilder[T] {
 
 func (s *stringBuilder[T]) Required() StringBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
-			return nil
-		}
 		switch strVal := value.(type) {
 		case *string:
 			if len(*strVal) < 1 {
@@ -105,9 +92,6 @@ func (s *stringBuilder[T]) Required() StringBuilder[T] {
 
 func (s *stringBuilder[T]) Regexp(regexp *regexp.Regexp, opts ...RegexpOption) StringBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
-			return nil
-		}
 		options := regexpOptions{
 			localeKey: regexpLocaleKey,
 		}
@@ -131,9 +115,6 @@ func (s *stringBuilder[T]) Regexp(regexp *regexp.Regexp, opts ...RegexpOption) S
 
 func (s *stringBuilder[T]) AnyOf(allowed ...string) StringBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
-			return nil
-		}
 		switch strVal := value.(type) {
 		case *string:
 			if !slices.Contains(allowed, *strVal) {
@@ -152,24 +133,23 @@ func (s *stringBuilder[T]) AnyOf(allowed ...string) StringBuilder[T] {
 func (s *stringBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value *T) []shared.Error) StringBuilder[T] {
 	customHelper := shared.NewFieldCustomHelper(s.field, s.h)
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
-			return nil
-		}
 		return f(ctx, customHelper, value.(*T))
 	})
 	return s
 }
 
-func (s *stringBuilder[T]) When(f func(ctx context.Context, value *T) bool) StringBuilder[T] {
-	fn := f
-	if s.enabler != nil {
-		fn = func(ctx context.Context, value *T) bool {
-			if s.enabler(ctx, value) {
-				return f(ctx, value)
-			}
-			return false
-		}
+func (s *stringBuilder[T]) When(whenFn func(ctx context.Context, value *T) bool) StringBuilder[T] {
+	if whenFn == nil {
+		return s
 	}
-	s.enabler = fn
+	s.appendFn = func(field fmap.Field, fn shared.FieldValidationFn) {
+		fnWithEnabler := func(ctx context.Context, h shared.Helper, v any) []shared.Error {
+			if !whenFn(ctx, v.(*T)) {
+				return nil
+			}
+			return fn(ctx, h, v)
+		}
+		s.appendFn(field, fnWithEnabler)
+	}
 	return s
 }

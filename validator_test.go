@@ -48,12 +48,13 @@ func benchValidateInit() {
 			}
 			return nil
 		})
-		builder.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *Sender) []shared.Error {
-			//if obj.Type != "" {
-			//	return []shared.Error{h.ErrorT(ctx, &obj.Type, obj.Type, "Should be fulfilled")}
-			//}
-			return nil
-		})
+		// Custom validation on struct gives 1 alloc per operation
+		//builder.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *Sender) []shared.Error {
+		//	if obj.Type == "" {
+		//		return []shared.Error{h.ErrorT(ctx, &obj.Type, obj.Type, "Should be fulfilled")}
+		//	}
+		//	return nil
+		//})
 		smtpValidator := builder.When(func(_ context.Context, obj *Sender) bool {
 			return obj.Type == "SMTP"
 		})
