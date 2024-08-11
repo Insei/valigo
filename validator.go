@@ -33,6 +33,10 @@ func (v *Validator) Validate(ctx context.Context, obj any) []error {
 	return errs
 }
 
+func (v *Validator) GetHelper() shared.Helper {
+	return v.helper
+}
+
 func New(opts ...Option) *Validator {
 	v := &Validator{
 		storage: newStorage(),

@@ -22,6 +22,7 @@ type stringBuilder[T string | *string] struct {
 	field    fmap.Field
 	appendFn func(field fmap.Field, fn shared.FieldValidationFn)
 	enabler  func(ctx context.Context, value *T) bool
+	h        shared.Helper
 }
 
 func (s *stringBuilder[T]) Trim() StringBuilder[T] {
@@ -148,12 +149,13 @@ func (s *stringBuilder[T]) AnyOf(allowed ...string) StringBuilder[T] {
 	return s
 }
 
-func (s *stringBuilder[T]) Custom(f func(ctx context.Context, h shared.Helper, value *T) []shared.Error) StringBuilder[T] {
+func (s *stringBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value *T) []shared.Error) StringBuilder[T] {
+	customHelper := shared.NewFieldCustomHelper(s.field, s.h)
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
-		return f(ctx, h, value.(*T))
+		return f(ctx, customHelper, value.(*T))
 	})
 	return s
 }

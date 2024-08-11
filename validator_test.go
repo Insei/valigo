@@ -42,7 +42,16 @@ func benchValidateInit() {
 	}
 	initialized = true
 	Configure[Sender](validator, func(builder Builder[Sender], temp *Sender) {
-		builder.Custom(func(ctx context.Context, h shared.Helper, obj *Sender) []shared.Error {
+		builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
+			if len(*value) < 20 {
+				return []shared.Error{h.ErrorT(ctx, *value, "Should be longer than 20 characters")}
+			}
+			return nil
+		})
+		builder.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *Sender) []shared.Error {
+			//if obj.Type != "" {
+			//	return []shared.Error{h.ErrorT(ctx, &obj.Type, obj.Type, "Should be fulfilled")}
+			//}
 			return nil
 		})
 		smtpValidator := builder.When(func(_ context.Context, obj *Sender) bool {

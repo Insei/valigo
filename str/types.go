@@ -11,7 +11,7 @@ type StringBuilder[T string | *string] interface {
 	Trim() StringBuilder[T]
 	Required() StringBuilder[T]
 	AnyOf(allowed ...string) StringBuilder[T]
-	Custom(f func(ctx context.Context, h shared.Helper, value *T) []shared.Error) StringBuilder[T]
+	Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value *T) []shared.Error) StringBuilder[T]
 	Regexp(regexp *regexp.Regexp, opts ...RegexpOption) StringBuilder[T]
 	MaxLen(int) StringBuilder[T]
 	MinLen(int) StringBuilder[T]
