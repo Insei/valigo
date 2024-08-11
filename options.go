@@ -1,27 +1,32 @@
 package valigo
 
-import "github.com/insei/valigo/translator"
-
-type Options struct {
-	storage storage
-}
+import (
+	"github.com/insei/fmap/v3"
+	"github.com/insei/valigo/translator"
+)
 
 type Option interface {
 	apply(v *Validator)
 }
 
-type translatorOption struct {
-	t translator.Translator
-}
+type optionFunc func(*Validator)
 
-func (t translatorOption) apply(v *Validator) {
-	if t.t != nil {
-		v.helper.Translator = t.t
-	}
+func (f optionFunc) apply(v *Validator) {
+	f(v)
 }
 
 func WithTranslator(t translator.Translator) Option {
-	return &translatorOption{
-		t: t,
-	}
+	return optionFunc(func(v *Validator) {
+		if t != nil {
+			v.helper.Translator = t
+		}
+	})
+}
+
+func WithFieldLocationNamingFn(fn func(field fmap.Field) string) Option {
+	return optionFunc(func(v *Validator) {
+		if fn != nil {
+			v.helper.GetFieldLocation = fn
+		}
+	})
 }

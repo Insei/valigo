@@ -4,22 +4,31 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/insei/valigo/helper"
+	"github.com/insei/valigo/shared"
 )
 
 type Validator struct {
 	storage *storage
-	helper  *helper.Helper
+	helper  *shared.Helper
 }
 
-func (v *Validator) Validate(ctx context.Context, obj any) []error {
+func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
 	validators, ok := v.storage.validators[reflect.TypeOf(obj)]
 	if !ok {
 		return nil
 	}
-	var errs []error
+	var errs []shared.Error
 	for _, validator := range validators {
 		errs = append(errs, validator(ctx, v.helper, obj)...)
+	}
+	return errs
+}
+
+func (v *Validator) Validate(ctx context.Context, obj any) []error {
+	errsTyped := v.ValidateTyped(ctx, obj)
+	errs := make([]error, len(errsTyped))
+	for i, err := range errsTyped {
+		errs[i] = err
 	}
 	return errs
 }
@@ -27,7 +36,7 @@ func (v *Validator) Validate(ctx context.Context, obj any) []error {
 func New(opts ...Option) *Validator {
 	v := &Validator{
 		storage: newStorage(),
-		helper:  helper.NewHelper(),
+		helper:  shared.NewHelper(),
 	}
 	for _, opt := range opts {
 		opt.apply(v)

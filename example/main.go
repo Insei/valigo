@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"regexp"
 
 	"github.com/google/uuid"
@@ -38,7 +40,7 @@ func main() {
 	v := manualValidatorSettings() //v := valigo.New()
 	valigo.Configure[Sender](v, func(builder valigo.Builder[Sender], obj *Sender) {
 		builder.String(&obj.Type).Required()
-		builder.String(&obj.SMTPHost).
+		builder.String(&obj.SMTPHost).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey)).
 			AnyOf("TEST", "TEST1")
 	})
@@ -50,5 +52,6 @@ func main() {
 		HTTPDestParam: uuid.New().String() + "  ",
 	}
 	errs := v.Validate(context.Background(), sender)
-	_ = errs
+	errsJson, _ := json.Marshal(errs)
+	fmt.Print(string(errsJson))
 }

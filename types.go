@@ -2,31 +2,17 @@ package valigo
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/insei/valigo/helper"
+	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
 )
-
-type Error struct {
-	Message  string
-	Location string
-	Value    any
-}
-
-func (e *Error) Error() string {
-	if e.Location == "" && e.Value == nil {
-		return e.Message
-	}
-	return fmt.Sprintf("%s (%s: %v)", e.Message, e.Location, e.Value)
-}
 
 type NumberBuilder[T ~int | int8 | int16 | int32 | int64 | *int | *int8 | *int16 | *int32 | *int64 |
 	uint | uint8 | uint16 | uint32 | uint64 | *uint | *uint8 | *uint16 | *uint32 | *uint64 |
 	float64 | float32 | *float64 | *float32] interface {
 	Max(T) NumberBuilder[T]
 	Min(T) NumberBuilder[T]
-	Custom(func(ctx context.Context, h *helper.Helper, value *T) []error) NumberBuilder[T]
+	Custom(func(ctx context.Context, h *shared.Helper, value *T) []error) NumberBuilder[T]
 	When(func(ctx context.Context, value *T) bool) NumberBuilder[T]
 }
 
@@ -71,7 +57,7 @@ type Builder[T any] interface {
 	//NumbersBundleBuilder
 	str.StringsBundleBuilder
 	When(func(ctx context.Context, obj *T) bool) Builder[T]
-	Custom(fn func(ctx context.Context, h *helper.Helper, obj *T) []*Error)
+	Custom(fn func(ctx context.Context, h *shared.Helper, obj *T) []shared.Error)
 	//Custom(func(obj *T) []error) Builder[T]
 	//SlicesBundleBuilder
 }

@@ -1,19 +1,17 @@
 package str
 
 import (
-	"context"
-
 	"github.com/insei/fmap/v3"
-	"github.com/insei/valigo/helper"
+	"github.com/insei/valigo/shared"
 )
 
 type StringBundle struct {
-	appendFn func(field fmap.Field, fn func(ctx context.Context, h *helper.Helper, v any) []error)
+	appendFn func(field fmap.Field, fn shared.FieldValidationFn)
 	storage  fmap.Storage
 	obj      any
 }
 
-func NewStringBundle(obj any, appendFn func(field fmap.Field, fn func(ctx context.Context, h *helper.Helper, v any) []error), fields fmap.Storage) *StringBundle {
+func NewStringBundle(obj any, appendFn func(field fmap.Field, fn shared.FieldValidationFn), fields fmap.Storage) *StringBundle {
 	return &StringBundle{appendFn: appendFn, storage: fields, obj: obj}
 }
 

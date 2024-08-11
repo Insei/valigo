@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/insei/fmap/v3"
-	"github.com/insei/valigo/helper"
+	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
 )
 
@@ -30,8 +30,8 @@ func (b *builder[T]) When(fn func(ctx context.Context, obj *T) bool) Builder[T] 
 	})
 }
 
-func (b *builder[T]) Custom(fn func(ctx context.Context, h *helper.Helper, obj *T) []*Error) {
-	fnConvert := func(ctx context.Context, h *helper.Helper, objAny any) []*Error {
+func (b *builder[T]) Custom(fn func(ctx context.Context, h *shared.Helper, obj *T) []shared.Error) {
+	fnConvert := func(ctx context.Context, h *shared.Helper, objAny any) []shared.Error {
 		return fn(ctx, h, objAny.(*T))
 	}
 	b.v.storage.newOnStruct(b.obj, b.enablerFn, fnConvert)

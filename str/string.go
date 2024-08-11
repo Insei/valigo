@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/insei/fmap/v3"
-	"github.com/insei/valigo/helper"
+	"github.com/insei/valigo/shared"
 )
 
 const (
@@ -20,12 +20,12 @@ const (
 
 type stringBuilder[T string | *string] struct {
 	field    fmap.Field
-	appendFn func(field fmap.Field, fn func(ctx context.Context, h *helper.Helper, v any) []error)
+	appendFn func(field fmap.Field, fn shared.FieldValidationFn)
 	enabler  func(ctx context.Context, value *T) bool
 }
 
 func (s *stringBuilder[T]) Trim() StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *shared.Helper, value any) []shared.Error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
@@ -43,18 +43,18 @@ func (s *stringBuilder[T]) Trim() StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) MaxLen(maxLen int) StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *shared.Helper, value any) []shared.Error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
 		switch strVal := value.(type) {
 		case *string:
 			if len(*strVal) > maxLen {
-				return []error{h.ErrorT(ctx, maxLengthLocaleKey, maxLen)}
+				return []shared.Error{h.ErrorT(ctx, s.field, *strVal, maxLengthLocaleKey, maxLen)}
 			}
 		case **string:
 			if *strVal == nil || len(**strVal) > maxLen {
-				return []error{h.ErrorT(ctx, maxLengthLocaleKey, maxLen)}
+				return []shared.Error{h.ErrorT(ctx, s.field, **strVal, maxLengthLocaleKey, maxLen)}
 			}
 		}
 		return nil
@@ -63,18 +63,18 @@ func (s *stringBuilder[T]) MaxLen(maxLen int) StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) MinLen(minLen int) StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *shared.Helper, value any) []shared.Error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
 		switch strVal := value.(type) {
 		case *string:
 			if len(*strVal) < minLen {
-				return []error{h.ErrorT(ctx, minLengthLocaleKey, minLen)}
+				return []shared.Error{h.ErrorT(ctx, s.field, *strVal, minLengthLocaleKey, minLen)}
 			}
 		case **string:
 			if *strVal == nil || len(**strVal) < minLen {
-				return []error{h.ErrorT(ctx, minLengthLocaleKey, minLen)}
+				return []shared.Error{h.ErrorT(ctx, s.field, **strVal, minLengthLocaleKey, minLen)}
 			}
 		}
 		return nil
@@ -83,18 +83,18 @@ func (s *stringBuilder[T]) MinLen(minLen int) StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) Required() StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *shared.Helper, value any) []shared.Error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
 		switch strVal := value.(type) {
 		case *string:
 			if len(*strVal) < 1 {
-				return []error{h.ErrorT(ctx, requiredLocaleKey)}
+				return []shared.Error{h.ErrorT(ctx, s.field, *strVal, requiredLocaleKey)}
 			}
 		case **string:
 			if *strVal == nil || len(**strVal) < 1 {
-				return []error{h.ErrorT(ctx, requiredLocaleKey)}
+				return []shared.Error{h.ErrorT(ctx, s.field, **strVal, requiredLocaleKey)}
 			}
 		}
 		return nil
@@ -103,7 +103,7 @@ func (s *stringBuilder[T]) Required() StringBuilder[T] {
 }
 
 func (s *stringBuilder[T]) Regexp(regexp *regexp.Regexp, opts ...RegexpOption) StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *shared.Helper, value any) []shared.Error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
@@ -116,11 +116,11 @@ func (s *stringBuilder[T]) Regexp(regexp *regexp.Regexp, opts ...RegexpOption) S
 		switch strVal := value.(type) {
 		case *string:
 			if regexp.FindString(*strVal) == "" {
-				return []error{h.ErrorT(ctx, options.localeKey)}
+				return []shared.Error{h.ErrorT(ctx, s.field, *strVal, options.localeKey)}
 			}
 		case **string:
 			if *strVal == nil || regexp.FindString(**strVal) == "" {
-				return []error{h.ErrorT(ctx, options.localeKey)}
+				return []shared.Error{h.ErrorT(ctx, s.field, **strVal, options.localeKey)}
 			}
 		}
 		return nil
@@ -129,18 +129,18 @@ func (s *stringBuilder[T]) Regexp(regexp *regexp.Regexp, opts ...RegexpOption) S
 }
 
 func (s *stringBuilder[T]) AnyOf(allowed ...string) StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
+	s.appendFn(s.field, func(ctx context.Context, h *shared.Helper, value any) []shared.Error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
 		switch strVal := value.(type) {
 		case *string:
 			if !slices.Contains(allowed, *strVal) {
-				return []error{h.ErrorT(ctx, anyOfLocaleKey, "\""+strings.Join(allowed, "\",\"")+"\"")}
+				return []shared.Error{h.ErrorT(ctx, s.field, *strVal, anyOfLocaleKey, "\""+strings.Join(allowed, "\",\"")+"\"")}
 			}
 		case **string:
 			if *strVal == nil || !slices.Contains(allowed, **strVal) {
-				return []error{h.ErrorT(ctx, anyOfLocaleKey, "\""+strings.Join(allowed, "\",\"")+"\"")}
+				return []shared.Error{h.ErrorT(ctx, s.field, **strVal, anyOfLocaleKey, "\""+strings.Join(allowed, "\",\"")+"\"")}
 			}
 		}
 		return nil
@@ -148,8 +148,8 @@ func (s *stringBuilder[T]) AnyOf(allowed ...string) StringBuilder[T] {
 	return s
 }
 
-func (s *stringBuilder[T]) Custom(f func(ctx context.Context, h *helper.Helper, value *T) []error) StringBuilder[T] {
-	s.appendFn(s.field, func(ctx context.Context, h *helper.Helper, value any) []error {
+func (s *stringBuilder[T]) Custom(f func(ctx context.Context, h *shared.Helper, value *T) []shared.Error) StringBuilder[T] {
+	s.appendFn(s.field, func(ctx context.Context, h *shared.Helper, value any) []shared.Error {
 		if s.enabler != nil && !s.enabler(ctx, value.(*T)) {
 			return nil
 		}
