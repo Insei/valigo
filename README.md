@@ -5,7 +5,7 @@ Valigo is a powerfull, zero allocations validation engine with localizations, co
 * Custom validation functions
 * Localizations
 * Zero allocations
-* Configuration using pointers to structure fields.
+* Configured using pointers to structure fields
 ## Roadmap
 * [x] Zero allocations on valid structs
 * [x] On Field Conditional validation
