@@ -15,7 +15,7 @@ type TranslationStorageRO interface {
 
 type TranslationStorage interface {
 	TranslationStorageRO
-	AddTranslations(lang string, data map[string]string) error
+	AddTranslations(lang string, data map[string]string)
 }
 
 type Option interface {

@@ -1,3 +1,8 @@
 ---
 validation:
-  "Field should be fulfilled": "Field should be fulfilled"
+  string:
+    "Should be fulfilled": Should be fulfilled
+    "Cannot be longer than %d characters": Cannot be longer than %d characters
+    "Cannot be shorter than %d characters": Cannot be shorter than %d characters
+    "Doesn't match required regexp pattern": Doesn't match required regexp pattern
+    "Only %s values is allowed": Only %s values is allowed

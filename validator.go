@@ -38,7 +38,7 @@ func New(opts ...Option) *Validator {
 func Configure[T any](v *Validator, fn func(builder Builder[T], obj *T)) {
 	obj := new(T)
 	// allocate all pointers fields values recursively
-	MustZero(obj)
+	mustZero(obj)
 	b := configure[T](v, obj, nil)
 	// Append users validators
 	fn(b, obj)

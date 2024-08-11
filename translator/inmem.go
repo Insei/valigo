@@ -18,15 +18,13 @@ func NewInMemStorage(opts ...InMemStorageOption) TranslationStorage {
 	return storage
 }
 
-func (t *inMemTranslatorStorage) AddTranslations(lang string, data map[string]string) error {
+func (t *inMemTranslatorStorage) AddTranslations(lang string, data map[string]string) {
 	if _, ok := t.translations[lang]; !ok {
 		t.translations[lang] = data
-		return nil
 	}
 	for key, value := range data {
 		t.translations[lang][key] = value
 	}
-	return nil
 }
 
 func (t *inMemTranslatorStorage) GetTranslated(prefer []string, format string, args ...any) string {

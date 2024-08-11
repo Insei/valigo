@@ -10,8 +10,8 @@ import (
 // the pointer contains a pointer to an initialized value,
 // e.g. an *int field will be a pointer to 0 instead of a nil pointer.
 //
-// Zero does not allocate private fields.
-func Zero(obj interface{}) error {
+// zero does not allocate private fields.
+func zero(obj interface{}) error {
 	indirectVal := reflect.Indirect(reflect.ValueOf(obj))
 
 	if !indirectVal.CanSet() {
@@ -42,12 +42,12 @@ func Zero(obj interface{}) error {
 		case reflect.Struct:
 			// recursively allocate each of the structs embedded fields
 			if field.Kind() == reflect.Ptr {
-				err = Zero(field.Interface())
+				err = zero(field.Interface())
 			} else {
 				// field of Struct can always use field.Addr()
 				fieldAddr := field.Addr()
 				if fieldAddr.CanInterface() {
-					err = Zero(fieldAddr.Interface())
+					err = zero(fieldAddr.Interface())
 				} else {
 					err = fmt.Errorf("struct field can't interface, %#v", fieldAddr)
 				}
@@ -61,8 +61,8 @@ func Zero(obj interface{}) error {
 }
 
 // MustZero will panic instead of return error
-func MustZero(obj interface{}) {
-	err := Zero(obj)
+func mustZero(obj interface{}) {
+	err := zero(obj)
 	if err != nil {
 		panic(err)
 	}
