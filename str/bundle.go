@@ -12,8 +12,13 @@ type StringBundle struct {
 	h        shared.Helper
 }
 
-func NewStringBundle(obj any, h shared.Helper, appendFn func(field fmap.Field, fn shared.FieldValidationFn), fields fmap.Storage) *StringBundle {
-	return &StringBundle{appendFn: appendFn, storage: fields, obj: obj, h: h}
+func NewStringBundle(deps shared.BundleDependencies) *StringBundle {
+	return &StringBundle{
+		appendFn: deps.AppendFn,
+		storage:  deps.Fields,
+		obj:      deps.Object,
+		h:        deps.Helper,
+	}
 }
 
 func (s *StringBundle) String(field *string) StringBuilder[string] {

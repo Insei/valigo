@@ -57,7 +57,16 @@ func (b *builder[T]) Custom(fn func(ctx context.Context, h shared.StructCustomHe
 }
 
 func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, obj any) bool) Builder[T] {
-	fieldsStorage, _ := fmap.GetFrom(obj)
-	sb := str.NewStringBundle(obj, v.GetHelper(), v.storage.newOnField(obj, enabler), fieldsStorage)
+	fields, err := fmap.GetFrom(obj)
+	if err != nil {
+		panic(err)
+	}
+	bundleDeps := shared.BundleDependencies{
+		Object:   obj,
+		Helper:   v.GetHelper(),
+		AppendFn: v.storage.newOnField(obj, enabler),
+		Fields:   fields,
+	}
+	sb := str.NewStringBundle(bundleDeps)
 	return &builder[T]{StringBundle: sb, obj: obj, v: v, enablerFn: enabler}
 }
