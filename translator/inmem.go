@@ -2,10 +2,15 @@ package translator
 
 import "fmt"
 
+// inMemTranslatorStorage represents an in-memory storage for translations.
+// It maps languages to maps of translation keys to translated values.
 type inMemTranslatorStorage struct {
 	translations map[string]map[string]string
 }
 
+// NewInMemStorage creates a new in-memory translation storage.
+// It loads initial data from the embedded locales YAML file.
+// If an error occurs during loading, it panics.
 func NewInMemStorage(opts ...InMemStorageOption) TranslationStorage {
 	data, err := LocalesFromFS(EmbedFSLocalesYAML)
 	if err != nil {
@@ -18,6 +23,7 @@ func NewInMemStorage(opts ...InMemStorageOption) TranslationStorage {
 	return storage
 }
 
+// AddTranslations adds new translations for a given language to the storage.
 func (t *inMemTranslatorStorage) AddTranslations(lang string, data map[string]string) {
 	if _, ok := t.translations[lang]; !ok {
 		t.translations[lang] = data
@@ -27,6 +33,7 @@ func (t *inMemTranslatorStorage) AddTranslations(lang string, data map[string]st
 	}
 }
 
+// GetTranslated returns the translated value for a given format and language preferences.
 func (t *inMemTranslatorStorage) GetTranslated(prefer []string, format string, args ...any) string {
 	translatedFormat := format
 	for _, preferLang := range prefer {

@@ -7,11 +7,15 @@ import (
 	"github.com/insei/valigo/shared"
 )
 
+// Validator is a struct that holds a storage and a helper object.
 type Validator struct {
 	storage *storage
 	helper  *helper
 }
 
+// ValidateTyped validates an object of any type using validators from the storage.
+// It takes a context.Context and an object as input and returns a slice of shared.Error objects.
+// If no validators are found for the object's type, it returns nil.
 func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
 	validators, ok := v.storage.validators[reflect.TypeOf(obj)]
 	if !ok {
@@ -24,6 +28,8 @@ func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
 	return errs
 }
 
+// Validate is similar to ValidateTyped, but it returns a slice of error
+// objects instead of shared.Error objects.
 func (v *Validator) Validate(ctx context.Context, obj any) []error {
 	errsTyped := v.ValidateTyped(ctx, obj)
 	errs := make([]error, len(errsTyped))
@@ -33,10 +39,13 @@ func (v *Validator) Validate(ctx context.Context, obj any) []error {
 	return errs
 }
 
+// GetHelper returns the helper object associated with the Validator instance.
 func (v *Validator) GetHelper() shared.Helper {
 	return v.helper
 }
 
+// New creates a new Validator instance with default values for storage and helper.
+// It also applies any options passed to the function to the new instance.
 func New(opts ...Option) *Validator {
 	v := &Validator{
 		storage: newStorage(),
@@ -48,9 +57,13 @@ func New(opts ...Option) *Validator {
 	return v
 }
 
+// Configure configures a Validator instance for a specific type T.
+// It creates a new instance of type T, allocates values for all pointer fields recursively,
+// creates a Builder instance for the type T, calls the provided function fn with the Builder
+// instance and the instance of type T, and appends any user-defined validators to the Builder instance.
 func Configure[T any](v *Validator, fn func(builder Builder[T], obj *T)) {
 	obj := new(T)
-	// allocate all pointers fields values recursively
+	// allocate all pointer fields values recursively
 	mustZero(obj)
 	b := configure[T](v, obj, nil)
 	// Append users validators
