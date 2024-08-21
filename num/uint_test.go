@@ -10,36 +10,36 @@ import (
 	"github.com/insei/valigo/shared"
 )
 
-type helperIntImpl struct{}
+type helperUuintImpl struct{}
 
-func (h *helperIntImpl) ErrorT(ctx context.Context, field fmap.Field, value any, localeKey string, args ...any) shared.Error {
+func (h *helperUuintImpl) ErrorT(ctx context.Context, field fmap.Field, value any, localeKey string, args ...any) shared.Error {
 	return shared.Error{
 		Message: fmt.Sprintf(localeKey, value),
 	}
 }
 
-type user struct {
-	Age       int
-	Height    int32
-	AgePtr    *int
-	HeightPtr *int32
+type man struct {
+	Age       uint8
+	Height    uint
+	AgePtr    *uint8
+	HeightPtr *uint
 }
 
-func TestIntBuilderMax(t *testing.T) {
-	testUser := user{
+func TestUintBuilderMax(t *testing.T) {
+	testMan := man{
 		Age:    40,
 		Height: 185,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("Age")
-	builder1 := intBuilder[int]{
+	builder1 := uintBuilder[uint8]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Age)
+			errs = fn(context.Background(), &helper, &testMan.Age)
 		},
 	}
 	builder1.Max(35)
@@ -48,11 +48,11 @@ func TestIntBuilderMax(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("Height")
-	builder2 := intBuilder[int32]{
+	builder2 := uintBuilder[uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Height)
+			errs = fn(context.Background(), &helper, &testMan.Height)
 		},
 	}
 	builder2.Max(190)
@@ -61,23 +61,23 @@ func TestIntBuilderMax(t *testing.T) {
 	}
 }
 
-func TestIntPtrBuilderMax(t *testing.T) {
-	age := 40
-	height := int32(185)
-	testUser := user{
+func TestUintPtrBuilderMax(t *testing.T) {
+	age := uint8(40)
+	height := uint(185)
+	testMan := man{
 		AgePtr:    &age,
 		HeightPtr: &height,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("AgePtr")
-	builder1 := intBuilder[*int]{
+	builder1 := uintBuilder[*uint8]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.AgePtr)
+			errs = fn(context.Background(), &helper, &testMan.AgePtr)
 		},
 	}
 	builder1.Max(35)
@@ -86,11 +86,11 @@ func TestIntPtrBuilderMax(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("HeightPtr")
-	builder2 := intBuilder[*int32]{
+	builder2 := uintBuilder[*uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.HeightPtr)
+			errs = fn(context.Background(), &helper, &testMan.HeightPtr)
 		},
 	}
 	builder2.Max(190)
@@ -99,22 +99,22 @@ func TestIntPtrBuilderMax(t *testing.T) {
 	}
 }
 
-func TestIntBuilderMin(t *testing.T) {
-	testUser := user{
+func TestUintBuilderMin(t *testing.T) {
+	testMan := man{
 		Age:    20,
 		Height: 185,
 	}
-	storage, _ := fmap.GetFrom(testUser)
+	storage, _ := fmap.GetFrom(testMan)
 
-	helper := helperIntImpl{}
+	helper := helperUuintImpl{}
 	var errs []shared.Error
 	field1 := storage.MustFind("Age")
 
-	builder1 := intBuilder[int]{
+	builder1 := uintBuilder[uint8]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Age)
+			errs = fn(context.Background(), &helper, &testMan.Age)
 		},
 	}
 	builder1.Min(25)
@@ -123,11 +123,11 @@ func TestIntBuilderMin(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("Height")
-	builder2 := intBuilder[int32]{
+	builder2 := uintBuilder[uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Height)
+			errs = fn(context.Background(), &helper, &testMan.Height)
 		},
 	}
 	builder2.Min(165)
@@ -136,24 +136,24 @@ func TestIntBuilderMin(t *testing.T) {
 	}
 }
 
-func TestIntPtrBuilderMin(t *testing.T) {
-	age := 20
-	height := int32(185)
-	testUser := user{
+func TestUintPtrBuilderMin(t *testing.T) {
+	age := uint8(20)
+	height := uint(185)
+	testMan := man{
 		AgePtr:    &age,
 		HeightPtr: &height,
 	}
-	storage, _ := fmap.GetFrom(testUser)
+	storage, _ := fmap.GetFrom(testMan)
 
-	helper := helperIntImpl{}
+	helper := helperUuintImpl{}
 	var errs []shared.Error
 	field1 := storage.MustFind("AgePtr")
 
-	builder1 := intBuilder[*int]{
+	builder1 := uintBuilder[*uint8]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.AgePtr)
+			errs = fn(context.Background(), &helper, &testMan.AgePtr)
 		},
 	}
 	builder1.Min(25)
@@ -162,11 +162,11 @@ func TestIntPtrBuilderMin(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("HeightPtr")
-	builder2 := intBuilder[*int32]{
+	builder2 := uintBuilder[*uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.HeightPtr)
+			errs = fn(context.Background(), &helper, &testMan.HeightPtr)
 		},
 	}
 	builder2.Min(165)
@@ -175,20 +175,20 @@ func TestIntPtrBuilderMin(t *testing.T) {
 	}
 }
 
-func TestIntBuilderRequired(t *testing.T) {
-	testUser := user{
+func TestUintBuilderRequired(t *testing.T) {
+	testMan := man{
 		Age: 20,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("Height")
-	builder1 := intBuilder[*int32]{
+	builder1 := uintBuilder[*uint]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Height)
+			errs = fn(context.Background(), &helper, &testMan.Height)
 		},
 	}
 	builder1.Required()
@@ -197,11 +197,11 @@ func TestIntBuilderRequired(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("Age")
-	builder2 := intBuilder[int]{
+	builder2 := uintBuilder[uint8]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Age)
+			errs = fn(context.Background(), &helper, &testMan.Age)
 		},
 	}
 	builder2.Required()
@@ -210,21 +210,21 @@ func TestIntBuilderRequired(t *testing.T) {
 	}
 }
 
-func TestIntPtrBuilderRequired(t *testing.T) {
-	age := 20
-	testUser := user{
+func TestUintPtrBuilderRequired(t *testing.T) {
+	age := uint8(20)
+	testMan := man{
 		AgePtr: &age,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("HeightPtr")
-	builder1 := intBuilder[*int32]{
+	builder1 := uintBuilder[*uint]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.HeightPtr)
+			errs = fn(context.Background(), &helper, &testMan.HeightPtr)
 		},
 	}
 	builder1.Required()
@@ -233,11 +233,11 @@ func TestIntPtrBuilderRequired(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("AgePtr")
-	builder2 := intBuilder[*int]{
+	builder2 := uintBuilder[*uint8]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.AgePtr)
+			errs = fn(context.Background(), &helper, &testMan.AgePtr)
 		},
 	}
 	builder2.Required()
@@ -246,23 +246,23 @@ func TestIntPtrBuilderRequired(t *testing.T) {
 	}
 }
 
-func TestIntBuilderAnyOf(t *testing.T) {
-	testUser := user{
+func TestUintBuilderAnyOf(t *testing.T) {
+	testMan := man{
 		Age:    18,
 		Height: 185,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
-	allowedAges := []int{20, 30, 40}
-	allowedHeights := []int{180, 185, 190}
+	allowedAges := []uint{20, 30, 40}
+	allowedHeights := []uint{180, 185, 190}
 
 	field1 := storage.MustFind("Age")
-	builder1 := intBuilder[int]{
+	builder1 := uintBuilder[uint8]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Age)
+			errs = fn(context.Background(), &helper, &testMan.Age)
 		},
 	}
 	builder1.AnyOf(allowedAges...)
@@ -271,11 +271,11 @@ func TestIntBuilderAnyOf(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("Height")
-	builder2 := intBuilder[int32]{
+	builder2 := uintBuilder[uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Height)
+			errs = fn(context.Background(), &helper, &testMan.Height)
 		},
 	}
 	builder2.AnyOf(allowedHeights...)
@@ -284,25 +284,25 @@ func TestIntBuilderAnyOf(t *testing.T) {
 	}
 }
 
-func TestIntPtrBuilderAnyOf(t *testing.T) {
-	age := 18
-	height := int32(185)
-	testUser := user{
+func TestUintPtrBuilderAnyOf(t *testing.T) {
+	age := uint8(18)
+	height := uint(185)
+	testMan := man{
 		AgePtr:    &age,
 		HeightPtr: &height,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
-	allowedAges := []int{20, 30, 40}
-	allowedHeights := []int{180, 185, 190}
+	allowedAges := []uint{20, 30, 40}
+	allowedHeights := []uint{180, 185, 190}
 
 	field1 := storage.MustFind("AgePtr")
-	builder1 := intBuilder[*int]{
+	builder1 := uintBuilder[*uint8]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.AgePtr)
+			errs = fn(context.Background(), &helper, &testMan.AgePtr)
 		},
 	}
 	builder1.AnyOf(allowedAges...)
@@ -311,11 +311,11 @@ func TestIntPtrBuilderAnyOf(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("HeightPtr")
-	builder2 := intBuilder[*int32]{
+	builder2 := uintBuilder[*uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.HeightPtr)
+			errs = fn(context.Background(), &helper, &testMan.HeightPtr)
 		},
 	}
 	builder2.AnyOf(allowedHeights...)
@@ -324,25 +324,25 @@ func TestIntPtrBuilderAnyOf(t *testing.T) {
 	}
 }
 
-func TestIntBuilderAnyOfInterval(t *testing.T) {
-	testUser := user{
+func TestUintBuilderAnyOfInterval(t *testing.T) {
+	testMan := man{
 		Age:    18,
 		Height: 185,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
-	beginAgeInterval := 20
-	endAgeInterval := 50
-	beginHeightInterval := 160
-	endHeightInterval := 190
+	beginAgeInterval := uint(20)
+	endAgeInterval := uint(50)
+	beginHeightInterval := uint(160)
+	endHeightInterval := uint(190)
 
 	field1 := storage.MustFind("Age")
-	builder1 := intBuilder[int]{
+	builder1 := uintBuilder[uint8]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Age)
+			errs = fn(context.Background(), &helper, &testMan.Age)
 		},
 	}
 	builder1.AnyOfInterval(beginAgeInterval, endAgeInterval)
@@ -351,11 +351,11 @@ func TestIntBuilderAnyOfInterval(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("Height")
-	builder2 := intBuilder[int32]{
+	builder2 := uintBuilder[uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Height)
+			errs = fn(context.Background(), &helper, &testMan.Height)
 		},
 	}
 	builder2.AnyOfInterval(beginHeightInterval, endHeightInterval)
@@ -364,27 +364,27 @@ func TestIntBuilderAnyOfInterval(t *testing.T) {
 	}
 }
 
-func TestIntPtrBuilderAnyOfInterval(t *testing.T) {
-	age := 18
-	height := int32(185)
-	testUser := user{
+func TestUintPtrBuilderAnyOfInterval(t *testing.T) {
+	age := uint8(18)
+	height := uint(185)
+	testMan := man{
 		AgePtr:    &age,
 		HeightPtr: &height,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
-	beginAgeInterval := 20
-	endAgeInterval := 50
-	beginHeightInterval := 160
-	endHeightInterval := 190
+	beginAgeInterval := uint(20)
+	endAgeInterval := uint(50)
+	beginHeightInterval := uint(160)
+	endHeightInterval := uint(190)
 
 	field1 := storage.MustFind("AgePtr")
-	builder1 := intBuilder[*int]{
+	builder1 := uintBuilder[*uint8]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.AgePtr)
+			errs = fn(context.Background(), &helper, &testMan.AgePtr)
 		},
 	}
 	builder1.AnyOfInterval(beginAgeInterval, endAgeInterval)
@@ -393,11 +393,11 @@ func TestIntPtrBuilderAnyOfInterval(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("HeightPtr")
-	builder2 := intBuilder[*int32]{
+	builder2 := uintBuilder[*uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.HeightPtr)
+			errs = fn(context.Background(), &helper, &testMan.HeightPtr)
 		},
 	}
 	builder2.AnyOfInterval(beginHeightInterval, endHeightInterval)
@@ -406,23 +406,23 @@ func TestIntPtrBuilderAnyOfInterval(t *testing.T) {
 	}
 }
 
-func TestIntBuilderCustom(t *testing.T) {
-	testUser := user{
+func TestUintBuilderCustom(t *testing.T) {
+	testMan := man{
 		Age: 18,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("Height")
-	builder1 := intBuilder[int32]{
+	builder1 := uintBuilder[uint]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Height)
+			errs = fn(context.Background(), &helper, &testMan.Height)
 		},
 	}
-	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *int32) []shared.Error {
+	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *uint) []shared.Error {
 		if value == nil || *value == 0 {
 			return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
 		}
@@ -433,14 +433,14 @@ func TestIntBuilderCustom(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("Age")
-	builder2 := intBuilder[int]{
+	builder2 := uintBuilder[uint8]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Age)
+			errs = fn(context.Background(), &helper, &testMan.Age)
 		},
 	}
-	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *int) []shared.Error {
+	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *uint8) []shared.Error {
 		if value == nil || *value == 0 {
 			return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
 		}
@@ -451,24 +451,24 @@ func TestIntBuilderCustom(t *testing.T) {
 	}
 }
 
-func TestIntPtrBuilderCustom(t *testing.T) {
-	age := 18
-	testUser := user{
+func TestUintPtrBuilderCustom(t *testing.T) {
+	age := uint8(18)
+	testMan := man{
 		AgePtr: &age,
 	}
-	storage, _ := fmap.GetFrom(testUser)
-	helper := helperIntImpl{}
+	storage, _ := fmap.GetFrom(testMan)
+	helper := helperUuintImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("HeightPtr")
-	builder1 := intBuilder[*int32]{
+	builder1 := uintBuilder[*uint]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.HeightPtr)
+			errs = fn(context.Background(), &helper, &testMan.HeightPtr)
 		},
 	}
-	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **int32) []shared.Error {
+	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **uint) []shared.Error {
 		if value == nil || *value == nil || **value == 0 {
 			return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
 		}
@@ -479,14 +479,14 @@ func TestIntPtrBuilderCustom(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("AgePtr")
-	builder2 := intBuilder[*int]{
+	builder2 := uintBuilder[*uint8]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.AgePtr)
+			errs = fn(context.Background(), &helper, &testMan.AgePtr)
 		},
 	}
-	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **int) []shared.Error {
+	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **uint8) []shared.Error {
 		if value == nil || *value == nil || **value == 0 {
 			return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
 		}

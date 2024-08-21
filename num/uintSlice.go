@@ -9,14 +9,14 @@ import (
 	"github.com/insei/valigo/shared"
 )
 
-type intSliceBuilder[T []int | *[]int | []int8 | *[]int8 | []int16 | *[]int16 | []int32 | *[]int32 | []int64 | *[]int64] struct {
+type uintSliceBuilder[T []uint8 | *[]uint8 | []uint16 | *[]uint16 | []uint32 | *[]uint32 | []uint64 | *[]uint64 | []uint | *[]uint] struct {
 	h        shared.Helper
 	field    fmap.Field
 	appendFn func(field fmap.Field, fn shared.FieldValidationFn)
 }
 
-// Min checks if each integer in the slice has a minimum number.
-func (s *intSliceBuilder[T]) Min(minNum int) IntSliceBuilder[T] {
+// Min checks if each uint in the slice has a minimum number.
+func (s *uintSliceBuilder[T]) Min(minNum uint) UintSliceBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		v := reflect.ValueOf(value)
 		if v.Kind() == reflect.Ptr {
@@ -28,8 +28,8 @@ func (s *intSliceBuilder[T]) Min(minNum int) IntSliceBuilder[T] {
 		switch v.Kind() {
 		case reflect.Array, reflect.Slice:
 			for i := 0; i < v.Len(); i++ {
-				if int(v.Index(i).Int()) < minNum {
-					return []shared.Error{h.ErrorT(ctx, s.field, v.Index(i).Int(), minLocaleKey, minNum)}
+				if uint(v.Index(i).Uint()) < minNum {
+					return []shared.Error{h.ErrorT(ctx, s.field, v.Index(i).Uint(), minLocaleKey, minNum)}
 				}
 			}
 		default:
@@ -40,8 +40,8 @@ func (s *intSliceBuilder[T]) Min(minNum int) IntSliceBuilder[T] {
 	return s
 }
 
-// Max checks if each integer in the slice has a maximum number.
-func (s *intSliceBuilder[T]) Max(maxNum int) IntSliceBuilder[T] {
+// Max checks if each uint in the slice has a maximum number.
+func (s *uintSliceBuilder[T]) Max(maxNum uint) UintSliceBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		v := reflect.ValueOf(value)
 		if v.Kind() == reflect.Ptr {
@@ -53,8 +53,8 @@ func (s *intSliceBuilder[T]) Max(maxNum int) IntSliceBuilder[T] {
 		switch v.Kind() {
 		case reflect.Array, reflect.Slice:
 			for i := 0; i < v.Len(); i++ {
-				if int(v.Index(i).Int()) > maxNum {
-					return []shared.Error{h.ErrorT(ctx, s.field, v.Index(i).Int(), maxLocaleKey, maxNum)}
+				if uint(v.Index(i).Uint()) > maxNum {
+					return []shared.Error{h.ErrorT(ctx, s.field, v.Index(i).Uint(), maxLocaleKey, maxNum)}
 				}
 			}
 		default:
@@ -65,8 +65,8 @@ func (s *intSliceBuilder[T]) Max(maxNum int) IntSliceBuilder[T] {
 	return s
 }
 
-// Required checks if the integer slice is not empty.
-func (s *intSliceBuilder[T]) Required() IntSliceBuilder[T] {
+// Required checks if the uint slice is not empty.
+func (s *uintSliceBuilder[T]) Required() UintSliceBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		v := reflect.ValueOf(value)
 		if v.Kind() == reflect.Ptr {
@@ -89,7 +89,7 @@ func (s *intSliceBuilder[T]) Required() IntSliceBuilder[T] {
 }
 
 // Custom allows for custom validation logic.
-func (s *intSliceBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value *T) []shared.Error) IntSliceBuilder[T] {
+func (s *uintSliceBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value *T) []shared.Error) UintSliceBuilder[T] {
 	customHelper := shared.NewFieldCustomHelper(s.field, s.h)
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		return f(ctx, customHelper, value.(*T))
@@ -98,7 +98,7 @@ func (s *intSliceBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldC
 }
 
 // When allows for conditional validation based on a given condition.
-func (s *intSliceBuilder[T]) When(whenFn func(ctx context.Context, value *T) bool) IntSliceBuilder[T] {
+func (s *uintSliceBuilder[T]) When(whenFn func(ctx context.Context, value *T) bool) UintSliceBuilder[T] {
 	if whenFn == nil {
 		return s
 	}

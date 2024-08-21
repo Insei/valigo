@@ -8,7 +8,7 @@ import (
 
 // IntBuilder is a builder interface for integer fields.
 // It provides methods for adding validation rules to an integer field.
-type IntBuilder[T int | *int] interface {
+type IntBuilder[T int | *int | int8 | *int8 | int16 | *int16 | int32 | *int32 | int64 | *int64] interface {
 	// Required checks if the integer is not empty.
 	Required() IntBuilder[T]
 
@@ -33,7 +33,7 @@ type IntBuilder[T int | *int] interface {
 
 // IntSliceBuilder is a builder interface for integer slice fields.
 // It provides methods for adding validation rules to an integer slice field.
-type IntSliceBuilder[T []int | *[]int] interface {
+type IntSliceBuilder[T []int | *[]int | []int8 | *[]int8 | []int16 | *[]int16 | []int32 | *[]int32 | []int64 | *[]int64] interface {
 	// Required checks if the slice is not empty.
 	Required() IntSliceBuilder[T]
 
@@ -50,18 +50,18 @@ type IntSliceBuilder[T []int | *[]int] interface {
 	When(f func(ctx context.Context, value *T) bool) IntSliceBuilder[T]
 }
 
-// IntBundleBuilder is a builder interface for a bundle of integer fields.
+// IntBundleBuilder is a builder interface for a bundle of uint fields.
 // It provides methods for adding integer fields to the bundle.
 type IntBundleBuilder interface {
 	// Int adds an integer field to the bundle.
-	Int(field *int) IntBuilder[int]
+	Int(field any) IntBuilder[int]
 
 	// IntPtr adds a pointer to an integer field to the bundle.
-	IntPtr(field **int) IntBuilder[*int]
+	IntPtr(field any) IntBuilder[*int]
 
 	// IntSlice adds an integer slice field to the bundle.
-	IntSlice(field *[]int) IntSliceBuilder[[]int]
+	IntSlice(field any) IntSliceBuilder[[]int]
 
 	// IntSlicePtr adds a pointer to an integer slice field to the bundle.
-	IntSlicePtr(field **[]int) IntSliceBuilder[*[]int]
+	IntSlicePtr(field any) IntSliceBuilder[*[]int]
 }

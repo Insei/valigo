@@ -10,35 +10,35 @@ import (
 	"github.com/insei/valigo/shared"
 )
 
-type helperIntSliceImpl struct{}
+type helperUintSliceImpl struct{}
 
-func (h *helperIntSliceImpl) ErrorT(ctx context.Context, field fmap.Field, value any, localeKey string, args ...any) shared.Error {
+func (h *helperUintSliceImpl) ErrorT(ctx context.Context, field fmap.Field, value any, localeKey string, args ...any) shared.Error {
 	return shared.Error{
 		Message: fmt.Sprintf(localeKey, value),
 	}
 }
 
-type admin struct {
-	RoleIDs    []int
-	ChatIDs    []int32
-	RoleIDsPtr *[]int
-	ChatIDsPtr *[]int32
+type test struct {
+	RoleIDs    []uint
+	ChatIDs    []uint16
+	RoleIDsPtr *[]uint
+	ChatIDsPtr *[]uint16
 }
 
-func TestIntSliceBuilderMax(t *testing.T) {
-	testAdmin := admin{
-		RoleIDs: []int{1, 2, 3, 4, 5},
+func TestUintSliceBuilderMax(t *testing.T) {
+	tt := test{
+		RoleIDs: []uint{1, 2, 3, 4, 5},
 	}
-	storage, _ := fmap.GetFrom(testAdmin)
-	helper := helperIntSliceImpl{}
+	storage, _ := fmap.GetFrom(tt)
+	helper := helperUintSliceImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("RoleIDs")
-	builder1 := intSliceBuilder[[]int]{
+	builder1 := uintSliceBuilder[[]uint]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDs)
+			errs = fn(context.Background(), &helper, &tt.RoleIDs)
 		},
 	}
 	builder1.Max(3)
@@ -47,11 +47,11 @@ func TestIntSliceBuilderMax(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("RoleIDs")
-	builder2 := intSliceBuilder[[]int]{
+	builder2 := uintSliceBuilder[[]uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDs)
+			errs = fn(context.Background(), &helper, &tt.RoleIDs)
 		},
 	}
 	builder2.Max(7)
@@ -60,21 +60,21 @@ func TestIntSliceBuilderMax(t *testing.T) {
 	}
 }
 
-func TestIntSlicePtrBuilderMax(t *testing.T) {
-	roleIDs := []int{1, 2, 3, 4, 5}
-	testAdmin := admin{
+func TestUintSlicePtrBuilderMax(t *testing.T) {
+	roleIDs := []uint{1, 2, 3, 4, 5}
+	tt := test{
 		RoleIDsPtr: &roleIDs,
 	}
-	storage, _ := fmap.GetFrom(testAdmin)
-	helper := helperIntSliceImpl{}
+	storage, _ := fmap.GetFrom(tt)
+	helper := helperUintSliceImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("RoleIDsPtr")
-	builder1 := intSliceBuilder[*[]int]{
+	builder1 := uintSliceBuilder[*[]uint]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDsPtr)
+			errs = fn(context.Background(), &helper, &tt.RoleIDsPtr)
 		},
 	}
 	builder1.Max(3)
@@ -83,11 +83,11 @@ func TestIntSlicePtrBuilderMax(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("RoleIDsPtr")
-	builder2 := intSliceBuilder[*[]int]{
+	builder2 := uintSliceBuilder[*[]uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDsPtr)
+			errs = fn(context.Background(), &helper, &tt.RoleIDsPtr)
 		},
 	}
 	builder2.Max(7)
@@ -96,20 +96,20 @@ func TestIntSlicePtrBuilderMax(t *testing.T) {
 	}
 }
 
-func TestIntSliceBuilderMin(t *testing.T) {
-	testAdmin := admin{
-		RoleIDs: []int{1, 2, 3, 4, 5},
+func TestUintSliceBuilderMin(t *testing.T) {
+	tt := test{
+		RoleIDs: []uint{1, 2, 3, 4, 5},
 	}
-	storage, _ := fmap.GetFrom(testAdmin)
-	helper := helperIntSliceImpl{}
+	storage, _ := fmap.GetFrom(tt)
+	helper := helperUintSliceImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("RoleIDs")
-	builder1 := intSliceBuilder[[]int]{
+	builder1 := uintSliceBuilder[[]uint]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDs)
+			errs = fn(context.Background(), &helper, &tt.RoleIDs)
 		},
 	}
 	builder1.Min(2)
@@ -118,11 +118,11 @@ func TestIntSliceBuilderMin(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("RoleIDs")
-	builder2 := intSliceBuilder[[]int]{
+	builder2 := uintSliceBuilder[[]uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDs)
+			errs = fn(context.Background(), &helper, &tt.RoleIDs)
 		},
 	}
 	builder2.Min(1)
@@ -131,21 +131,21 @@ func TestIntSliceBuilderMin(t *testing.T) {
 	}
 }
 
-func TestIntSlicePtrBuilderMin(t *testing.T) {
-	roleIDs := []int{1, 2, 3, 4, 5}
-	testAdmin := admin{
+func TestUintSlicePtrBuilderMin(t *testing.T) {
+	roleIDs := []uint{1, 2, 3, 4, 5}
+	tt := test{
 		RoleIDsPtr: &roleIDs,
 	}
-	storage, _ := fmap.GetFrom(testAdmin)
-	helper := helperIntSliceImpl{}
+	storage, _ := fmap.GetFrom(tt)
+	helper := helperUintSliceImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("RoleIDsPtr")
-	builder1 := intSliceBuilder[*[]int]{
+	builder1 := uintSliceBuilder[*[]uint]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDsPtr)
+			errs = fn(context.Background(), &helper, &tt.RoleIDsPtr)
 		},
 	}
 	builder1.Min(2)
@@ -154,11 +154,11 @@ func TestIntSlicePtrBuilderMin(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("RoleIDsPtr")
-	builder2 := intSliceBuilder[*[]int]{
+	builder2 := uintSliceBuilder[*[]uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDsPtr)
+			errs = fn(context.Background(), &helper, &tt.RoleIDsPtr)
 		},
 	}
 	builder2.Min(1)
@@ -167,20 +167,20 @@ func TestIntSlicePtrBuilderMin(t *testing.T) {
 	}
 }
 
-func TestIntSliceBuilderRequired(t *testing.T) {
-	testAdmin := admin{
-		RoleIDs: []int{1, 2, 3, 4, 5},
+func TestUintSliceBuilderRequired(t *testing.T) {
+	tt := test{
+		RoleIDs: []uint{1, 2, 3, 4, 5},
 	}
-	storage, _ := fmap.GetFrom(testAdmin)
-	helper := helperIntSliceImpl{}
+	storage, _ := fmap.GetFrom(tt)
+	helper := helperUintSliceImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("ChatIDs")
-	builder1 := intSliceBuilder[[]int32]{
+	builder1 := uintSliceBuilder[[]uint16]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.ChatIDs)
+			errs = fn(context.Background(), &helper, &tt.ChatIDs)
 		},
 	}
 	builder1.Required()
@@ -189,11 +189,11 @@ func TestIntSliceBuilderRequired(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("RoleIDs")
-	builder2 := intSliceBuilder[[]int]{
+	builder2 := uintSliceBuilder[[]uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDs)
+			errs = fn(context.Background(), &helper, &tt.RoleIDs)
 		},
 	}
 	builder2.Required()
@@ -202,21 +202,21 @@ func TestIntSliceBuilderRequired(t *testing.T) {
 	}
 }
 
-func TestIntSlicePtrBuilderRequired(t *testing.T) {
-	roleIDs := []int{1, 2, 3, 4, 5}
-	testAdmin := admin{
+func TestUintSlicePtrBuilderRequired(t *testing.T) {
+	roleIDs := []uint{1, 2, 3, 4, 5}
+	tt := test{
 		RoleIDsPtr: &roleIDs,
 	}
-	storage, _ := fmap.GetFrom(testAdmin)
-	helper := helperIntSliceImpl{}
+	storage, _ := fmap.GetFrom(tt)
+	helper := helperUintSliceImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("ChatIDsPtr")
-	builder1 := intSliceBuilder[*[]int32]{
+	builder1 := uintSliceBuilder[*[]uint16]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.ChatIDsPtr)
+			errs = fn(context.Background(), &helper, &tt.ChatIDsPtr)
 		},
 	}
 	builder1.Required()
@@ -225,11 +225,11 @@ func TestIntSlicePtrBuilderRequired(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("RoleIDs")
-	builder2 := intSliceBuilder[*[]int]{
+	builder2 := uintSliceBuilder[*[]uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDsPtr)
+			errs = fn(context.Background(), &helper, &tt.RoleIDsPtr)
 		},
 	}
 	builder2.Required()
@@ -238,23 +238,23 @@ func TestIntSlicePtrBuilderRequired(t *testing.T) {
 	}
 }
 
-func TestIntSliceBuilderCustom(t *testing.T) {
-	testAdmin := admin{
-		RoleIDs: []int{1, 2, 3, 4, 5},
+func TestUintSliceBuilderCustom(t *testing.T) {
+	tt := test{
+		RoleIDs: []uint{1, 2, 3, 4, 5},
 	}
-	storage, _ := fmap.GetFrom(testAdmin)
-	helper := helperIntSliceImpl{}
+	storage, _ := fmap.GetFrom(tt)
+	helper := helperUintSliceImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("ChatIDs")
-	builder1 := intSliceBuilder[[]int32]{
+	builder1 := uintSliceBuilder[[]uint16]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.ChatIDs)
+			errs = fn(context.Background(), &helper, &tt.ChatIDs)
 		},
 	}
-	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *[]int32) []shared.Error {
+	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *[]uint16) []shared.Error {
 		if len(*value) == 0 {
 			return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
 		}
@@ -265,14 +265,14 @@ func TestIntSliceBuilderCustom(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("RoleIDs")
-	builder2 := intSliceBuilder[[]int]{
+	builder2 := uintSliceBuilder[[]uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDs)
+			errs = fn(context.Background(), &helper, &tt.RoleIDs)
 		},
 	}
-	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *[]int) []shared.Error {
+	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *[]uint) []shared.Error {
 		if len(*value) == 0 {
 			return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
 		}
@@ -283,24 +283,24 @@ func TestIntSliceBuilderCustom(t *testing.T) {
 	}
 }
 
-func TestIntSlicePtrBuilderCustom(t *testing.T) {
-	roleIDs := []int{1, 2, 3, 4, 5}
-	testAdmin := admin{
+func TestUintSlicePtrBuilderCustom(t *testing.T) {
+	roleIDs := []uint{1, 2, 3, 4, 5}
+	tt := test{
 		RoleIDsPtr: &roleIDs,
 	}
-	storage, _ := fmap.GetFrom(testAdmin)
-	helper := helperIntSliceImpl{}
+	storage, _ := fmap.GetFrom(tt)
+	helper := helperUintSliceImpl{}
 	var errs []shared.Error
 
 	field1 := storage.MustFind("ChatIDsPtr")
-	builder1 := intSliceBuilder[*[]int32]{
+	builder1 := uintSliceBuilder[*[]uint16]{
 		field: field1,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.ChatIDsPtr)
+			errs = fn(context.Background(), &helper, &tt.ChatIDsPtr)
 		},
 	}
-	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **[]int32) []shared.Error {
+	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **[]uint16) []shared.Error {
 		if value == nil || *value == nil || len(**value) == 0 {
 			return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
 		}
@@ -311,14 +311,14 @@ func TestIntSlicePtrBuilderCustom(t *testing.T) {
 	}
 
 	field2 := storage.MustFind("RoleIDsPtr")
-	builder2 := intSliceBuilder[*[]int]{
+	builder2 := uintSliceBuilder[*[]uint]{
 		field: field2,
 		h:     &helper,
 		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RoleIDsPtr)
+			errs = fn(context.Background(), &helper, &tt.RoleIDsPtr)
 		},
 	}
-	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **[]int) []shared.Error {
+	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **[]uint) []shared.Error {
 		if value == nil || *value == nil || len(**value) == 0 {
 			return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
 		}

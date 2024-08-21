@@ -12,7 +12,9 @@ import (
 
 type testStruct struct {
 	Int         int
+	Int16       int16
 	IntPtr      *int
+	Int16Ptr    *int16
 	IntSlice    []int
 	IntSlicePtr *[]int
 }
@@ -80,7 +82,8 @@ func TestNewIntBundle(t *testing.T) {
 
 func TestIntBundle(t *testing.T) {
 	test := testStruct{
-		Int: 5,
+		Int:   5,
+		Int16: int16(10),
 	}
 	storage, err := fmap.GetFrom(test)
 	if err != nil {
@@ -134,8 +137,10 @@ func TestIntBundle(t *testing.T) {
 
 func TestIntBundleIntPtr(t *testing.T) {
 	temp := 5
+	temp2 := int16(10)
 	test := testStruct{
-		IntPtr: &temp,
+		IntPtr:   &temp,
+		Int16Ptr: &temp2,
 	}
 	storage, err := fmap.GetFrom(test)
 	if err != nil {
@@ -151,6 +156,10 @@ func TestIntBundleIntPtr(t *testing.T) {
 	sb := NewIntBundle(deps)
 	sbStr := sb.IntPtr(&test.IntPtr)
 	if sbStr == nil {
+		t.Errorf("field not set correctly")
+	}
+	sbStr2 := sb.IntPtr(&test.Int16Ptr)
+	if sbStr2 == nil {
 		t.Errorf("field not set correctly")
 	}
 

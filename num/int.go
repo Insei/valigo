@@ -2,6 +2,7 @@ package num
 
 import (
 	"context"
+	"reflect"
 	"slices"
 
 	"github.com/insei/fmap/v3"
@@ -15,28 +16,52 @@ const (
 	requiredLocaleKey = "validation:int:Should be fulfilled"
 	anyOfLocaleKey    = "validation:int:Only %d values is allowed"
 	anyOfInterval     = "validation:int:Only interval[%d - %d] is allowed"
+	invalidLocaleKey  = "validation:int:Invalid value"
 )
 
-type intBuilder[T int | *int] struct {
+type intBuilder[T int | *int | int8 | *int8 | int16 | *int16 | int32 | *int32 | int64 | *int64] struct {
 	h        shared.Helper
 	field    fmap.Field
 	appendFn func(field fmap.Field, fn shared.FieldValidationFn)
 }
 
+func maxT[T int | int8 | uint | uint8 | uint16 | uint32 | uint64 | int | int8 | int16 | int32 | int64](valuePtr *T, valuePtr2 **T, max int) bool {
+	if valuePtr == nil && *valuePtr2 == nil {
+		return true
+	}
+	if valuePtr != nil {
+		return *valuePtr > T(0)
+	}
+	return **valuePtr2 > T(0)
+}
+
 // Max checks if the integer exceeds the maximum allowed number.
 func (i *intBuilder[T]) Max(maxNum int) IntBuilder[T] {
 	i.appendFn(i.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		switch intVal := value.(type) {
+		isValid := true
+		switch typed := value.(type) {
 		case *int:
-			if *intVal > maxNum {
-				return []shared.Error{h.ErrorT(ctx, i.field, *intVal, maxLocaleKey, maxNum)}
-			}
-		case **int:
-			if *intVal == nil || **intVal > maxNum {
-				return []shared.Error{h.ErrorT(ctx, i.field, "", maxLocaleKey, maxNum)}
-			}
+			isValid = maxT(typed, nil, maxNum)
 		}
-		return nil
+		if !isValid {
+			return []shared.Error{h.ErrorT(ctx, i.field, value, maxLocaleKey, maxNum)}
+		}
+		//v := reflect.ValueOf(value)
+		//if v.Kind() == reflect.Ptr {
+		//	v = v.Elem()
+		//}
+		//if v.Kind() == reflect.Ptr {
+		//	v = v.Elem()
+		//}
+		//switch v.Kind() {
+		//case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
+		//	if int(v.Int()) > maxNum {
+		//		return []shared.Error{h.ErrorT(ctx, i.field, int(v.Int()), maxLocaleKey, maxNum)}
+		//	}
+		//default:
+		//	return []shared.Error{h.ErrorT(ctx, i.field, "", invalidLocaleKey)}
+		//}
+		//return nil
 	})
 	return i
 }
@@ -44,15 +69,20 @@ func (i *intBuilder[T]) Max(maxNum int) IntBuilder[T] {
 // Min checks if the integer is less than the minimum allowed number.
 func (i *intBuilder[T]) Min(minNum int) IntBuilder[T] {
 	i.appendFn(i.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		switch intVal := value.(type) {
-		case *int:
-			if *intVal < minNum {
-				return []shared.Error{h.ErrorT(ctx, i.field, *intVal, minLocaleKey, minNum)}
+		v := reflect.ValueOf(value)
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		switch v.Kind() {
+		case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
+			if int(v.Int()) < minNum {
+				return []shared.Error{h.ErrorT(ctx, i.field, int(v.Int()), minLocaleKey, minNum)}
 			}
-		case **int:
-			if *intVal == nil || **intVal < minNum {
-				return []shared.Error{h.ErrorT(ctx, i.field, "", minLocaleKey, minNum)}
-			}
+		default:
+			return []shared.Error{h.ErrorT(ctx, i.field, "", invalidLocaleKey)}
 		}
 		return nil
 	})
@@ -62,15 +92,20 @@ func (i *intBuilder[T]) Min(minNum int) IntBuilder[T] {
 // Required checks if the integer value is not empty.
 func (i *intBuilder[T]) Required() IntBuilder[T] {
 	i.appendFn(i.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		switch intVal := value.(type) {
-		case *int:
-			if *intVal == 0 {
-				return []shared.Error{h.ErrorT(ctx, i.field, *intVal, requiredLocaleKey)}
-			}
-		case **int:
-			if intVal == nil || *intVal == nil {
+		v := reflect.ValueOf(value)
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		switch v.Kind() {
+		case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
+			if v.IsZero() {
 				return []shared.Error{h.ErrorT(ctx, i.field, "", requiredLocaleKey)}
 			}
+		default:
+			return []shared.Error{h.ErrorT(ctx, i.field, "", invalidLocaleKey)}
 		}
 		return nil
 	})
@@ -80,15 +115,20 @@ func (i *intBuilder[T]) Required() IntBuilder[T] {
 // AnyOf checks if the integer value is one of the allowed values.
 func (i *intBuilder[T]) AnyOf(allowed ...int) IntBuilder[T] {
 	i.appendFn(i.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		switch intVal := value.(type) {
-		case *int:
-			if !slices.Contains(allowed, *intVal) {
-				return []shared.Error{h.ErrorT(ctx, i.field, *intVal, anyOfLocaleKey, allowed)}
+		v := reflect.ValueOf(value)
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		switch v.Kind() {
+		case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
+			if !slices.Contains(allowed, int(v.Int())) {
+				return []shared.Error{h.ErrorT(ctx, i.field, int(v.Int()), anyOfLocaleKey, allowed)}
 			}
-		case **int:
-			if *intVal == nil || !slices.Contains(allowed, **intVal) {
-				return []shared.Error{h.ErrorT(ctx, i.field, "", anyOfLocaleKey, allowed)}
-			}
+		default:
+			return []shared.Error{h.ErrorT(ctx, i.field, "", invalidLocaleKey)}
 		}
 		return nil
 	})
@@ -98,15 +138,20 @@ func (i *intBuilder[T]) AnyOf(allowed ...int) IntBuilder[T] {
 // AnyOfInterval checks if the integer value is one of the allowed values intervals.
 func (i *intBuilder[T]) AnyOfInterval(begin, end int) IntBuilder[T] {
 	i.appendFn(i.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		switch intVal := value.(type) {
-		case *int:
-			if !(*intVal > begin && *intVal < end) {
-				return []shared.Error{h.ErrorT(ctx, i.field, *intVal, anyOfInterval, begin, end)}
+		v := reflect.ValueOf(value)
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		switch v.Kind() {
+		case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
+			if !(int(v.Int()) > begin && int(v.Int()) < end) {
+				return []shared.Error{h.ErrorT(ctx, i.field, int(v.Int()), anyOfInterval, begin, end)}
 			}
-		case **int:
-			if *intVal == nil || !(**intVal > begin && **intVal < end) {
-				return []shared.Error{h.ErrorT(ctx, i.field, "", anyOfInterval, begin, end)}
-			}
+		default:
+			return []shared.Error{h.ErrorT(ctx, i.field, "", invalidLocaleKey)}
 		}
 		return nil
 	})
