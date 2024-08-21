@@ -10,9 +10,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// EmbedFSLocalesYAML is an embedded file system that contains the locale YAML files.
+//
 //go:embed locales/*/*.yaml
 var EmbedFSLocalesYAML embed.FS
 
+// fromMap recursively flattens a map of any type into a map of strings.
+// It prefixes each key with the given prefix.
 func fromMap(source map[string]any, dest map[string]string, prefix string) {
 	if len(prefix) > 0 {
 		prefix += ":"
@@ -28,6 +32,7 @@ func fromMap(source map[string]any, dest map[string]string, prefix string) {
 	}
 }
 
+// LocalesFromFS reads the locale data from a file system and returns a map of locale data.
 func LocalesFromFS(fsys fs.FS) (map[string]map[string]string, error) {
 	rootDir, err := fs.ReadDir(fsys, "locales")
 	if err != nil {
