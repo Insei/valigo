@@ -12,7 +12,9 @@ import (
 
 type testStruct struct {
 	Int         int
+	Int16       int16
 	IntPtr      *int
+	Int16Ptr    *int16
 	IntSlice    []int
 	IntSlicePtr *[]int
 }
@@ -27,10 +29,10 @@ func (h *helperImpl) ErrorT(ctx context.Context, field fmap.Field, value any, lo
 
 func TestNewIntBundle(t *testing.T) {
 	// Test case 1: Valid input
-	test := testStruct{
+	tt := testStruct{
 		Int: 5,
 	}
-	storage, _ := fmap.GetFrom(test)
+	storage, _ := fmap.GetFrom(tt)
 	helper := helperImpl{}
 	deps := shared.BundleDependencies{
 		AppendFn: func(field fmap.Field, fn shared.FieldValidationFn) {},
@@ -79,10 +81,10 @@ func TestNewIntBundle(t *testing.T) {
 }
 
 func TestIntBundle(t *testing.T) {
-	test := testStruct{
+	tt := testStruct{
 		Int: 5,
 	}
-	storage, err := fmap.GetFrom(test)
+	storage, err := fmap.GetFrom(tt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,7 +92,7 @@ func TestIntBundle(t *testing.T) {
 	deps := shared.BundleDependencies{
 		AppendFn: func(field fmap.Field, fn shared.FieldValidationFn) {},
 		Fields:   storage,
-		Object:   &test,
+		Object:   &tt,
 		Helper:   &helper,
 	}
 
@@ -101,7 +103,7 @@ func TestIntBundle(t *testing.T) {
 	}{
 		{
 			name:          "Valid field",
-			field:         &test.Int,
+			field:         &tt.Int,
 			expectedError: false,
 		},
 		{
@@ -134,10 +136,10 @@ func TestIntBundle(t *testing.T) {
 
 func TestIntBundleIntPtr(t *testing.T) {
 	temp := 5
-	test := testStruct{
+	tt := testStruct{
 		IntPtr: &temp,
 	}
-	storage, err := fmap.GetFrom(test)
+	storage, err := fmap.GetFrom(tt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,11 +147,11 @@ func TestIntBundleIntPtr(t *testing.T) {
 	deps := shared.BundleDependencies{
 		AppendFn: func(field fmap.Field, fn shared.FieldValidationFn) {},
 		Fields:   storage,
-		Object:   &test,
+		Object:   &tt,
 		Helper:   &helper,
 	}
 	sb := NewIntBundle(deps)
-	sbStr := sb.IntPtr(&test.IntPtr)
+	sbStr := sb.IntPtr(&tt.IntPtr)
 	if sbStr == nil {
 		t.Errorf("field not set correctly")
 	}
@@ -171,10 +173,10 @@ func TestIntBundleIntPtr(t *testing.T) {
 }
 
 func TestIntBundleIntSlice(t *testing.T) {
-	test := testStruct{
+	tt := testStruct{
 		IntSlice: []int{10, 20},
 	}
-	storage, err := fmap.GetFrom(test)
+	storage, err := fmap.GetFrom(tt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,11 +184,11 @@ func TestIntBundleIntSlice(t *testing.T) {
 	deps := shared.BundleDependencies{
 		AppendFn: func(field fmap.Field, fn shared.FieldValidationFn) {},
 		Fields:   storage,
-		Object:   &test,
+		Object:   &tt,
 		Helper:   &helper,
 	}
 	sb := NewIntBundle(deps)
-	modelsPtr := &test.IntSlice
+	modelsPtr := &tt.IntSlice
 	sbStr := sb.IntSlice(modelsPtr)
 	if sbStr == nil {
 		t.Errorf("field not set correctly")
@@ -210,10 +212,10 @@ func TestIntBundleIntSlice(t *testing.T) {
 
 func TestIntBundleIntSlicePtr(t *testing.T) {
 	temp := []int{10, 20}
-	test := testStruct{
+	tt := testStruct{
 		IntSlicePtr: &temp,
 	}
-	storage, err := fmap.GetFrom(test)
+	storage, err := fmap.GetFrom(tt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -221,11 +223,11 @@ func TestIntBundleIntSlicePtr(t *testing.T) {
 	deps := shared.BundleDependencies{
 		AppendFn: func(field fmap.Field, fn shared.FieldValidationFn) {},
 		Fields:   storage,
-		Object:   &test,
+		Object:   &tt,
 		Helper:   &helper,
 	}
 	sb := NewIntBundle(deps)
-	sbStr := sb.IntSlicePtr(&test.IntSlicePtr)
+	sbStr := sb.IntSlicePtr(&tt.IntSlicePtr)
 	if sbStr == nil {
 		t.Errorf("field not set correctly")
 	}
