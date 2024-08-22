@@ -47,7 +47,7 @@ func TestNewStringBundle(t *testing.T) {
 		t.Errorf("obj not set correctly")
 	}
 	if sb.h != deps.Helper {
-		t.Errorf("h not set correctly")
+		t.Errorf("helper not set correctly")
 	}
 
 	// Test case 2: Nil storage
@@ -75,7 +75,6 @@ func TestNewStringBundle(t *testing.T) {
 	}()
 	sb = NewStringBundle(deps)
 	sb.appendFn(nil, nil)
-
 }
 
 func TestStringBundleString(t *testing.T) {

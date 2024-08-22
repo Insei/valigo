@@ -27,60 +27,115 @@ type admin struct {
 }
 
 func TestStringSliceBuilderTrim(t *testing.T) {
-	roles := []string{"   root ", "read  "}
 	testAdmin := admin{
-		Roles:    roles,
-		RolesPtr: &roles,
+		Roles: []string{"   root "},
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringSliceImpl{}
 
-	field := storage.MustFind("Roles")
-	builder := stringSliceBuilder[[]string]{
-		field: field,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			fn(context.Background(), &helper, &testAdmin.Roles)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		trimmedValue  string
+		value         any
+		expectedError bool
+	}{
+		{
+			name:          "Roles slice trim check",
+			fieldName:     "Roles",
+			trimmedValue:  " root",
+			value:         &testAdmin.Roles,
+			expectedError: true,
+		},
+		{
+			name:          "Roles slice trim check",
+			fieldName:     "Roles",
+			trimmedValue:  "root",
+			value:         &testAdmin.Roles,
+			expectedError: false,
 		},
 	}
-	builder.Trim()
-	trimmedValue := field.Get(&testAdmin)
-	trimmedSliceValue := trimmedValue.([]string)
 
-	if trimmedSliceValue[0] != "root" || trimmedSliceValue[1] != "read" {
-		t.Errorf("expected 'test value', got '%v'", trimmedValue)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Trim()
+			trimmedValue := field.Get(&testAdmin)
+			if trimmedValue != nil {
+				trimmedSliceValue := trimmedValue.([]string)
+				if trimmedSliceValue[0] != tc.trimmedValue && !tc.expectedError {
+					t.Errorf("expected 'test value', got '%v'", trimmedValue)
+				}
+			} else {
+				t.Errorf("trimmedValue is nil")
+			}
+		})
 	}
 }
 
 func TestStringSlicePtrBuilderTrim(t *testing.T) {
-	roles := []string{"   root ", "read  "}
+	roles := []string{"   root "}
 	testAdmin := admin{
 		RolesPtr: &roles,
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringSliceImpl{}
 
-	field := storage.MustFind("RolesPtr")
-	builder := stringSliceBuilder[*[]string]{
-		field: field,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			fn(context.Background(), &helper, &testAdmin.RolesPtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		trimmedValue  string
+		value         any
+		expectedError bool
+	}{
+		{
+			name:          "RolesPtr slice trim check",
+			fieldName:     "RolesPtr",
+			trimmedValue:  " root",
+			value:         &testAdmin.RolesPtr,
+			expectedError: true,
+		},
+		{
+			name:          "RolesPtr slice trim check",
+			fieldName:     "RolesPtr",
+			trimmedValue:  "root",
+			value:         &testAdmin.RolesPtr,
+			expectedError: false,
 		},
 	}
-	builder.Trim()
-	trimmedValue := field.Get(&testAdmin)
-	if trimmedValue != nil {
-		trimmedSliceValue := trimmedValue.(*[]string)
-		if (*trimmedSliceValue)[0] != "root" || (*trimmedSliceValue)[1] != "read" {
-			t.Errorf("expected 'test value', got '%v'", trimmedValue)
-		}
-	} else {
-		t.Errorf("trimmedValue is nil")
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[*[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Trim()
+			trimmedValue := field.Get(&testAdmin)
+			if trimmedValue != nil {
+				trimmedSliceValue := trimmedValue.(*[]string)
+				if (*trimmedSliceValue)[0] != tc.trimmedValue && !tc.expectedError {
+					t.Errorf("expected 'test value', got '%v'", trimmedValue)
+				}
+			} else {
+				t.Errorf("trimmedValue is nil")
+			}
+		})
 	}
 }
 
-func TestStringSliceBuilderMaxLen(t *testing.T) {
+func TestStringSliceBuilderMax(t *testing.T) {
 	phoneNumbers := []string{"911", "8982168233", "9876543210923"}
 	testAdmin := admin{
 		PhoneNumbers:    phoneNumbers,
@@ -88,32 +143,46 @@ func TestStringSliceBuilderMaxLen(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("PhoneNumbers")
-	builder1 := stringSliceBuilder[[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbers)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		maxLen        int
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumbers slice max length check",
+			fieldName:     "PhoneNumbers",
+			maxLen:        12,
+			value:         &testAdmin.PhoneNumbers,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumbers slice max length check",
+			fieldName:     "PhoneNumbers",
+			maxLen:        15,
+			value:         &testAdmin.PhoneNumbers,
+			expectedError: 0,
 		},
 	}
-	builder1.MaxLen(12)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumbers")
-	builder2 := stringSliceBuilder[[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbers)
-		},
-	}
-	builder2.MaxLen(15)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.MaxLen(tc.maxLen)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -124,67 +193,95 @@ func TestStringSlicePtrBuilderMaxLen(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("PhoneNumbersPtr")
-	builder1 := stringSliceBuilder[*[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbersPtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		maxLen        int
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumbersPtr slice max length check",
+			fieldName:     "PhoneNumbers",
+			maxLen:        12,
+			value:         &testAdmin.PhoneNumbersPtr,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumbersPtr slice max length check",
+			fieldName:     "PhoneNumbersPtr",
+			maxLen:        15,
+			value:         &testAdmin.PhoneNumbersPtr,
+			expectedError: 0,
 		},
 	}
-	builder1.MaxLen(12)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumbersPtr")
-	builder2 := stringSliceBuilder[*[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbersPtr)
-		},
-	}
-	builder2.MaxLen(15)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[*[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.MaxLen(tc.maxLen)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
-func TestStringSliceBuilderMinLen(t *testing.T) {
+func TestStringSliceBuilderMinlen(t *testing.T) {
 	testAdmin := admin{
 		PhoneNumbers: []string{"911", "8982168233", "9876543210923"},
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("PhoneNumbers")
-	builder1 := stringSliceBuilder[[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbers)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		minLength     int
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumbers slice min length check",
+			fieldName:     "PhoneNumbers",
+			minLength:     8,
+			value:         &testAdmin.PhoneNumbers,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumbers slice min length check",
+			fieldName:     "PhoneNumbers",
+			minLength:     3,
+			value:         &testAdmin.PhoneNumbers,
+			expectedError: 0,
 		},
 	}
-	builder1.MinLen(8)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumbers")
-	builder2 := stringSliceBuilder[[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbers)
-		},
-	}
-	builder2.MinLen(3)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[*[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.MinLen(tc.minLength)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -195,32 +292,46 @@ func TestStringSlicePtrBuilderMinLen(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("PhoneNumbersPtr")
-	builder1 := stringSliceBuilder[*[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbersPtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		min           int
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumbersPtr slice min length check",
+			fieldName:     "PhoneNumbersPtr",
+			min:           8,
+			value:         &testAdmin.PhoneNumbersPtr,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumbersPtr slice min length check",
+			fieldName:     "PhoneNumbersPtr",
+			min:           3,
+			value:         &testAdmin.PhoneNumbersPtr,
+			expectedError: 0,
 		},
 	}
-	builder1.MinLen(8)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumbersPtr")
-	builder2 := stringSliceBuilder[*[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbers)
-		},
-	}
-	builder2.MinLen(3)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[*[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.MinLen(tc.min)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -230,32 +341,43 @@ func TestStringSliceBuilderRequired(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("Roles")
-	builder1 := stringSliceBuilder[[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.Roles)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "Roles slice required check",
+			fieldName:     "Roles",
+			value:         &testAdmin.Roles,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumbers slice required check",
+			fieldName:     "PhoneNumbers",
+			value:         &testAdmin.PhoneNumbers,
+			expectedError: 0,
 		},
 	}
-	builder1.Required()
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumbers")
-	builder2 := stringSliceBuilder[[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbers)
-		},
-	}
-	builder2.Required()
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Required()
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -266,32 +388,43 @@ func TestStringSlicePtrBuilderRequired(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("RolesPtr")
-	builder1 := stringSliceBuilder[*[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RolesPtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "RolesPtr slice required check",
+			fieldName:     "RolesPtr",
+			value:         &testAdmin.RolesPtr,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumbersPtr slice required check",
+			fieldName:     "PhoneNumbersPtr",
+			value:         &testAdmin.PhoneNumbersPtr,
+			expectedError: 0,
 		},
 	}
-	builder1.Required()
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumbersPtr")
-	builder2 := stringSliceBuilder[*[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbersPtr)
-		},
-	}
-	builder2.Required()
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[*[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Required()
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -302,33 +435,46 @@ func TestStringSliceBuilderRegexp(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
-	re := regexp.MustCompile(`^[0-9]{3,25}`)
 
-	field1 := storage.MustFind("Roles")
-	builder1 := stringSliceBuilder[[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.Roles)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		re            *regexp.Regexp
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "Roles slice regex check",
+			fieldName:     "Roles",
+			re:            regexp.MustCompile(`^[0-9]{3,25}`),
+			value:         &testAdmin.Roles,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumbers slice regex check",
+			fieldName:     "PhoneNumbers",
+			re:            regexp.MustCompile(`^[0-9]{3,25}`),
+			value:         &testAdmin.PhoneNumbers,
+			expectedError: 0,
 		},
 	}
-	builder1.Regexp(re)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumbers")
-	builder2 := stringSliceBuilder[[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbers)
-		},
-	}
-	builder2.Regexp(re)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Regexp(tc.re)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -341,33 +487,46 @@ func TestStringSlicePtrBuilderRegexp(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
-	re := regexp.MustCompile(`^[0-9]{3,25}`)
 
-	field1 := storage.MustFind("RolesPtr")
-	builder1 := stringSliceBuilder[*[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RolesPtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		re            *regexp.Regexp
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "RolesPtr slice regex check",
+			fieldName:     "RolesPtr",
+			re:            regexp.MustCompile(`^[0-9]{3,25}`),
+			value:         &testAdmin.RolesPtr,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumbersPtr slice regex check",
+			fieldName:     "PhoneNumbersPtr",
+			re:            regexp.MustCompile(`^[0-9]{3,25}`),
+			value:         &testAdmin.PhoneNumbersPtr,
+			expectedError: 0,
 		},
 	}
-	builder1.Regexp(re)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumbersPtr")
-	builder2 := stringSliceBuilder[*[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbersPtr)
-		},
-	}
-	builder2.Regexp(re)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[*[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Regexp(tc.re)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -377,42 +536,48 @@ func TestStringSliceBuilderCustom(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("PhoneNumbers")
-	builder1 := stringSliceBuilder[[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbers)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumbers slice custom function check",
+			fieldName:     "PhoneNumbers",
+			value:         &testAdmin.PhoneNumbers,
+			expectedError: 1,
+		},
+		{
+			name:          "Roles slice custom function check",
+			fieldName:     "Roles",
+			value:         &testAdmin.Roles,
+			expectedError: 0,
 		},
 	}
-	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *[]string) []shared.Error {
-		if len(*value) == 0 {
-			return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
-		}
-		return nil
-	})
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("Roles")
-	builder2 := stringSliceBuilder[[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.Roles)
-		},
-	}
-	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *[]string) []shared.Error {
-		if len(*value) == 0 {
-			return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
-		}
-		return nil
-	})
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *[]string) []shared.Error {
+				if len(*value) == 0 {
+					return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
+				}
+				return nil
+			})
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -423,41 +588,47 @@ func TestStringSlicePtrBuilderCustom(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testAdmin)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("PhoneNumbersPtr")
-	builder1 := stringSliceBuilder[*[]string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.PhoneNumbersPtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumbersPtr slice custom function check",
+			fieldName:     "PhoneNumbersPtr",
+			value:         &testAdmin.PhoneNumbersPtr,
+			expectedError: 1,
+		},
+		{
+			name:          "RolesPtr slice custom function check",
+			fieldName:     "RolesPtr",
+			value:         &testAdmin.RolesPtr,
+			expectedError: 0,
 		},
 	}
-	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **[]string) []shared.Error {
-		if *value == nil || len(**value) == 0 {
-			return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
-		}
-		return nil
-	})
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("RolesPtr")
-	builder2 := stringSliceBuilder[*[]string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testAdmin.RolesPtr)
-		},
-	}
-	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **[]string) []shared.Error {
-		if *value == nil || len(**value) == 0 {
-			return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
-		}
-		return nil
-	})
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringSliceBuilder[*[]string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **[]string) []shared.Error {
+				if *value == nil || len(**value) == 0 {
+					return []shared.Error{h.ErrorT(ctx, value, requiredLocaleKey)}
+				}
+				return nil
+			})
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }

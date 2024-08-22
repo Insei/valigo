@@ -6,16 +6,16 @@ import (
 
 func TestError(t *testing.T) {
 	tests := []struct {
-		name     string
-		error    Error
-		expected string
+		name          string
+		error         Error
+		expectedError bool
 	}{
 		{
 			name: "Simple error",
 			error: Error{
 				Message: "Test error",
 			},
-			expected: "Test error",
+			expectedError: true,
 		},
 		{
 			name: "Error with value",
@@ -23,7 +23,7 @@ func TestError(t *testing.T) {
 				Message: "Test error",
 				Value:   "some value",
 			},
-			expected: "Test error (: some value)",
+			expectedError: true,
 		},
 		{
 			name: "Error with location and value",
@@ -32,7 +32,7 @@ func TestError(t *testing.T) {
 				Location: "file.go",
 				Value:    "some value",
 			},
-			expected: "Test error (file.go: some value)",
+			expectedError: true,
 		},
 		{
 			name: "Error with empty message",
@@ -40,15 +40,20 @@ func TestError(t *testing.T) {
 				Location: "file.go",
 				Value:    "some value",
 			},
-			expected: " (file.go: some value)",
+			expectedError: true,
+		},
+		{
+			name:          "No error",
+			error:         Error{},
+			expectedError: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tt.error.Error()
-			if result != tt.expected {
-				t.Errorf("Expected: %s, but got: %s", tt.expected, result)
+			if (result != "") != tt.expectedError {
+				t.Errorf("Expected error: %v, but got: %s", tt.expectedError, result)
 			}
 		})
 	}

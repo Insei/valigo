@@ -27,8 +27,8 @@ func NewIntBundle(deps shared.BundleDependencies) *IntBundle {
 }
 
 // Int returns an intBuilder instance for an integer field.
-// It takes a pointer to an integer (*int) field as an argument.
-func (i *IntBundle) Int(field any) IntBuilder[int] {
+// It takes a pointer to an integer field as an argument.
+func (i *IntBundle) Int(field *int) IntBuilder[int] {
 	fmapField, err := i.storage.GetFieldByPtr(i.obj, field)
 	if err != nil {
 		panic(err)
@@ -41,8 +41,8 @@ func (i *IntBundle) Int(field any) IntBuilder[int] {
 }
 
 // IntPtr returns an intBuilder instance for a pointer to an integer field.
-// It takes a pointer to a pointer to an integer (**int) field as an argument.
-func (i *IntBundle) IntPtr(field any) IntBuilder[*int] {
+// It takes a pointer to a pointer to an integer field as an argument.
+func (i *IntBundle) IntPtr(field **int) IntBuilder[*int] {
 	fmapField, err := i.storage.GetFieldByPtr(i.obj, field)
 	if err != nil {
 		panic(err)
@@ -55,8 +55,8 @@ func (i *IntBundle) IntPtr(field any) IntBuilder[*int] {
 }
 
 // IntSlice returns an IntSliceBuilder instance for an integer slice field.
-// It takes a pointer to an integer slice (*[]int) field as an argument.
-func (i *IntBundle) IntSlice(field any) IntSliceBuilder[[]int] {
+// It takes a pointer to an integer slice field as an argument.
+func (i *IntBundle) IntSlice(field *[]int) IntSliceBuilder[[]int] {
 	fmapField, err := i.storage.GetFieldByPtr(i.obj, field)
 	if err != nil {
 		panic(err)
@@ -69,8 +69,8 @@ func (i *IntBundle) IntSlice(field any) IntSliceBuilder[[]int] {
 }
 
 // IntSlicePtr returns an IntSliceBuilder instance for a pointer to an integer slice field.
-// It takes a pointer to a pointer to an integer slice (**[]int) field as an argument.
-func (i *IntBundle) IntSlicePtr(field any) IntSliceBuilder[*[]int] {
+// It takes a pointer to a pointer to an integer slice field as an argument.
+func (i *IntBundle) IntSlicePtr(field **[]int) IntSliceBuilder[*[]int] {
 	fmapField, err := i.storage.GetFieldByPtr(i.obj, field)
 	if err != nil {
 		panic(err)

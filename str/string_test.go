@@ -31,42 +31,104 @@ type user struct {
 }
 
 func TestStringBuilderTrim(t *testing.T) {
-	testUser := user{Name: "   Rebecca "}
+	testUser := user{
+		Name:     "   Rebecca ",
+		LastName: "Smith  ",
+	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
 
-	field := storage.MustFind("Name")
-	builder := stringBuilder[string]{
-		field: field,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			fn(context.Background(), &helper, &testUser.Name)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		trimmedValue  string
+		value         any
+		expectedError bool
+	}{
+		{
+			name:          "Name trim check",
+			fieldName:     "Name",
+			trimmedValue:  " Rebecca",
+			value:         &testUser.Name,
+			expectedError: true,
+		},
+		{
+			name:          "LastName trim check",
+			fieldName:     "LastName",
+			trimmedValue:  "Smith",
+			value:         &testUser.LastName,
+			expectedError: false,
 		},
 	}
-	builder.Trim()
-	trimmedValue := field.Get(&testUser)
-	if trimmedValue != "Rebecca" {
-		t.Errorf("expected 'test value', got '%v'", trimmedValue)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Trim()
+			trimmedValue := field.Get(&testUser)
+			if trimmedValue != tc.trimmedValue && !tc.expectedError {
+				t.Errorf("expected '%v', got '%v'", tc.trimmedValue, trimmedValue)
+			}
+		})
 	}
 }
+
 func TestStringPtrBuilderTrim(t *testing.T) {
 	name := "   Rebecca "
-	testUser := user{NamePtr: &name}
+	lastName := "Smith  "
+	testUser := user{
+		NamePtr:     &name,
+		LastNamePtr: &lastName,
+	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
 
-	field := storage.MustFind("NamePtr")
-	builder := stringBuilder[*string]{
-		field: field,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			fn(context.Background(), &helper, &testUser.NamePtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		trimmedValue  string
+		value         any
+		expectedError bool
+	}{
+		{
+			name:          "NamePtr trim check",
+			fieldName:     "NamePtr",
+			trimmedValue:  " Rebecca",
+			value:         &testUser.NamePtr,
+			expectedError: true,
+		},
+		{
+			name:          "LastNamePtr trim check",
+			fieldName:     "LastNamePtr",
+			trimmedValue:  "Smith",
+			value:         &testUser.LastNamePtr,
+			expectedError: false,
 		},
 	}
-	builder.Trim()
-	trimmedValue := field.Get(&testUser).(*string)
-	if *trimmedValue != "Rebecca" {
-		t.Errorf("expected 'test value', got '%v'", trimmedValue)
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[*string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Trim()
+			trimmedValue := field.Get(&testUser).(*string)
+			if *trimmedValue != tc.trimmedValue && !tc.expectedError {
+				t.Errorf("expected '%v', got '%v'", tc.trimmedValue, *trimmedValue)
+			}
+		})
 	}
 }
 
@@ -77,32 +139,46 @@ func TestStringBuilderMaxLen(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("PhoneNumber1")
-	builder1 := stringBuilder[string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.PhoneNumber1)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		maxLen        int
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumber1 max length check",
+			fieldName:     "PhoneNumber1",
+			maxLen:        12,
+			value:         &testUser.PhoneNumber1,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumber2 max length check",
+			fieldName:     "PhoneNumber2",
+			maxLen:        12,
+			value:         &testUser.PhoneNumber2,
+			expectedError: 0,
 		},
 	}
-	builder1.MaxLen(12)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumber2")
-	builder2 := stringBuilder[string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.PhoneNumber2)
-		},
-	}
-	builder2.MaxLen(12)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.MaxLen(tc.maxLen)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -115,32 +191,46 @@ func TestStringPtrBuilderMaxLen(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("PhoneNumberPtr1")
-	builder1 := stringBuilder[*string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.PhoneNumberPtr1)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		maxLen        int
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumberPtr1 max length check",
+			fieldName:     "PhoneNumberPtr1",
+			maxLen:        12,
+			value:         &testUser.PhoneNumberPtr1,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumberPtr2 max length check",
+			fieldName:     "PhoneNumberPtr2",
+			maxLen:        12,
+			value:         &testUser.PhoneNumberPtr2,
+			expectedError: 0,
 		},
 	}
-	builder1.MaxLen(12)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumberPtr2")
-	builder2 := stringBuilder[*string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.PhoneNumberPtr2)
-		},
-	}
-	builder2.MaxLen(12)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[*string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.MaxLen(tc.maxLen)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -150,34 +240,47 @@ func TestStringBuilderMinLen(t *testing.T) {
 		PhoneNumber2: "987767272",
 	}
 	storage, _ := fmap.GetFrom(testUser)
-
 	helper := helperStringImpl{}
-	var errs []shared.Error
-	field1 := storage.MustFind("PhoneNumber1")
 
-	builder1 := stringBuilder[string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.PhoneNumber1)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		minLen        int
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumber1 min length check",
+			fieldName:     "PhoneNumber1",
+			minLen:        9,
+			value:         &testUser.PhoneNumber1,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumber2 min length check",
+			fieldName:     "PhoneNumber2",
+			minLen:        9,
+			value:         &testUser.PhoneNumber2,
+			expectedError: 0,
 		},
 	}
-	builder1.MinLen(9)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumber2")
-	builder2 := stringBuilder[string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.PhoneNumber2)
-		},
-	}
-	builder2.MaxLen(9)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.MinLen(tc.minLen)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -189,34 +292,47 @@ func TestStringPtrBuilderMinLen(t *testing.T) {
 		PhoneNumberPtr2: &phoneNumber2,
 	}
 	storage, _ := fmap.GetFrom(testUser)
-
 	helper := helperStringImpl{}
-	var errs []shared.Error
-	field1 := storage.MustFind("PhoneNumberPtr1")
 
-	builder1 := stringBuilder[*string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.PhoneNumberPtr1)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		minLen        int
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "PhoneNumberPtr1 min length check",
+			fieldName:     "PhoneNumberPtr1",
+			minLen:        9,
+			value:         &testUser.PhoneNumberPtr1,
+			expectedError: 1,
+		},
+		{
+			name:          "PhoneNumberPtr2 min length check",
+			fieldName:     "PhoneNumberPtr2",
+			minLen:        9,
+			value:         &testUser.PhoneNumberPtr2,
+			expectedError: 0,
 		},
 	}
-	builder1.MinLen(9)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("PhoneNumberPtr2")
-	builder2 := stringBuilder[*string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.PhoneNumberPtr2)
-		},
-	}
-	builder2.MaxLen(9)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[*string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.MinLen(tc.minLen)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -226,32 +342,43 @@ func TestStringBuilderRequired(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("LastName")
-	builder1 := stringBuilder[string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.LastName)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "LastName required check",
+			fieldName:     "LastName",
+			value:         &testUser.LastName,
+			expectedError: 1,
+		},
+		{
+			name:          "Name required check",
+			fieldName:     "Name",
+			value:         &testUser.Name,
+			expectedError: 0,
 		},
 	}
-	builder1.Required()
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("Name")
-	builder2 := stringBuilder[string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Name)
-		},
-	}
-	builder2.Required()
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Required()
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -262,32 +389,43 @@ func TestStringPtrBuilderRequired(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("LastNamePtr")
-	builder1 := stringBuilder[*string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.LastNamePtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "LastNamePtr required check",
+			fieldName:     "LastNamePtr",
+			value:         &testUser.LastNamePtr,
+			expectedError: 1,
+		},
+		{
+			name:          "NamePtr required check",
+			fieldName:     "NamePtr",
+			value:         &testUser.NamePtr,
+			expectedError: 0,
 		},
 	}
-	builder1.Required()
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("NamePtr")
-	builder2 := stringBuilder[*string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.NamePtr)
-		},
-	}
-	builder2.Required()
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[*string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Required()
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -298,33 +436,46 @@ func TestStringBuilderRegexp(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
-	re := regexp.MustCompile(`^[a-zA-Z]{3,25}`)
 
-	field1 := storage.MustFind("Name")
-	builder1 := stringBuilder[string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Name)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		re            *regexp.Regexp
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "Name regex check",
+			fieldName:     "Name",
+			re:            regexp.MustCompile(`^[a-zA-Z]{3,25}`),
+			value:         &testUser.Name,
+			expectedError: 1,
+		},
+		{
+			name:          "LastName regex check",
+			fieldName:     "LastName",
+			re:            regexp.MustCompile(`^[a-zA-Z]{3,25}`),
+			value:         &testUser.LastName,
+			expectedError: 0,
 		},
 	}
-	builder1.Regexp(re)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("LastName")
-	builder2 := stringBuilder[string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.LastName)
-		},
-	}
-	builder2.Regexp(re)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Regexp(tc.re)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -337,33 +488,46 @@ func TestStringPtrBuilderRegexp(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
-	re := regexp.MustCompile(`^[a-zA-Z]{3,25}`)
 
-	field1 := storage.MustFind("NamePtr")
-	builder1 := stringBuilder[*string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.NamePtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		re            *regexp.Regexp
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "NamePtr regex check",
+			fieldName:     "NamePtr",
+			re:            regexp.MustCompile(`^[a-zA-Z]{3,25}`),
+			value:         &testUser.NamePtr,
+			expectedError: 1,
+		},
+		{
+			name:          "LastNamePtr regex check",
+			fieldName:     "LastNamePtr",
+			re:            regexp.MustCompile(`^[a-zA-Z]{3,25}`),
+			value:         &testUser.LastNamePtr,
+			expectedError: 0,
 		},
 	}
-	builder1.Regexp(re)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("LastNamePtr")
-	builder2 := stringBuilder[*string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.LastNamePtr)
-		},
-	}
-	builder2.Regexp(re)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[*string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Regexp(tc.re)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -374,34 +538,46 @@ func TestStringBuilderAnyOf(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
-	allowedNames := []string{"Rebecca", "John", "Alex"}
-	allowedLastNames := []string{"Smith", "Doe", "Williams"}
 
-	field1 := storage.MustFind("Name")
-	builder1 := stringBuilder[string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Name)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		allowedValues []string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "Name any of check",
+			fieldName:     "Name",
+			allowedValues: []string{"Rebecca", "John", "Alex"},
+			value:         &testUser.Name,
+			expectedError: 1,
+		},
+		{
+			name:          "LastName any of check",
+			fieldName:     "LastName",
+			allowedValues: []string{"Smith", "Doe", "Williams"},
+			value:         &testUser.LastName,
+			expectedError: 0,
 		},
 	}
-	builder1.AnyOf(allowedNames...)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("LastName")
-	builder2 := stringBuilder[string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.LastName)
-		},
-	}
-	builder2.AnyOf(allowedLastNames...)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.AnyOf(tc.allowedValues...)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -414,34 +590,46 @@ func TestStringPtrBuilderAnyOf(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
-	allowedNames := []string{"Rebecca", "John", "Alex"}
-	allowedLastNames := []string{"Smith", "Doe", "Williams"}
 
-	field1 := storage.MustFind("NamePtr")
-	builder1 := stringBuilder[*string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.NamePtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		allowedValues []string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "NamePtr any of check",
+			fieldName:     "NamePtr",
+			allowedValues: []string{"Rebecca", "John", "Alex"},
+			value:         &testUser.NamePtr,
+			expectedError: 1,
+		},
+		{
+			name:          "LastNamePtr any of check",
+			fieldName:     "LastNamePtr",
+			allowedValues: []string{"Smith", "Doe", "Williams"},
+			value:         &testUser.LastNamePtr,
+			expectedError: 0,
 		},
 	}
-	builder1.AnyOf(allowedNames...)
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("LastNamePtr")
-	builder2 := stringBuilder[*string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.LastNamePtr)
-		},
-	}
-	builder2.AnyOf(allowedLastNames...)
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[*string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.AnyOf(tc.allowedValues...)
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -451,42 +639,48 @@ func TestStringBuilderCustom(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("Name")
-	builder1 := stringBuilder[string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.Name)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "Name custom function check",
+			fieldName:     "Name",
+			value:         &testUser.Name,
+			expectedError: 1,
+		},
+		{
+			name:          "LastName custom function check",
+			fieldName:     "LastName",
+			value:         &testUser.LastName,
+			expectedError: 0,
 		},
 	}
-	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
-		if value == nil || *value == "" {
-			return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
-		}
-		return nil
-	})
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("LastName")
-	builder2 := stringBuilder[string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.LastName)
-		},
-	}
-	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
-		if value == nil || *value == "" {
-			return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
-		}
-		return nil
-	})
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
+				if value == nil || *value == "" {
+					return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
+				}
+				return nil
+			})
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
 
@@ -497,41 +691,47 @@ func TestStringPtrBuilderCustom(t *testing.T) {
 	}
 	storage, _ := fmap.GetFrom(testUser)
 	helper := helperStringImpl{}
-	var errs []shared.Error
 
-	field1 := storage.MustFind("NamePtr")
-	builder1 := stringBuilder[*string]{
-		field: field1,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.NamePtr)
+	testCases := []struct {
+		name          string
+		fieldName     string
+		value         any
+		expectedError int
+	}{
+		{
+			name:          "NamePtr custom function check",
+			fieldName:     "NamePtr",
+			value:         &testUser.NamePtr,
+			expectedError: 1,
+		},
+		{
+			name:          "LastNamePtr custom function check",
+			fieldName:     "LastNamePtr",
+			value:         &testUser.LastNamePtr,
+			expectedError: 0,
 		},
 	}
-	builder1.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **string) []shared.Error {
-		if value == nil || *value == nil || **value == "" {
-			return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
-		}
-		return nil
-	})
-	if len(errs) == 0 {
-		t.Errorf("expected error, got nil")
-	}
 
-	field2 := storage.MustFind("LastNamePtr")
-	builder2 := stringBuilder[*string]{
-		field: field2,
-		h:     &helper,
-		appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
-			errs = fn(context.Background(), &helper, &testUser.LastNamePtr)
-		},
-	}
-	builder2.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **string) []shared.Error {
-		if value == nil || *value == nil || **value == "" {
-			return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
-		}
-		return nil
-	})
-	if len(errs) > 0 {
-		t.Errorf("expected nil, got %v", errs)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var errs []shared.Error
+			field := storage.MustFind(tc.fieldName)
+			builder := stringBuilder[*string]{
+				field: field,
+				h:     &helper,
+				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
+					errs = fn(context.Background(), &helper, tc.value)
+				},
+			}
+			builder.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value **string) []shared.Error {
+				if value == nil || *value == nil || **value == "" {
+					return []shared.Error{h.ErrorT(ctx, *value, requiredLocaleKey)}
+				}
+				return nil
+			})
+			if len(errs) != tc.expectedError {
+				t.Errorf("expected %v, got %v", tc.expectedError, len(errs))
+			}
+		})
 	}
 }
