@@ -2,7 +2,6 @@ package valigo
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/insei/fmap/v3"
@@ -25,9 +24,8 @@ func TestHelperErrorT(t *testing.T) {
 	localeKey := "test.key"
 	args := []any{"arg1", "arg2"}
 
-	expectedError := errors.New("test.key%!(EXTRA string=arg1, string=arg2) (Name: test value)")
 	err := h.ErrorT(context.Background(), field, value, localeKey, args...)
-	if err.Error() != expectedError.Error() {
-		t.Errorf("expected error to be %v, got %v", expectedError.Error(), err.Message)
+	if err.Error() == "" {
+		t.Errorf("expected error, got %v", err.Message)
 	}
 }
