@@ -3,11 +3,13 @@ package uuid
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/insei/fmap/v3"
-	"github.com/insei/valigo/shared"
 	"slices"
 	"strings"
+
+	"github.com/google/uuid"
+	"github.com/insei/fmap/v3"
+
+	"github.com/insei/valigo/shared"
 )
 
 const (
@@ -21,7 +23,7 @@ type uuidBuilder[T uuid.UUID | *uuid.UUID] struct {
 	h        shared.Helper
 }
 
-func (s *uuidBuilder[T]) Required() Builder[T] {
+func (s *uuidBuilder[T]) Required() UUIDBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		switch uuidVal := value.(type) {
 		case *uuid.UUID:
@@ -44,7 +46,7 @@ func (s *uuidBuilder[T]) Required() Builder[T] {
 }
 
 // AnyOf checks if the string value is one of the allowed values.
-func (s *uuidBuilder[T]) AnyOf(allowed ...uuid.UUID) Builder[T] {
+func (s *uuidBuilder[T]) AnyOf(allowed ...uuid.UUID) UUIDBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		switch uuidVal := value.(type) {
 		case *uuid.UUID:
@@ -64,7 +66,7 @@ func (s *uuidBuilder[T]) AnyOf(allowed ...uuid.UUID) Builder[T] {
 }
 
 // Custom allows for custom validation logic to be applied to the string value.
-func (s *uuidBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value *T) []shared.Error) Builder[T] {
+func (s *uuidBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value *T) []shared.Error) UUIDBuilder[T] {
 	customHelper := shared.NewFieldCustomHelper(s.field, s.h)
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		return f(ctx, customHelper, value.(*T))
@@ -73,7 +75,7 @@ func (s *uuidBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldCusto
 }
 
 // When allows for conditional validation logic to be applied to the string value.
-func (s *uuidBuilder[T]) When(whenFn func(ctx context.Context, value *T) bool) Builder[T] {
+func (s *uuidBuilder[T]) When(whenFn func(ctx context.Context, value *T) bool) UUIDBuilder[T] {
 	if whenFn == nil {
 		return s
 	}

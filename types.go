@@ -3,8 +3,10 @@ package valigo
 import (
 	"context"
 
+	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
+	"github.com/insei/valigo/uuid"
 )
 
 // NumberBuilder is an interface that defines methods for building validators for numeric types.
@@ -92,7 +94,8 @@ type SlicesBundleBuilder interface {
 // Builder is an interface that defines methods for building validators for any type T.
 type Builder[T any] interface {
 	str.StringsBundleBuilder
-	// num.IntBundleBuilder
+	num.IntBundleBuilder
+	uuid.UuidBundleBuilder
 	// When sets a condition for when the validator should be applied.
 	When(func(ctx context.Context, obj *T) bool) Builder[T]
 	// Custom adds a custom validation function to the validator.
