@@ -2,8 +2,10 @@ package uuid
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 	"github.com/insei/fmap/v3"
+
 	"github.com/insei/valigo/shared"
 )
 
@@ -14,7 +16,7 @@ type uuidSliceBuilder[T []uuid.UUID | *[]uuid.UUID] struct {
 }
 
 // Required checks if the string slice is not empty.
-func (s *uuidSliceBuilder[T]) Required() SliceBuilder[T] {
+func (s *uuidSliceBuilder[T]) Required() UUIDSliceBuilder[T] {
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		switch uuidSliceVal := value.(type) {
 		case *[]uuid.UUID:
@@ -42,7 +44,7 @@ func (s *uuidSliceBuilder[T]) Required() SliceBuilder[T] {
 }
 
 // Custom allows for custom validation logic.
-func (s *uuidSliceBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value *T) []shared.Error) SliceBuilder[T] {
+func (s *uuidSliceBuilder[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value *T) []shared.Error) UUIDSliceBuilder[T] {
 	customHelper := shared.NewFieldCustomHelper(s.field, s.h)
 	s.appendFn(s.field, func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		return f(ctx, customHelper, value.(*T))
@@ -51,7 +53,7 @@ func (s *uuidSliceBuilder[T]) Custom(f func(ctx context.Context, h *shared.Field
 }
 
 // When allows for conditional validation based on a given condition.
-func (s *uuidSliceBuilder[T]) When(whenFn func(ctx context.Context, value *T) bool) SliceBuilder[T] {
+func (s *uuidSliceBuilder[T]) When(whenFn func(ctx context.Context, value *T) bool) UUIDSliceBuilder[T] {
 	if whenFn == nil {
 		return s
 	}
