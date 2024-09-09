@@ -41,14 +41,14 @@ func TestIntBuilderMax(t *testing.T) {
 		expectedError int
 	}{
 		{
-			name:          "Age max check",
+			name:          "Age maxT check",
 			fieldName:     "Age",
 			max:           35,
 			value:         &testUser.Age,
 			expectedError: 1,
 		},
 		{
-			name:          "Height max check",
+			name:          "Height maxT check",
 			fieldName:     "Height",
 			max:           190,
 			value:         &testUser.Height,
@@ -60,7 +60,7 @@ func TestIntBuilderMax(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[int]{
+			builder := numBuilder[int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -93,14 +93,14 @@ func TestIntPtrBuilderMax(t *testing.T) {
 		expectedError int
 	}{
 		{
-			name:          "AgePtr max check",
+			name:          "AgePtr maxT check",
 			fieldName:     "AgePtr",
 			max:           35,
 			value:         &testUser.AgePtr,
 			expectedError: 1,
 		},
 		{
-			name:          "HeightPtr max check",
+			name:          "HeightPtr maxT check",
 			fieldName:     "HeightPtr",
 			max:           190,
 			value:         &testUser.HeightPtr,
@@ -112,7 +112,7 @@ func TestIntPtrBuilderMax(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[*int]{
+			builder := numBuilder[*int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -162,7 +162,7 @@ func TestIntBuilderMin(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[int]{
+			builder := numBuilder[int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -214,7 +214,7 @@ func TestIntPtrBuilderMin(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[*int]{
+			builder := numBuilder[*int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -260,7 +260,7 @@ func TestIntBuilderRequired(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[int]{
+			builder := numBuilder[int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -307,7 +307,7 @@ func TestIntPtrBuilderRequired(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[*int]{
+			builder := numBuilder[*int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -357,7 +357,7 @@ func TestIntBuilderAnyOf(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[int]{
+			builder := numBuilder[int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -409,7 +409,7 @@ func TestIntPtrBuilderAnyOf(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[*int]{
+			builder := numBuilder[*int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -462,7 +462,7 @@ func TestIntBuilderAnyOfInterval(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[int]{
+			builder := numBuilder[int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -517,7 +517,7 @@ func TestIntPtrBuilderAnyOfInterval(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[*int]{
+			builder := numBuilder[*int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -563,7 +563,7 @@ func TestIntBuilderCustom(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[int]{
+			builder := numBuilder[int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {
@@ -615,7 +615,7 @@ func TestIntPtrBuilderCustom(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			var errs []shared.Error
 			field := storage.MustFind(tc.fieldName)
-			builder := intBuilder[*int]{
+			builder := numBuilder[*int]{
 				field: field,
 				h:     &helper,
 				appendFn: func(field fmap.Field, fn shared.FieldValidationFn) {

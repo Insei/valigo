@@ -15,7 +15,7 @@ import (
 // It is generic and can be used to build validators for any type.
 type builder[T any] struct {
 	*str.StringBundle
-	*num.IntBundle
+	*num.Bundle
 	*uuid.UUIDBundle
 	obj       any
 	v         *Validator
@@ -26,7 +26,7 @@ type builder[T any] struct {
 // It takes a function that returns a boolean and returns a builder.
 // The function is called with the context and the object being validated.
 // If the function returns true, the validation is enabled.
-func (b *builder[T]) When(fn func(ctx context.Context, obj *T) bool) Builder[T] {
+func (b *builder[T]) When(fn func(ctx context.Context, obj *T) bool) Configurator[T] {
 	return configure[T](b.v, b.obj, func(ctx context.Context, obj any) bool {
 		enablerFn := fn
 		if b.enablerFn != nil {
@@ -80,7 +80,7 @@ func (b *builder[T]) Custom(fn func(ctx context.Context, h shared.StructCustomHe
 // configure creates a new builder with the given validator, object, and enabler function.
 // It takes a validator, an object, and an enabler function as input,
 // and returns a builder.
-func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, obj any) bool) Builder[T] {
+func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, obj any) bool) Configurator[T] {
 	fields, err := fmap.GetFrom(obj)
 	if err != nil {
 		panic(err)
@@ -96,7 +96,7 @@ func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, o
 	ub := uuid.NewUUIDBundle(bundleDeps)
 	return &builder[T]{
 		StringBundle: sb,
-		IntBundle:    nb,
+		Bundle:       nb,
 		UUIDBundle:   ub,
 		obj:          obj,
 		v:            v,

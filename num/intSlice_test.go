@@ -40,14 +40,14 @@ func TestIntSliceBuilderMax(t *testing.T) {
 		expectedError int
 	}{
 		{
-			name:          "RoleIDs slice max check",
+			name:          "RoleIDs slice maxT check",
 			fieldName:     "RoleIDs",
 			max:           3,
 			value:         &testAdmin.RoleIDs,
 			expectedError: 1,
 		},
 		{
-			name:          "RoleIDs slice max check",
+			name:          "RoleIDs slice maxT check",
 			fieldName:     "RoleIDs",
 			max:           7,
 			value:         &testAdmin.RoleIDs,
@@ -90,14 +90,14 @@ func TestIntSlicePtrBuilderMax(t *testing.T) {
 		expectedError int
 	}{
 		{
-			name:          "RoleIDsPtr slice max check",
+			name:          "RoleIDsPtr slice maxT check",
 			fieldName:     "RoleIDsPtr",
 			max:           3,
 			value:         &testAdmin.RoleIDsPtr,
 			expectedError: 1,
 		},
 		{
-			name:          "RoleIDsPtr slice max check",
+			name:          "RoleIDsPtr slice maxT check",
 			fieldName:     "RoleIDsPtr",
 			max:           7,
 			value:         &testAdmin.RoleIDsPtr,

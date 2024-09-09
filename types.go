@@ -91,15 +91,15 @@ type SlicesBundleBuilder interface {
 	SlicePtrStringsPtr(value **[]*string) StringSliceBuilder[*string]
 }
 
-// Builder is an interface that defines methods for building validators for any type T.
-type Builder[T any] interface {
+// Configurator is an interface that defines methods for building validators for any type T.
+type Configurator[T any] interface {
 	str.StringsBundleBuilder
-	num.IntBundleBuilder
+	num.BundleConfigurator
 	uuid.UuidBundleBuilder
 	// When sets a condition for when the validator should be applied.
-	When(func(ctx context.Context, obj *T) bool) Builder[T]
+	When(func(ctx context.Context, obj *T) bool) Configurator[T]
 	// Custom adds a custom validation function to the validator.
 	Custom(fn func(ctx context.Context, h shared.StructCustomHelper, obj *T) []shared.Error)
-	//Custom(func(obj *T) []error) Builder[T]
+	//Custom(func(obj *T) []error) Configurator[T]
 	//SlicesBundleBuilder
 }

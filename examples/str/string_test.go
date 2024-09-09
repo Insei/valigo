@@ -17,7 +17,7 @@ type car struct {
 
 func TestStringBuilderTrim(t *testing.T) {
 	v := valigo.New()
-	valigo.Configure[car](v, func(builder valigo.Builder[car], obj *car) {
+	valigo.Configure[car](v, func(builder valigo.Configurator[car], obj *car) {
 		builder.String(&obj.Model).
 			Trim()
 	})
@@ -50,7 +50,7 @@ func TestStringBuilderTrim(t *testing.T) {
 func TestStringBuilderRegexp(t *testing.T) {
 	v := valigo.New()
 	re := regexp.MustCompile(`^[a-zA-Z0-9]{3,20}$`)
-	valigo.Configure[car](v, func(builder valigo.Builder[car], obj *car) {
+	valigo.Configure[car](v, func(builder valigo.Configurator[car], obj *car) {
 		builder.String(&obj.Model).
 			Regexp(re)
 	})
@@ -112,7 +112,7 @@ type admin struct {
 
 func TestStringBuilderMaxLen(t *testing.T) {
 	v := valigo.New()
-	valigo.Configure[admin](v, func(builder valigo.Builder[admin], obj *admin) {
+	valigo.Configure[admin](v, func(builder valigo.Configurator[admin], obj *admin) {
 		builder.String(&obj.PhoneNumber).
 			MaxLen(12)
 	})
