@@ -16,7 +16,7 @@ type User struct {
 
 func main() {
 	v := valigo.New() //v := valigo.New()
-	valigo.Configure[User](v, func(builder valigo.Builder[User], obj *User) {
+	valigo.Configure[User](v, func(builder valigo.Configurator[User], obj *User) {
 		// Custom on struct type
 		builder.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *User) []shared.Error {
 			if obj.Name != "Rebecca" {

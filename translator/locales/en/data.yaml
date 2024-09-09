@@ -6,3 +6,10 @@ validation:
     "Cannot be shorter than %d characters": Cannot be shorter than %d characters
     "Doesn't match required regexp pattern": Doesn't match required regexp pattern
     "Only %s values is allowed": Only %s values is allowed
+  num:
+    "Cannot be less than %d": Cannot be less than %d
+    "Cannot be greater than %d": Cannot be greater than %d
+    "Should be fulfilled": Should be fulfilled
+    "Only %d values is allowed": Only %d values is allowed
+    "Only interval[%d - %d] is allowed": Only interval[%d - %d] is allowed
+    "Invalid value": Invalid value

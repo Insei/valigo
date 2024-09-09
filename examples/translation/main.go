@@ -18,6 +18,7 @@ type Sender struct {
 	SMTPPort      string
 	HTTPAddress   string
 	HTTPDestParam string
+	Int           int
 }
 
 const (
@@ -38,7 +39,8 @@ func manualValidatorSettings() *valigo.Validator {
 
 func main() {
 	v := manualValidatorSettings() //v := valigo.New()
-	valigo.Configure[Sender](v, func(builder valigo.Builder[Sender], obj *Sender) {
+	valigo.Configure[Sender](v, func(builder valigo.Configurator[Sender], obj *Sender) {
+		builder.Int(&obj.Int).Max(2)
 		builder.String(&obj.Type).Required()
 		builder.String(&obj.SMTPHost).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
@@ -49,6 +51,7 @@ func main() {
 		SMTPPort:      uuid.New().String() + " ",
 		HTTPAddress:   uuid.New().String() + " ",
 		HTTPDestParam: uuid.New().String() + "  ",
+		Int:           123,
 	}
 	errs := v.Validate(context.Background(), sender)
 	errsJson, _ := json.Marshal(errs)

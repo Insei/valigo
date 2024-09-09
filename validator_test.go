@@ -44,7 +44,7 @@ func benchValidateInit() {
 		return
 	}
 	initialized = true
-	Configure[Sender](validator, func(builder Builder[Sender], temp *Sender) {
+	Configure[Sender](validator, func(builder Configurator[Sender], temp *Sender) {
 		builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
 			if len(*value) < 20 {
 				return []shared.Error{h.ErrorT(ctx, *value, "Should be longer than 20 characters")}
@@ -257,7 +257,7 @@ func TestConfigure(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			Configure[Sender](validator, func(builder Builder[Sender], temp *Sender) {
+			Configure[Sender](validator, func(builder Configurator[Sender], temp *Sender) {
 				builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
 					if len(*value) < 20 {
 						return []shared.Error{h.ErrorT(ctx, *value, "Should be longer than 20 characters")}
