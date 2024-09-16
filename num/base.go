@@ -34,7 +34,7 @@ func anyOfT[T numbers](val T, allowed []T) bool {
 }
 
 func anyOfIntervalT[T numbers](val T, begin, end T) bool {
-	return end < val && val > begin
+	return end > val && val > begin
 }
 
 var _ BaseConfigurator[int, *baseConfigurator[int]] = &baseConfigurator[int]{}
