@@ -19,7 +19,7 @@ func TestStorageNewOnStruct(t *testing.T) {
 	fn := func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
 		return nil
 	}
-	s.newOnStruct(temp, enabler, fn)
+	s.newOnStructAppend(temp, enabler, fn)
 	if len(s.validators[reflect.TypeOf(temp)]) != 1 {
 		t.Errorf("expected 1 validator, got %d", len(s.validators[reflect.TypeOf(temp)]))
 	}
@@ -32,7 +32,7 @@ func TestStorageNewOnStructWithNilEnabler(t *testing.T) {
 	fn := func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
 		return nil
 	}
-	s.newOnStruct(temp, enabler, fn)
+	s.newOnStructAppend(temp, enabler, fn)
 	if len(s.validators[reflect.TypeOf(temp)]) != 1 {
 		t.Errorf("expected 1 validator, got %d", len(s.validators[reflect.TypeOf(temp)]))
 	}
@@ -58,7 +58,7 @@ func TestStorageNewOnField(t *testing.T) {
 	fn := func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
 		return nil
 	}
-	s.newOnField(temp, enabler)(field, fn)
+	s.newOnFieldAppend(temp, enabler)(field, fn)
 	if len(s.validators[reflect.TypeOf(temp)]) != 1 {
 		t.Errorf("expected 1 validator, got %d", len(s.validators[reflect.TypeOf(temp)]))
 	}
@@ -77,7 +77,7 @@ func TestStorageNewOnFieldWithNilEnabler(t *testing.T) {
 	fn := func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
 		return nil
 	}
-	s.newOnField(temp, enabler)(field, fn)
+	s.newOnFieldAppend(temp, enabler)(field, fn)
 	if len(s.validators[reflect.TypeOf(temp)]) != 1 {
 		t.Errorf("expected 1 validator, got %d", len(s.validators[reflect.TypeOf(temp)]))
 	}

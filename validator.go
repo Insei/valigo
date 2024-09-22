@@ -57,8 +57,8 @@ func New(opts ...Option) *Validator {
 	return v
 }
 
-// Configure configures a Validator instance for a specific type T.
-// It creates a new instance of type T, allocates values for all pointer fields recursively,
+// Configure configures a Validator instance for a specific type T, i.e.: var t *T.
+// It creates a new instance of type T, allocates values for all fields recursively,
 // creates a Configurator instance for the type T, calls the provided function fn with the Configurator
 // instance and the instance of type T, and appends any user-defined validators to the Configurator instance.
 func Configure[T any](v *Validator, fn func(builder Configurator[T], obj *T)) {

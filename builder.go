@@ -74,13 +74,38 @@ func (b *builder[T]) Custom(fn func(ctx context.Context, h shared.StructCustomHe
 	fnConvert := func(ctx context.Context, h shared.Helper, objAny any) []shared.Error {
 		return fn(ctx, newHFn(objAny, h), objAny.(*T))
 	}
-	b.v.storage.newOnStruct(b.obj, b.enablerFn, fnConvert)
+	b.v.storage.newOnStructAppend(b.obj, b.enablerFn, fnConvert)
+}
+
+func (b *builder[T]) Slice(sliceFieldPtr any) *num.StringSliceFieldConfigurator {
+	fields, err := fmap.GetFrom(b.obj)
+	if err != nil {
+		panic(err)
+	}
+	field, err := fields.GetFieldByPtr(b.obj, sliceFieldPtr)
+	if err != nil {
+		panic(err)
+	}
+	ok := shared.AddSliceMutation[string](sliceFieldPtr)
+	if !ok {
+		panic(err)
+	}
+	return &num.StringSliceFieldConfigurator{
+		SliceFieldConfigurator: shared.NewSliceFieldConfigurator[string](shared.FieldConfiguratorParams[[]*any]{
+			GetValueFn: func(value any) ([]*any, bool) {
+				val, ok := shared.ConvertSliceValue[string](value)
+				return val, ok
+			},
+			Field:    field,
+			Helper:   b.v.GetHelper(),
+			AppendFn: b.v.storage.newOnFieldAppend(b.obj, nil),
+		})}
 }
 
 // configure creates a new builder with the given validator, object, and enabler function.
 // It takes a validator, an object, and an enabler function as input,
 // and returns a builder.
-func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, obj any) bool) Configurator[T] {
+func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, obj any) bool) *builder[T] {
 	fields, err := fmap.GetFrom(obj)
 	if err != nil {
 		panic(err)
@@ -88,11 +113,11 @@ func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, o
 	bundleDeps := shared.BundleDependencies{
 		Object:   obj,
 		Helper:   v.GetHelper(),
-		AppendFn: v.storage.newOnField(obj, enabler),
+		AppendFn: v.storage.newOnFieldAppend(obj, enabler),
 		Fields:   fields,
 	}
 	sb := str.NewStringBundle(bundleDeps)
-	nb := num.NewIntBundle(bundleDeps)
+	nb := num.NewNumBundle(bundleDeps)
 	ub := uuid.NewUUIDBundle(bundleDeps)
 	return &builder[T]{
 		StringBundle: sb,
