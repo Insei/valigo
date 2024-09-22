@@ -16,6 +16,7 @@ func TestBuilderWhen(t *testing.T) {
 	obj := &TestStruct{
 		Field: "test",
 	}
+	validator = New()
 	bld := configure[TestStruct](validator, obj, func(ctx context.Context, obj any) bool {
 		return true
 	})
@@ -118,4 +119,21 @@ func TestConfigurePanic(t *testing.T) {
 		}
 	}()
 	configure[TestStruct](vld, &obj, nil)
+}
+
+func TestBuilder_Slice(t *testing.T) {
+	type TestStruct struct {
+		Slice  []string
+		PtrInt float32
+	}
+	obj := &TestStruct{
+		Slice:  []string{"  test1   ", "  test2  "},
+		PtrInt: 44,
+	}
+	vld := New()
+	bld := configure[*TestStruct](vld, obj, nil)
+	bld.Slice(&obj.Slice).Trim().MaxLen(1)
+	bld.Number(&obj.PtrInt).Max(float32(22.22))
+	err := vld.Validate(context.Background(), obj)
+	_ = err
 }

@@ -20,11 +20,11 @@ type storage struct {
 	validators map[reflect.Type][]structValidationFn
 }
 
-// newOnStruct adds a new struct validator to the storage.
+// newOnStructAppend adds a new struct validator to the storage.
 // It takes a temporary object, an enabler function, and a field validation function as input.
 // The enabler function is optional and can be used to conditionally enable the validation.
 // The field validation function is called for each field of the struct.
-func (s *storage) newOnStruct(temp any, enabler func(context.Context, any) bool, fn shared.FieldValidationFn) {
+func (s *storage) newOnStructAppend(temp any, enabler func(context.Context, any) bool, fn shared.FieldValidationFn) {
 	t := reflect.TypeOf(temp)
 	fnNew := func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
 		if enabler != nil && !enabler(ctx, obj) {
@@ -35,11 +35,11 @@ func (s *storage) newOnStruct(temp any, enabler func(context.Context, any) bool,
 	s.validators[t] = append(s.validators[t], fnNew)
 }
 
-// newOnField adds a new field validator to the storage.
+// newOnFieldAppend adds a new field validator to the storage.
 // It takes a temporary object, an enabler function, and a field validation function as input.
 // The enabler function is optional and can be used to conditionally enable the validation.
 // The field validation function is called for each field of the struct.
-func (s *storage) newOnField(temp any, enabler func(context.Context, any) bool) func(field fmap.Field, fn shared.FieldValidationFn) {
+func (s *storage) newOnFieldAppend(temp any, enabler func(context.Context, any) bool) func(field fmap.Field, fn shared.FieldValidationFn) {
 	t := reflect.TypeOf(temp)
 	return func(field fmap.Field, fn shared.FieldValidationFn) {
 		fnNew := func(ctx context.Context, h shared.Helper, obj, v any) []shared.Error {

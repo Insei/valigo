@@ -15,6 +15,7 @@ type Sender struct {
 	Type          string
 	SMTPHost      string
 	SMTPPort      string
+	SMTPInt       int
 	HTTPAddress   string
 	HTTPDestParam string
 	PtrString     *string
@@ -26,6 +27,7 @@ func createSender() *Sender {
 		Type:          "SMTP",
 		SMTPHost:      uuid.New().String() + "   ",
 		SMTPPort:      uuid.New().String() + " ",
+		SMTPInt:       10,
 		HTTPAddress:   uuid.New().String() + " ",
 		HTTPDestParam: uuid.New().String() + "  ",
 		PtrString:     &ptr,
@@ -63,9 +65,11 @@ func benchValidateInit() {
 		})
 		smtpValidator.String(&temp.SMTPHost).Trim().Required()
 		smtpValidator.String(&temp.SMTPPort).Trim().Required()
-
+		smtpValidator.Number(&temp.SMTPInt).Max(20)
 		builder.StringPtr(&temp.PtrString).Trim().Required()
-
+		builder.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *Sender) []shared.Error {
+			h.ErrorT(ctx)
+		})
 		httpValidator := builder.When(func(_ context.Context, temp *Sender) bool {
 			return temp.Type == "HTTP"
 		})
