@@ -96,7 +96,7 @@ type Configurator[T any] interface {
 	str.StringsBundleBuilder
 	num.BundleConfigurator
 	uuid.UuidBundleBuilder
-	Slice(sliceFieldPtr any) *num.StringSliceFieldConfigurator
+	Slice(sliceFieldPtr any) *shared.SliceFieldConfigurator
 	// When sets a condition for when the validator should be applied.
 	When(func(ctx context.Context, obj *T) bool) Configurator[T]
 	// Custom adds a custom validation function to the validator.

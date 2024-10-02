@@ -1,146 +1,129 @@
 package shared
 
 import (
+	"context"
 	"reflect"
+	"unsafe"
 
 	"github.com/insei/fmap/v3"
 )
 
-var sliceConvertersCache = map[reflect.Type]func(value any) (any, bool){}
-
-func PtrSlicePtrElem[T any](value any) ([]*T, bool) {
-	v, ok := value.(*[]*T)
-	if !ok {
-		return nil, false
+func UnsafeSliceCast[T any](slice []*any) []*T {
+	ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&slice)))[1]
+	arr := (*[]*T)(ptr)
+	if arr == nil {
+		return nil
 	}
-	return *v, true
-}
-
-func SlicePtrElem[T any](value any) ([]*T, bool) {
-	v, ok := value.([]*T)
-	if !ok {
-		return nil, false
-	}
-	return v, true
-}
-
-func SliceElem[T any](value any) ([]*T, bool) {
-	v, ok := value.([]T)
-	if !ok {
-		return nil, false
-	}
-	var rv []*T
-	for i, _ := range v {
-		rv = append(rv, &v[i])
-	}
-	return rv, true
-}
-
-func PtrSliceElem[T any](value any) ([]*T, bool) {
-	v, ok := value.(*[]T)
-	if !ok {
-		return nil, false
-	}
-	var rv []*T
-	for i, _ := range *v {
-		rv = append(rv, &(*v)[i])
-	}
-	return rv, true
-}
-
-func addSliceMutation[T any](field fmap.Field) bool {
-	var isPtrToSlice, isPtrToValue bool
-
-	sliceType := field.GetType()
-	typeOf := sliceType
-	if typeOf.Kind() == reflect.Ptr {
-		isPtrToSlice = true
-		typeOf = typeOf.Elem()
-	}
-	if typeOf.Kind() != reflect.Slice {
-		return false
-	}
-	typeOf = typeOf.Elem()
-	if typeOf.Kind() == reflect.Ptr {
-		isPtrToValue = true
-	}
-	switch {
-	case isPtrToSlice && isPtrToValue:
-		convFn := func(value any) (any, bool) {
-			return PtrSlicePtrElem[T](value)
-		}
-		sliceConvertersCache[sliceType] = convFn
-		return true
-	case !isPtrToSlice && isPtrToValue:
-		convFn := func(value any) (any, bool) {
-			return SlicePtrElem[T](value)
-		}
-		sliceConvertersCache[sliceType] = convFn
-		return true
-	case isPtrToSlice && !isPtrToValue:
-		convFn := func(value any) (any, bool) {
-			return PtrSliceElem[T](value)
-		}
-		sliceConvertersCache[sliceType] = convFn
-		return true
-	case !isPtrToSlice && !isPtrToValue:
-		convFn := func(value any) (any, bool) {
-			return SliceElem[T](value)
-		}
-		sliceConvertersCache[sliceType] = convFn
-		return true
-	}
-	return false
-}
-
-func ConvertSliceValue[T any](slice any) ([]*T, bool) {
-	fn, ok := sliceConvertersCache[reflect.TypeOf(slice)]
-	if !ok {
-		return nil, false
-	}
-	s, ok := fn(slice)
-	if !ok {
-		return nil, false
-	}
-	sc, ok := s.([]*T)
-	return sc, ok
+	return *arr
 }
 
 type SliceFieldConfigurator struct {
-	*FieldConfigurator[[]*any]
+	field  fmap.Field
+	helper Helper
+	c      *FieldConfigurator[[]*any]
 }
 
-func validateSliceField(field fmap.Field) {
-	typeOf := field.GetType()
-	if typeOf.Kind() == reflect.Ptr {
-		typeOf = typeOf.Elem()
+func makeGetValueSliceFn(field fmap.Field) func(value any) ([]*any, bool) {
+	fType := field.GetType()
+	ptrToSlice := 1 // All values that comes to validator is a pointer
+	ptrToSliceElem := 0
+	for fType.Kind() == reflect.Ptr {
+		ptrToSlice++
+		fType = fType.Elem()
 	}
-	if typeOf.Kind() != reflect.Slice {
-	}
-}
-
-func NewSliceFieldConfigurator(params FieldConfiguratorParams[[]*any]) *SliceFieldConfigurator {
-	fType := params.Field.GetType()
 	if fType.Kind() != reflect.Slice {
-		panic("wrong configuration field is not a slice")
+		panic("field value is not a slice")
 	}
-	elemType := fType.Elem()
-	for elemType.Kind() == reflect.Ptr {
-		elemType = elemType.Elem()
+	sliceElemType := fType.Elem()
+	for sliceElemType.Kind() == reflect.Ptr {
+		ptrToSliceElem++
+		sliceElemType = sliceElemType.Elem()
 	}
-	switch elemType.Kind() {
-	case reflect.Int8:
-	case reflect.Int16:
+	if ptrToSlice > 2 || ptrToSliceElem > 1 {
+		panic("Are you sure about that? (c)")
+	}
+	switch {
+	case ptrToSlice == 1 && ptrToSliceElem == 0:
+		return func(value any) ([]*any, bool) {
+			var convertedArr []*any
+			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
+			arr := (*[]any)(ptr)
+			for i, _ := range *arr {
+				convertedArr = append(convertedArr, &(*arr)[i])
+			}
+			return convertedArr, true
+		}
+	case ptrToSlice == 2 && ptrToSliceElem == 0:
+		return func(value any) ([]*any, bool) {
+			var convertedArr []*any
+			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
+			arr := (**[]any)(ptr)
+			if *arr == nil || **arr == nil {
+				return nil, false
+			}
+			for i, _ := range **arr {
+				convertedArr = append(convertedArr, &(**arr)[i])
+			}
+			return convertedArr, true
+		}
+	case ptrToSlice == 1 && ptrToSliceElem == 1:
+		return func(value any) ([]*any, bool) {
+			var convertedArr []*any
+			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
+			arr := (*[]*any)(ptr)
+			for _, v := range *arr {
+				convertedArr = append(convertedArr, &(*v))
+			}
+			return convertedArr, true
+		}
+	case ptrToSlice == 2 && ptrToSliceElem == 1:
+		return func(value any) ([]*any, bool) {
+			var convertedArr []*any
+			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
+			arr := (**[]*any)(ptr)
+			if *arr == nil || **arr == nil {
+				return nil, false
+			}
+			for _, v := range **arr {
+				convertedArr = append(convertedArr, &(*v))
+			}
+			return convertedArr, true
+		}
+	}
+	//ptr := unsafe.Pointer(&convertedArr)
+	//ee := *((*[]*string)(ptr))
+	//for _, v := range ee {
+	//	*v = "222"
+	//}
+	//fmt.Println(ee)
+	return nil
+}
 
-	}
-	//addSliceMutation(f)
+type SliceFieldConfiguratorParams struct {
+	Field    fmap.Field
+	Helper   Helper
+	AppendFn func(fn FieldValidationFn)
+}
+
+func NewSliceFieldConfigurator(p SliceFieldConfiguratorParams) *SliceFieldConfigurator {
+	getValueFn := makeGetValueSliceFn(p.Field)
+	mk := NewSimpleFieldFnMaker(SimpleFieldFnMakerParams[[]*any]{
+		GetValue: getValueFn,
+		Field:    p.Field,
+		Helper:   p.Helper,
+	})
 	return &SliceFieldConfigurator{
-		FieldConfigurator: NewFieldConfigurator(params),
+		field:  p.Field,
+		helper: p.Helper,
+		c: NewFieldConfigurator(FieldConfiguratorParams[[]*any]{
+			Maker:    mk,
+			AppendFn: p.AppendFn,
+		}),
 	}
 }
 
 func (s *SliceFieldConfigurator) MaxLen(maxLen int) *SliceFieldConfigurator {
-	s.Append(func(v []*any) bool {
+	s.c.Append(func(v []*any) bool {
 		if len(v) > maxLen {
 			return false
 		}
@@ -150,7 +133,7 @@ func (s *SliceFieldConfigurator) MaxLen(maxLen int) *SliceFieldConfigurator {
 }
 
 func (s *SliceFieldConfigurator) MinLen(MinLen int) *SliceFieldConfigurator {
-	s.Append(func(v []*any) bool {
+	s.c.Append(func(v []*any) bool {
 		if len(v) < MinLen {
 			return false
 		}
@@ -160,11 +143,37 @@ func (s *SliceFieldConfigurator) MinLen(MinLen int) *SliceFieldConfigurator {
 }
 
 func (s *SliceFieldConfigurator) Required() *SliceFieldConfigurator {
-	s.Append(func(v []*any) bool {
-		if len(v) < 1 {
+	s.c.Append(func(v []*any) bool {
+		if v == nil {
 			return false
 		}
 		return true
 	}, "required error")
+	return s
+}
+
+// Custom allows for custom validation logic.
+func (s *SliceFieldConfigurator) Custom(f func(ctx context.Context, h *FieldCustomHelper, value []*any) []Error) *SliceFieldConfigurator {
+	customHelper := NewFieldCustomHelper(s.field, s.helper)
+	s.c.appendFn(func(ctx context.Context, h Helper, value any) []Error {
+		return f(ctx, customHelper, value.([]*any))
+	})
+	return s
+}
+
+// When allows for conditional validation based on a given condition.
+func (s *SliceFieldConfigurator) When(whenFn func(ctx context.Context, value []*any) bool) *SliceFieldConfigurator {
+	if whenFn == nil {
+		return s
+	}
+	s.c.appendFn = func(fn FieldValidationFn) {
+		fnWithEnabler := func(ctx context.Context, h Helper, v any) []Error {
+			if !whenFn(ctx, v.([]*any)) {
+				return nil
+			}
+			return fn(ctx, h, v)
+		}
+		s.c.appendFn(fnWithEnabler)
+	}
 	return s
 }

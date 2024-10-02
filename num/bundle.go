@@ -122,13 +122,28 @@ var dereferenceFuncCache = map[reflect.Type]func(value any) (any, bool){
 	},
 }
 
-func newBaseConfigurator[T numbers](params shared.FieldConfiguratorParams[T], derefFn func(value any) (any, bool)) *baseConfigurator[T] {
-	params.GetValueFn = func(value any) (T, bool) {
-		val, ok := derefFn(value)
-		return val.(T), ok
-	}
+type baseConfiguratorParams[T numbers] struct {
+	Field    fmap.Field
+	Helper   shared.Helper
+	AppendFn func(fn shared.FieldValidationFn)
+}
+
+func newBaseConfigurator[T numbers](p baseConfiguratorParams[T], derefFn func(value any) (any, bool)) *baseConfigurator[T] {
+	mk := shared.NewSimpleFieldFnMaker(shared.SimpleFieldFnMakerParams[T]{
+		GetValue: func(value any) (T, bool) {
+			val, ok := derefFn(value)
+			return val.(T), ok
+		},
+		Field:  p.Field,
+		Helper: p.Helper,
+	})
 	return &baseConfigurator[T]{
-		c: shared.NewFieldConfigurator[T](params),
+		field: p.Field,
+		h:     p.Helper,
+		c: shared.NewFieldConfigurator[T](shared.FieldConfiguratorParams[T]{
+			Maker:    mk,
+			AppendFn: p.AppendFn,
+		}),
 	}
 }
 
@@ -145,76 +160,100 @@ func (i *Bundle) Number(fieldPtr any) BaseConfigurator {
 	}
 	switch field.GetDereferencedType().Kind() {
 	case reflect.Int:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[int]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[int]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Int8:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[int8]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[int8]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Int16:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[int16]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[int16]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Int32:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[int32]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[int32]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Int64:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[int64]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[int64]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Uint:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[uint]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[uint]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Uint8:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[uint8]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[uint8]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Uint16:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[uint16]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[uint16]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Uint32:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[uint32]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[uint32]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Uint64:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[uint64]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[uint64]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Float32:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[float32]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[float32]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	case reflect.Float64:
-		return newBaseConfigurator(shared.FieldConfiguratorParams[float64]{
-			Field:    field,
-			Helper:   i.h,
-			AppendFn: i.appendFn,
+		return newBaseConfigurator(baseConfiguratorParams[float64]{
+			Field:  field,
+			Helper: i.h,
+			AppendFn: func(fn shared.FieldValidationFn) {
+				i.appendFn(field, fn)
+			},
 		}, derefFn)
 	default:
 		panic("unsupported number field type")

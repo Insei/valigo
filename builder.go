@@ -77,7 +77,7 @@ func (b *builder[T]) Custom(fn func(ctx context.Context, h shared.StructCustomHe
 	b.v.storage.newOnStructAppend(b.obj, b.enablerFn, fnConvert)
 }
 
-func (b *builder[T]) Slice(sliceFieldPtr any) *num.StringSliceFieldConfigurator {
+func (b *builder[T]) Slice(sliceFieldPtr any) *shared.SliceFieldConfigurator {
 	fields, err := fmap.GetFrom(b.obj)
 	if err != nil {
 		panic(err)
@@ -86,20 +86,14 @@ func (b *builder[T]) Slice(sliceFieldPtr any) *num.StringSliceFieldConfigurator 
 	if err != nil {
 		panic(err)
 	}
-	ok := shared.AddSliceMutation[string](sliceFieldPtr)
-	if !ok {
-		panic(err)
-	}
-	return &num.StringSliceFieldConfigurator{
-		SliceFieldConfigurator: shared.NewSliceFieldConfigurator[string](shared.FieldConfiguratorParams[[]*any]{
-			GetValueFn: func(value any) ([]*any, bool) {
-				val, ok := shared.ConvertSliceValue[string](value)
-				return val, ok
-			},
-			Field:    field,
-			Helper:   b.v.GetHelper(),
-			AppendFn: b.v.storage.newOnFieldAppend(b.obj, nil),
-		})}
+	appendFn := b.v.storage.newOnFieldAppend(b.obj, b.enablerFn)
+	return shared.NewSliceFieldConfigurator(shared.SliceFieldConfiguratorParams{
+		Field:  field,
+		Helper: b.v.GetHelper(),
+		AppendFn: func(fn shared.FieldValidationFn) {
+			appendFn(field, fn)
+		},
+	})
 }
 
 // configure creates a new builder with the given validator, object, and enabler function.
