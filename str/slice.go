@@ -3,6 +3,7 @@ package str
 import (
 	"context"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/insei/fmap/v3"
@@ -158,4 +159,35 @@ func (s *stringSliceBuilder[T]) When(whenFn func(ctx context.Context, value *T) 
 		s.appendFn(field, fnWithEnabler)
 	}
 	return s
+}
+
+type StringSliceFieldConfigurator struct {
+	c *shared.SliceFieldConfigurator
+}
+
+func (c *StringSliceFieldConfigurator) Unique() *StringSliceFieldConfigurator {
+	c.c.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value []*any) []shared.Error {
+		strSlice := shared.UnsafeSliceCast[string](value)
+		if len(slices.CompactFunc(strSlice, func(s *string, s2 *string) bool {
+			if *s != *s2 {
+				return false
+			}
+			return true
+		})) != len(strSlice) {
+			return []shared.Error{h.ErrorT(ctx, strSlice, "")}
+		}
+		return nil
+	})
+	return c
+}
+
+func (c *StringSliceFieldConfigurator) TrimElems() *StringSliceFieldConfigurator {
+	c.c.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value []*any) []shared.Error {
+		strSlice := shared.UnsafeSliceCast[string](value)
+		for _, str := range strSlice {
+			*str = strings.TrimSpace(*str)
+		}
+		return nil
+	})
+	return c
 }

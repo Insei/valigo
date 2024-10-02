@@ -1,9 +1,7 @@
 package num
 
 import (
-	"fmt"
 	"reflect"
-	"testing"
 	"unsafe"
 
 	"github.com/insei/fmap/v3"
@@ -16,7 +14,7 @@ type Struct struct {
 	PtrSlicePtr *[]*string
 }
 
-func test(field fmap.Field, slicePtr any) {
+func makeGetValueSliceFn(field fmap.Field) func(value any) ([]*any, bool) {
 	fType := field.GetType()
 	ptrToSlice := 1 // All values that comes to validator is a pointer
 	ptrToSliceElem := 0
@@ -35,51 +33,61 @@ func test(field fmap.Field, slicePtr any) {
 	if ptrToSlice > 2 || ptrToSliceElem > 1 {
 		panic("Are you sure about that?")
 	}
-	var convertedArr []*any
 	switch {
 	case ptrToSlice == 1 && ptrToSliceElem == 0:
-		ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&slicePtr)))[1]
-		arr := (*[]any)(ptr)
-		for i, _ := range *arr {
-			convertedArr = append(convertedArr, &(*arr)[i])
+		return func(value any) ([]*any, bool) {
+			var convertedArr []*any
+			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
+			arr := (*[]any)(ptr)
+			for i, _ := range *arr {
+				convertedArr = append(convertedArr, &(*arr)[i])
+			}
+			return convertedArr, true
 		}
 	case ptrToSlice == 2 && ptrToSliceElem == 0:
-		ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&slicePtr)))[1]
-		arr := (**[]any)(ptr)
-		if *arr == nil || **arr == nil {
-			break
-		}
-		for i, _ := range **arr {
-			convertedArr = append(convertedArr, &(**arr)[i])
+		return func(value any) ([]*any, bool) {
+			var convertedArr []*any
+			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
+			arr := (**[]any)(ptr)
+			if *arr == nil || **arr == nil {
+				return nil, false
+			}
+			for i, _ := range **arr {
+				convertedArr = append(convertedArr, &(**arr)[i])
+			}
+			return convertedArr, true
 		}
 	case ptrToSlice == 1 && ptrToSliceElem == 1:
-		ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&slicePtr)))[1]
-		arr := (*[]*any)(ptr)
-		for _, v := range *arr {
-			convertedArr = append(convertedArr, &(*v))
+		return func(value any) ([]*any, bool) {
+			var convertedArr []*any
+			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
+			arr := (*[]*any)(ptr)
+			for _, v := range *arr {
+				convertedArr = append(convertedArr, &(*v))
+			}
+			return convertedArr, true
 		}
 	case ptrToSlice == 2 && ptrToSliceElem == 1:
-		ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&slicePtr)))[1]
-		arr := (**[]*any)(ptr)
-		if *arr == nil || **arr == nil {
-			break
-		}
-		for _, v := range **arr {
-			convertedArr = append(convertedArr, &(*v))
-		}
-	}
-	for _, val := range convertedArr {
-		switch (*val).(type) {
-		case string:
-			fmt.Println(val)
+		return func(value any) ([]*any, bool) {
+			var convertedArr []*any
+			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
+			arr := (**[]*any)(ptr)
+			if *arr == nil || **arr == nil {
+				return nil, false
+			}
+			for _, v := range **arr {
+				convertedArr = append(convertedArr, &(*v))
+			}
+			return convertedArr, true
 		}
 	}
-	ptr := unsafe.Pointer(&convertedArr)
-	ee := *((*[]*string)(ptr))
-	for _, v := range ee {
-		*v = "222"
-	}
-	fmt.Println(ee)
+	//ptr := unsafe.Pointer(&convertedArr)
+	//ee := *((*[]*string)(ptr))
+	//for _, v := range ee {
+	//	*v = "222"
+	//}
+	//fmt.Println(ee)
+	return nil
 }
 
 var str = "999"
@@ -89,32 +97,6 @@ var testStruct = &Struct{
 	SlicePtr:    []*string{&str},
 	PtrSlice:    &[]string{"999"},
 	PtrSlicePtr: &[]*string{&str1},
-}
-
-func TestTest(t *testing.T) {
-	slice := []string{"42", "hello", "3.14"}
-
-	ptr := unsafe.Pointer(&slice)
-	actualSlice := *((*[]interface{})(ptr))
-
-	for i, val := range actualSlice {
-		switch v := val.(type) {
-		case int:
-			fmt.Printf("Element at index %d is of type 'int' and value %d\n", i, v)
-		case string:
-			fmt.Printf("Element at index %d is of type 'string' and value '%s'\n", i, v)
-		case float64:
-			fmt.Printf("Element at index %d is of type 'float64' and value %f\n", i, v)
-		default:
-			fmt.Printf("Element at index %d is of unknown type\n", i)
-		}
-	}
-	fields, _ := fmap.GetFrom(testStruct)
-	test(fields.MustFind("Slice"), &testStruct.Slice)
-	test(fields.MustFind("SlicePtr"), &testStruct.SlicePtr)
-	test(fields.MustFind("PtrSlice"), &testStruct.PtrSlice)
-	test(fields.MustFind("PtrSlicePtr"), &testStruct.PtrSlicePtr)
-	fmt.Sprintf("sdasda")
 }
 
 //

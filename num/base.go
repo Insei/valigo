@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/insei/fmap/v3"
 	"github.com/insei/valigo/shared"
 )
 
@@ -14,7 +15,6 @@ const (
 	requiredLocaleKey     = "validation:num:Should be fulfilled"
 	anyOfLocaleKey        = "validation:num:Only %v values is allowed"
 	anyOfIntervalLocalKey = "validation:num:Only interval[%v - %v] is allowed"
-	invalidLocaleKey      = "validation:num:Invalid value"
 )
 
 func minT[T numbers](val T, min T) bool {
@@ -41,13 +41,15 @@ func anyOfIntervalT[T numbers](val T, begin, end T) bool {
 var _ BaseConfigurator = &baseConfigurator[int]{}
 
 type baseConfigurator[T numbers] struct {
-	c *shared.FieldConfigurator[T]
+	c     *shared.FieldConfigurator[T]
+	field fmap.Field
+	h     shared.Helper
 }
 
 // Max checks if the integer exceeds the maximum allowed number.
 func (i *baseConfigurator[T]) Max(maxNum any) BaseConfigurator {
-	if i.c.Field.GetDereferencedType() != reflect.TypeOf(maxNum) {
-		panic(fmt.Sprintf("field dereferenced type is %s, but maxNum type is %s", i.c.Field.GetDereferencedType(), reflect.TypeOf(maxNum).String()))
+	if i.field.GetDereferencedType() != reflect.TypeOf(maxNum) {
+		panic(fmt.Sprintf("field dereferenced type is %s, but maxNum type is %s", i.field.GetDereferencedType().String(), reflect.TypeOf(maxNum).String()))
 	}
 	i.c.Append(func(v T) bool {
 		return maxT[T](v, maxNum.(T))
@@ -57,8 +59,8 @@ func (i *baseConfigurator[T]) Max(maxNum any) BaseConfigurator {
 
 // Min checks if the integer is less than the minimum allowed number.
 func (i *baseConfigurator[T]) Min(minNum any) BaseConfigurator {
-	if i.c.Field.GetDereferencedType() != reflect.TypeOf(minNum) {
-		panic(fmt.Sprintf("field dereferenced type is %s, but minNum type is %s", i.c.Field.GetDereferencedType(), reflect.TypeOf(minNum).String()))
+	if i.field.GetDereferencedType() != reflect.TypeOf(minNum) {
+		panic(fmt.Sprintf("field dereferenced type is %s, but minNum type is %s", i.field.GetDereferencedType().String(), reflect.TypeOf(minNum).String()))
 	}
 	i.c.Append(func(v T) bool {
 		return minT[T](v, minNum.(T))
@@ -76,8 +78,8 @@ func (i *baseConfigurator[T]) Required() BaseConfigurator {
 
 // AnyOf checks if the integer value is one of the allowed values.
 func (i *baseConfigurator[T]) AnyOf(allowed ...any) BaseConfigurator {
-	if i.c.Field.GetDereferencedType().Elem() != reflect.TypeOf(allowed).Elem() {
-		panic(fmt.Sprintf("field dereferenced type is %s, but minNum type is %s", i.c.Field.GetDereferencedType(), reflect.TypeOf(allowed).Elem().String()))
+	if i.field.GetDereferencedType().Elem() != reflect.TypeOf(allowed).Elem() {
+		panic(fmt.Sprintf("field dereferenced type is %s, but minNum type is %s", i.field.GetDereferencedType().String(), reflect.TypeOf(allowed).Elem().String()))
 	}
 	i.c.Append(func(v T) bool {
 		return true
@@ -88,9 +90,9 @@ func (i *baseConfigurator[T]) AnyOf(allowed ...any) BaseConfigurator {
 
 // AnyOfInterval checks if the integer value is one of the allowed values intervals.
 func (i *baseConfigurator[T]) AnyOfInterval(begin, end any) BaseConfigurator {
-	if i.c.Field.GetDereferencedType() != reflect.TypeOf(begin) ||
-		i.c.Field.GetDereferencedType() != reflect.TypeOf(end) {
-		panic(fmt.Sprintf("field dereferenced type is %s, but begin and end type is %s", i.c.Field.GetDereferencedType(), reflect.TypeOf(reflect.TypeOf(end)).String()))
+	if i.field.GetDereferencedType() != reflect.TypeOf(begin) ||
+		i.field.GetDereferencedType() != reflect.TypeOf(end) {
+		panic(fmt.Sprintf("field dereferenced type is %s, but begin and end type is %s", i.field.GetDereferencedType().String(), reflect.TypeOf(reflect.TypeOf(end)).String()))
 	}
 	i.c.Append(func(v T) bool {
 		return anyOfIntervalT[T](v, begin.(T), end.(T))
@@ -100,7 +102,7 @@ func (i *baseConfigurator[T]) AnyOfInterval(begin, end any) BaseConfigurator {
 
 // Custom allows for custom validation logic to be applied to the integer value.
 func (i *baseConfigurator[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value any) []shared.Error) BaseConfigurator {
-	customHelper := shared.NewFieldCustomHelper(i.c.Field, i.c.Helper)
+	customHelper := shared.NewFieldCustomHelper(i.field, i.h)
 	i.c.CustomAppend(func(ctx context.Context, h shared.Helper, value any) []shared.Error {
 		return f(ctx, customHelper, value)
 	})
@@ -120,6 +122,8 @@ func (i *baseConfigurator[T]) When(whenFn func(ctx context.Context, value any) b
 		return whenFn(ctx, v)
 	})
 	return &baseConfigurator[T]{
-		base,
+		c:     base,
+		field: i.field,
+		h:     i.h,
 	}
 }

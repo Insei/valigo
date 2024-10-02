@@ -132,7 +132,7 @@ func TestBuilder_Slice(t *testing.T) {
 	}
 	vld := New()
 	bld := configure[*TestStruct](vld, obj, nil)
-	bld.Slice(&obj.Slice).Trim().MaxLen(1)
+	bld.Slice(&obj.Slice).MaxLen(1)
 	bld.Number(&obj.PtrInt).Max(float32(22.22))
 	err := vld.Validate(context.Background(), obj)
 	_ = err

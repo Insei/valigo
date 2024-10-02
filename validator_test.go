@@ -67,9 +67,9 @@ func benchValidateInit() {
 		smtpValidator.String(&temp.SMTPPort).Trim().Required()
 		smtpValidator.Number(&temp.SMTPInt).Max(20)
 		builder.StringPtr(&temp.PtrString).Trim().Required()
-		builder.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *Sender) []shared.Error {
-			h.ErrorT(ctx)
-		})
+		//builder.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *Sender) []shared.Error {
+		//	h.ErrorT(ctx)
+		//})
 		httpValidator := builder.When(func(_ context.Context, temp *Sender) bool {
 			return temp.Type == "HTTP"
 		})

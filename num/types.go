@@ -82,7 +82,7 @@ type IntSliceBuilder[T []int | *[]int | []int8 | *[]int8 | []int16 | *[]int16 | 
 // It provides methods for adding integer fields to the bundle.
 type BundleConfigurator interface {
 	Number(fieldPtr any) BaseConfigurator
-	NumberSlice(fieldPtr any) *shared.SliceFieldConfigurator
+	//NumberSlice(fieldPtr any) *shared.SliceFieldConfigurator
 	//// Int returns an int field validation configurator.
 	//Int(field *int) ValueConfigurator[int]
 	//
