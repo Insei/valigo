@@ -167,7 +167,7 @@ type StringSliceFieldConfigurator struct {
 
 func (c *StringSliceFieldConfigurator) Unique() *StringSliceFieldConfigurator {
 	c.c.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value []*any) []shared.Error {
-		strSlice := shared.UnsafeSliceCast[string](value)
+		strSlice := shared.UnsafeValigoSliceCast[string](value)
 		if len(slices.CompactFunc(strSlice, func(s *string, s2 *string) bool {
 			if *s != *s2 {
 				return false
@@ -183,7 +183,7 @@ func (c *StringSliceFieldConfigurator) Unique() *StringSliceFieldConfigurator {
 
 func (c *StringSliceFieldConfigurator) TrimElems() *StringSliceFieldConfigurator {
 	c.c.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value []*any) []shared.Error {
-		strSlice := shared.UnsafeSliceCast[string](value)
+		strSlice := shared.UnsafeValigoSliceCast[string](value)
 		for _, str := range strSlice {
 			*str = strings.TrimSpace(*str)
 		}
