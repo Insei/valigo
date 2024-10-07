@@ -260,16 +260,3 @@ func (i *Bundle) Number(fieldPtr any) BaseConfigurator {
 	}
 	return nil
 }
-
-//// Number returns a FieldConfigurator instance for an int field.
-//// It takes a pointer to an integer field as an argument.
-//func (i *Bundle) NumberSlice(fieldPtr any) *shared.SliceFieldConfigurator {
-//	field, err := i.storage.GetFieldByPtr(i.obj, fieldPtr)
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	typeOf := field.GetType()
-//
-//	shared.AddSliceMutation(fieldPtr)
-//}

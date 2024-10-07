@@ -76,14 +76,26 @@ func (i *baseConfigurator[T]) Required() BaseConfigurator {
 	return i
 }
 
+func sliceCast[T numbers](slice []any) []T {
+	ret := make([]T, 0, len(slice))
+	for _, val := range slice {
+		valTyped, ok := val.(T)
+		if !ok {
+			panic(fmt.Errorf("can't cast value %v to number type %s", val, reflect.TypeOf(*new(T)).String()))
+		}
+		ret = append(ret, valTyped)
+	}
+	return ret
+}
+
 // AnyOf checks if the integer value is one of the allowed values.
 func (i *baseConfigurator[T]) AnyOf(allowed ...any) BaseConfigurator {
-	if i.field.GetDereferencedType().Elem() != reflect.TypeOf(allowed).Elem() {
-		panic(fmt.Sprintf("field dereferenced type is %s, but minNum type is %s", i.field.GetDereferencedType().String(), reflect.TypeOf(allowed).Elem().String()))
+	slice := sliceCast[T](allowed)
+	if i.field.GetDereferencedType().Kind() != reflect.TypeOf(slice).Elem().Kind() {
+		panic(fmt.Sprintf("field dereferenced type is %s, but minNum type is %s", i.field.GetDereferencedType().Kind().String(), reflect.TypeOf(allowed).Elem().Kind().String()))
 	}
 	i.c.Append(func(v T) bool {
-		return true
-		//return anyOfT[T](v, allowed.([]T))
+		return anyOfT[T](v, slice)
 	}, anyOfLocaleKey, allowed)
 	return i
 }

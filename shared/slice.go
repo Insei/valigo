@@ -8,7 +8,7 @@ import (
 	"github.com/insei/fmap/v3"
 )
 
-func UnsafeSliceCast[T any](slice []*any) []*T {
+func UnsafeValigoSliceCast[T any](slice []*any) []*T {
 	ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&slice)))[1]
 	arr := (*[]*T)(ptr)
 	if arr == nil {
