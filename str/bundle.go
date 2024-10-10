@@ -3,6 +3,7 @@ package str
 import (
 	"github.com/insei/fmap/v3"
 	"github.com/insei/valigo/shared"
+	"reflect"
 )
 
 type strPtr interface {
@@ -54,6 +55,14 @@ func newBaseConfigurator[T strPtr](p baseConfiguratorParams[T], derefFn func(val
 	}
 }
 
+func ptrDeref[T strPtr](value any) (T, bool) {
+	val, ok := value.(*T)
+	if !ok {
+		return nil, ok
+	}
+	return *val, ok
+}
+
 func deref[T strPtr](value any) (T, bool) {
 	val, ok := value.(T)
 	if !ok {
@@ -66,6 +75,13 @@ func deref[T strPtr](value any) (T, bool) {
 // It takes a pointer to a string field as an argument.
 func (i *StringBundle) String(fieldPtr any) BaseConfigurator {
 	field, err := i.storage.GetFieldByPtr(i.obj, fieldPtr)
+	var derefFn func(value any) (*string, bool)
+	switch reflect.PointerTo(field.GetType()) {
+	case reflect.TypeOf(new(string)):
+		derefFn = deref
+	case reflect.TypeOf(new(*string)):
+		derefFn = ptrDeref
+	}
 	if err != nil {
 		panic(err)
 	}
@@ -75,5 +91,5 @@ func (i *StringBundle) String(fieldPtr any) BaseConfigurator {
 		AppendFn: func(fn shared.FieldValidationFn) {
 			i.appendFn(field, fn)
 		},
-	}, deref)
+	}, derefFn)
 }
