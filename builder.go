@@ -2,10 +2,10 @@ package valigo
 
 import (
 	"context"
+	"github.com/insei/valigo/num"
 
 	"github.com/insei/fmap/v3"
 
-	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
 	"github.com/insei/valigo/uuid"
@@ -15,7 +15,7 @@ import (
 // It is generic and can be used to build validators for any type.
 type builder[T any] struct {
 	*str.StringBundle
-	*num.Bundle
+	*num.NumberBundle
 	*uuid.UUIDBundle
 	obj       any
 	v         *Validator
@@ -115,7 +115,7 @@ func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, o
 	ub := uuid.NewUUIDBundle(bundleDeps)
 	return &builder[T]{
 		StringBundle: sb,
-		Bundle:       nb,
+		NumberBundle: nb,
 		UUIDBundle:   ub,
 		obj:          obj,
 		v:            v,
