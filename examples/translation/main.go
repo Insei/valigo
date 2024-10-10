@@ -19,6 +19,7 @@ type Sender struct {
 	HTTPAddress   string
 	HTTPDestParam string
 	Int           *int
+	Id            uuid.UUID
 }
 
 const (
@@ -44,13 +45,19 @@ func main() {
 		builder.String(&obj.Type).Required()
 		builder.String(&obj.SMTPHost).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
+		builder.UUID(&obj.Id).Required()
 	})
+	id, err := uuid.NewV7()
+	if err != nil {
+		panic(err)
+	}
 	sender := &Sender{
 		Type:          "123@123",
 		SMTPHost:      uuid.New().String() + "   ",
 		SMTPPort:      uuid.New().String() + " ",
 		HTTPAddress:   uuid.New().String() + " ",
 		HTTPDestParam: uuid.New().String() + "  ",
+		Id:            id,
 		//Int:           123,
 	}
 	errs := v.Validate(context.Background(), sender)
