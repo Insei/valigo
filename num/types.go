@@ -34,8 +34,8 @@ type BaseConfigurator interface {
 	When(whenFn func(ctx context.Context, value any) bool) BaseConfigurator
 }
 
-// BundleConfigurator is a builder interface for a bundle of uint fields.
+// NumberBundleConfigurator is a builder interface for a bundle of uint fields.
 // It provides methods for adding integer fields to the bundle.
-type BundleConfigurator interface {
+type NumberBundleConfigurator interface {
 	Number(fieldPtr any) BaseConfigurator
 }

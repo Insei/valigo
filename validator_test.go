@@ -47,9 +47,10 @@ func benchValidateInit() {
 	}
 	initialized = true
 	Configure[Sender](validator, func(builder Configurator[Sender], temp *Sender) {
-		builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
-			if len(*value) < 20 {
-				return []shared.Error{h.ErrorT(ctx, *value, "Should be longer than 20 characters")}
+		builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value any) []shared.Error {
+			v := *value.(*string)
+			if len(v) < 20 {
+				return []shared.Error{h.ErrorT(ctx, v, "Should be longer than 20 characters")}
 			}
 			return nil
 		})
@@ -66,7 +67,7 @@ func benchValidateInit() {
 		smtpValidator.String(&temp.SMTPHost).Trim().Required()
 		smtpValidator.String(&temp.SMTPPort).Trim().Required()
 		smtpValidator.Number(&temp.SMTPInt).Max(20)
-		builder.StringPtr(&temp.PtrString).Trim().Required()
+		builder.String(&temp.PtrString).Trim().Required()
 		//builder.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *Sender) []shared.Error {
 		//	h.ErrorT(ctx)
 		//})
@@ -262,9 +263,10 @@ func TestConfigure(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			Configure[Sender](validator, func(builder Configurator[Sender], temp *Sender) {
-				builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
-					if len(*value) < 20 {
-						return []shared.Error{h.ErrorT(ctx, *value, "Should be longer than 20 characters")}
+				builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value any) []shared.Error {
+					v := *value.(*string)
+					if len(v) < 20 {
+						return []shared.Error{h.ErrorT(ctx, v, "Should be longer than 20 characters")}
 					}
 					return nil
 				})
@@ -275,7 +277,7 @@ func TestConfigure(t *testing.T) {
 				smtpValidator.String(&temp.SMTPHost).Trim().Required()
 				smtpValidator.String(&temp.SMTPPort).Trim().Required()
 
-				builder.StringPtr(&temp.PtrString).Trim().Required()
+				builder.String(&temp.PtrString).Trim().Required()
 
 				httpValidator := builder.When(func(_ context.Context, temp *Sender) bool {
 					return temp.Type == "HTTP"
