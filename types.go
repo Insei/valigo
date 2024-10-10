@@ -2,8 +2,8 @@ package valigo
 
 import (
 	"context"
-
 	"github.com/insei/valigo/num"
+
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
 	"github.com/insei/valigo/uuid"
@@ -93,8 +93,8 @@ type SlicesBundleBuilder interface {
 
 // Configurator is an interface that defines methods for building validators for any type T.
 type Configurator[T any] interface {
-	str.StringsBundleBuilder
-	num.BundleConfigurator
+	str.StringBundleConfigurator
+	num.NumberBundleConfigurator
 	uuid.UuidBundleBuilder
 	Slice(sliceFieldPtr any) *shared.SliceFieldConfigurator
 	// When sets a condition for when the validator should be applied.
