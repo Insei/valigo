@@ -55,7 +55,7 @@ func (i *baseConfigurator[T]) MinLen(minLen int) BaseConfigurator {
 func (i *baseConfigurator[T]) Required() BaseConfigurator {
 	i.c.Append(func(v T) bool {
 		return len(*v) > 0
-	}, requiredLocaleKey) // TODO: translate key
+	}, requiredLocaleKey)
 
 	return i
 }
@@ -71,15 +71,15 @@ func (i *baseConfigurator[T]) Custom(f func(ctx context.Context, h *shared.Field
 
 // Regexp checks if the string value matches the given regular expression.
 func (i *baseConfigurator[T]) Regexp(regexp *regexp.Regexp, opts ...RegexpOption) BaseConfigurator {
+	options := regexpOptions{
+		localeKey: regexpLocaleKey,
+	}
+	for _, opt := range opts {
+		opt.apply(&options)
+	}
 	i.c.Append(func(v T) bool {
-		options := regexpOptions{
-			localeKey: regexpLocaleKey,
-		}
-		for _, opt := range opts {
-			opt.apply(&options)
-		}
 		return regexp.MatchString(*v)
-	}, regexpLocaleKey)
+	}, options.localeKey)
 	return i
 }
 

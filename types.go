@@ -2,8 +2,8 @@ package valigo
 
 import (
 	"context"
-	"github.com/insei/valigo/num"
 
+	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
 	"github.com/insei/valigo/uuid"
@@ -95,7 +95,7 @@ type SlicesBundleBuilder interface {
 type Configurator[T any] interface {
 	str.StringBundleConfigurator
 	num.NumberBundleConfigurator
-	uuid.UuidBundleBuilder
+	uuid.UUIDBundleConfigurator
 	Slice(sliceFieldPtr any) *shared.SliceFieldConfigurator
 	// When sets a condition for when the validator should be applied.
 	When(func(ctx context.Context, obj *T) bool) Configurator[T]
