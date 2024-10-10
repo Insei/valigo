@@ -2,10 +2,9 @@ package valigo
 
 import (
 	"context"
-	"github.com/insei/valigo/num"
 
 	"github.com/insei/fmap/v3"
-
+	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
 	"github.com/insei/valigo/uuid"
