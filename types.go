@@ -3,10 +3,11 @@ package valigo
 import (
 	"context"
 
+	"github.com/insei/valigo/guid"
 	"github.com/insei/valigo/num"
+
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
-	"github.com/insei/valigo/uuid"
 )
 
 // NumberBuilder is an interface that defines methods for building validators for numeric types.
@@ -93,9 +94,9 @@ type SlicesBundleBuilder interface {
 
 // Configurator is an interface that defines methods for building validators for any type T.
 type Configurator[T any] interface {
-	str.StringsBundleBuilder
-	num.BundleConfigurator
-	uuid.UuidBundleBuilder
+	str.StringBundleConfigurator
+	num.NumberBundleConfigurator
+	guid.UUIDBundleConfigurator
 	Slice(sliceFieldPtr any) *shared.SliceFieldConfigurator
 	// When sets a condition for when the validator should be applied.
 	When(func(ctx context.Context, obj *T) bool) Configurator[T]

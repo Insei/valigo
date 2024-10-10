@@ -8,9 +8,9 @@ import (
 	"github.com/insei/valigo/shared"
 )
 
-// Bundle is a struct that represents a bundle of integer fields.
+// NumberBundle is a struct that represents a bundle of integer fields.
 // It provides methods for adding validation rules to the integer fields.
-type Bundle struct {
+type NumberBundle struct {
 	appendFn func(field fmap.Field, fn shared.FieldValidationFn)
 	storage  fmap.Storage
 	obj      any
@@ -19,8 +19,8 @@ type Bundle struct {
 
 // NewNumBundle creates a new intBundle instance.
 // It takes a BundleDependencies object as an argument, which provides the necessary dependencies.
-func NewNumBundle(deps shared.BundleDependencies) *Bundle {
-	return &Bundle{
+func NewNumBundle(deps shared.BundleDependencies) *NumberBundle {
+	return &NumberBundle{
 		appendFn: deps.AppendFn,
 		storage:  deps.Fields,
 		obj:      deps.Object,
@@ -149,7 +149,7 @@ func newBaseConfigurator[T numbers](p baseConfiguratorParams[T], derefFn func(va
 
 // Number returns a FieldConfigurator instance for an int field.
 // It takes a pointer to an integer field as an argument.
-func (i *Bundle) Number(fieldPtr any) BaseConfigurator {
+func (i *NumberBundle) Number(fieldPtr any) BaseConfigurator {
 	field, err := i.storage.GetFieldByPtr(i.obj, fieldPtr)
 	if err != nil {
 		panic(err)
