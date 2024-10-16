@@ -99,6 +99,8 @@ type Configurator[T any] interface {
 
 	// StringSlice returns str.StringSliceFieldConfigurator for slice of strings validation
 	StringSlice(sliceFieldPtr any) *str.StringSliceFieldConfigurator
+	// UUIDSlice returns *uuid.UUIDSliceFieldConfigurator for slice of UUID's validation
+	UUIDSlice(sliceFieldPtr any) *uuid.UUIDSliceFieldConfigurator
 	// Slice return shared.SliceFieldConfigurator for slice validation
 	Slice(sliceFieldPtr any) *shared.SliceFieldConfigurator
 	// When sets a condition for when the validator should be applied.
