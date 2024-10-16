@@ -27,7 +27,9 @@ type baseConfigurator[T strPtr] struct {
 // Trim removes leading and trailing whitespace from the string value.
 func (i *baseConfigurator[T]) Trim() BaseConfigurator {
 	i.c.Append(func(v T) bool {
-		*v = strings.TrimSpace(*v)
+		if v != nil {
+			*v = strings.TrimSpace(*v)
+		}
 		return true
 	}, "")
 	return i
