@@ -76,6 +76,25 @@ func (b *builder[T]) Custom(fn func(ctx context.Context, h shared.StructCustomHe
 	b.v.storage.newOnStructAppend(b.obj, b.enablerFn, fnConvert)
 }
 
+func (b *builder[T]) StringSlice(sliceFieldPtr any) *str.StringSliceFieldConfigurator {
+	fields, err := fmap.GetFrom(b.obj)
+	if err != nil {
+		panic(err)
+	}
+	field, err := fields.GetFieldByPtr(b.obj, sliceFieldPtr)
+	if err != nil {
+		panic(err)
+	}
+	appendFn := b.v.storage.newOnFieldAppend(b.obj, b.enablerFn)
+	return str.NewStringSliceFieldConfigurator(shared.SliceFieldConfiguratorParams{
+		Field:  field,
+		Helper: b.v.GetHelper(),
+		AppendFn: func(fn shared.FieldValidationFn) {
+			appendFn(field, fn)
+		},
+	})
+}
+
 func (b *builder[T]) Slice(sliceFieldPtr any) *shared.SliceFieldConfigurator {
 	fields, err := fmap.GetFrom(b.obj)
 	if err != nil {

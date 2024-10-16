@@ -8,6 +8,7 @@ import (
 
 type ValidationFnMaker[T any] interface {
 	Make(validationFn func(v T) bool, format string, args ...any) FieldValidationFn
+	CustomMake(func(ctx context.Context, h Helper, value any) []Error) FieldValidationFn
 }
 
 type simpleFieldFnMaker[T any] struct {
@@ -27,6 +28,16 @@ func NewSimpleFieldFnMaker[T any](p SimpleFieldFnMakerParams[T]) ValidationFnMak
 		getValue: p.GetValue,
 		field:    p.Field,
 		helper:   p.Helper,
+	}
+}
+
+func (i *simpleFieldFnMaker[T]) CustomMake(f func(ctx context.Context, h Helper, value any) []Error) FieldValidationFn {
+	return func(ctx context.Context, h Helper, val any) []Error {
+		v, isValid := i.getValue(val)
+		if !isValid {
+			return []Error{i.helper.ErrorT(ctx, i.field, val, "failed to read value")}
+		}
+		return f(ctx, h, v)
 	}
 }
 

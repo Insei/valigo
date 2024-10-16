@@ -9,7 +9,8 @@ import (
 )
 
 func UnsafeValigoSliceCast[T any](slice []*any) []*T {
-	ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&slice)))[1]
+	var val any = slice
+	ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&val)))[1]
 	arr := (*[]*T)(ptr)
 	if arr == nil {
 		return nil
@@ -155,9 +156,9 @@ func (s *SliceFieldConfigurator) Required() *SliceFieldConfigurator {
 // Custom allows for custom validation logic.
 func (s *SliceFieldConfigurator) Custom(f func(ctx context.Context, h *FieldCustomHelper, value []*any) []Error) *SliceFieldConfigurator {
 	customHelper := NewFieldCustomHelper(s.field, s.helper)
-	s.c.appendFn(func(ctx context.Context, h Helper, value any) []Error {
+	s.c.appendFn(s.c.mk.CustomMake(func(ctx context.Context, h Helper, value any) []Error {
 		return f(ctx, customHelper, value.([]*any))
-	})
+	}))
 	return s
 }
 
