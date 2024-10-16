@@ -21,6 +21,7 @@ type Sender struct {
 	Int           int
 	Id            uuid.UUID
 	Templates     []string
+	ClientIDs     []*uuid.UUID
 }
 
 const (
@@ -41,6 +42,7 @@ func manualValidatorSettings() *valigo.Validator {
 
 func main() {
 	v := manualValidatorSettings() //v := valigo.New()
+	allowedClientID := uuid.New()
 	valigo.Configure[Sender](v, func(builder valigo.Configurator[Sender], obj *Sender) {
 		builder.Number(&obj.Int).AnyOf(2)
 		builder.String(&obj.Type).Trim()
@@ -50,6 +52,7 @@ func main() {
 		builder.String(&obj.Description).Trim()
 		builder.StringSlice(&obj.Templates).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
+		builder.UUIDSlice(&obj.ClientIDs).AnyOf(allowedClientID)
 	})
 	id, err := uuid.NewV7()
 	if err != nil {
@@ -58,6 +61,7 @@ func main() {
 	sender := &Sender{
 		Type:          "123@123       ",
 		Templates:     []string{"  correct  ", "incorrect&"},
+		ClientIDs:     []*uuid.UUID{&id},
 		SMTPHost:      uuid.New().String() + "   ",
 		SMTPPort:      uuid.New().String() + " ",
 		HTTPAddress:   uuid.New().String() + " ",
