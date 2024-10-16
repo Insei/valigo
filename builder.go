@@ -95,6 +95,25 @@ func (b *builder[T]) StringSlice(sliceFieldPtr any) *str.StringSliceFieldConfigu
 	})
 }
 
+func (b *builder[T]) UUIDSlice(sliceFieldPtr any) *uuid.UUIDSliceFieldConfigurator {
+	fields, err := fmap.GetFrom(b.obj)
+	if err != nil {
+		panic(err)
+	}
+	field, err := fields.GetFieldByPtr(b.obj, sliceFieldPtr)
+	if err != nil {
+		panic(err)
+	}
+	appendFn := b.v.storage.newOnFieldAppend(b.obj, b.enablerFn)
+	return uuid.NewUUIDSliceFieldConfigurator(shared.SliceFieldConfiguratorParams{
+		Field:  field,
+		Helper: b.v.GetHelper(),
+		AppendFn: func(fn shared.FieldValidationFn) {
+			appendFn(field, fn)
+		},
+	})
+}
+
 func (b *builder[T]) Slice(sliceFieldPtr any) *shared.SliceFieldConfigurator {
 	fields, err := fmap.GetFrom(b.obj)
 	if err != nil {
