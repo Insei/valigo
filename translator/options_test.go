@@ -12,7 +12,7 @@ const mockTranslatedString = "mock translated string"
 
 type mockStorage struct{}
 
-func (m *mockStorage) GetTranslated(prefer []string, format string, args ...any) string {
+func (m *mockStorage) Get(prefer []string, format string, args ...any) string {
 	return mockTranslatedString
 }
 

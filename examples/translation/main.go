@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
+
 	"github.com/google/uuid"
 	"github.com/insei/valigo"
 	"github.com/insei/valigo/str"
 	"github.com/insei/valigo/translator"
-	"regexp"
 )
 
 type Sender struct {
@@ -32,7 +33,7 @@ const (
 func manualValidatorSettings() *valigo.Validator {
 	tStorage := translator.NewInMemStorage()
 	// if you want to add new translation for you custom validators
-	tStorage.AddTranslations("en", map[string]string{
+	tStorage.Add("en", map[string]string{
 		customRegexpLocaleKey: customRegexpLocaleMsg,
 	})
 	t := translator.New(translator.WithStorage(tStorage), translator.WithDefaultLang("en"))

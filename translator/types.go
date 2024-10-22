@@ -13,18 +13,18 @@ type Translator interface {
 	T(ctx context.Context, format string, args ...any) string
 }
 
-// TranslationStorageRO interface defines a method for retrieving translated text.
-type TranslationStorageRO interface {
-	// GetTranslated returns a translated string based on the provided preferences, format, and arguments.
-	GetTranslated(prefer []string, format string, args ...any) string
+// StorageRO interface defines a method for retrieving translated text.
+type StorageRO interface {
+	// Get returns a translated string based on the provided preferences, format, and arguments.
+	Get(prefer []string, format string, args ...any) string
 }
 
-// TranslationStorage interface extends TranslationStorageRO and adds a method for adding new translations.
-type TranslationStorage interface {
-	TranslationStorageRO
+// Storage interface extends StorageRO and adds a method for adding new translations.
+type Storage interface {
+	StorageRO
 
-	// AddTranslations adds translations for a specific language.
-	AddTranslations(lang string, data map[string]string)
+	// Add adds translations for a specific language.
+	Add(lang string, data map[string]string)
 }
 
 // Option interface defines a method for applying options to a translator.

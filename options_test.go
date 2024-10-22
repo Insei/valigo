@@ -15,7 +15,7 @@ const (
 
 func TestOptionApply(t *testing.T) {
 	tStorage := translator.NewInMemStorage()
-	tStorage.AddTranslations("en", map[string]string{
+	tStorage.Add("en", map[string]string{
 		customRegexpLocaleKey: customRegexpLocaleMsg,
 	})
 	tr := translator.New(translator.WithStorage(tStorage), translator.WithDefaultLang("en"))
@@ -60,7 +60,7 @@ func TestOptionApplyWithNilFieldLocationNamingFn(t *testing.T) {
 
 func TestOptionApplyWithMultipleOptions(t *testing.T) {
 	tStorage := translator.NewInMemStorage()
-	tStorage.AddTranslations("en", map[string]string{
+	tStorage.Add("en", map[string]string{
 		customRegexpLocaleKey: customRegexpLocaleMsg,
 	})
 	tr := translator.New(translator.WithStorage(tStorage), translator.WithDefaultLang("en"))

@@ -4,7 +4,7 @@ import "context"
 
 // storageOption represents an option to set the storage for a translator.
 type storageOption struct {
-	storage TranslationStorageRO
+	storage StorageRO
 }
 
 // apply sets the storage for the given translator.
@@ -13,7 +13,7 @@ func (o *storageOption) apply(t *translator) {
 }
 
 // WithStorage returns an option to set the storage for a translator.
-func WithStorage(storage TranslationStorageRO) Option {
+func WithStorage(storage StorageRO) Option {
 	return &storageOption{storage}
 }
 

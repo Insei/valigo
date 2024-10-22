@@ -11,7 +11,7 @@ type inMemTranslatorStorage struct {
 // NewInMemStorage creates a new in-memory translation storage.
 // It loads initial data from the embedded locales YAML file.
 // If an error occurs during loading, it panics.
-func NewInMemStorage(opts ...InMemStorageOption) TranslationStorage {
+func NewInMemStorage(opts ...InMemStorageOption) Storage {
 	data, err := LocalesFromFS(EmbedFSLocalesYAML)
 	if err != nil {
 		panic(err)
@@ -23,8 +23,8 @@ func NewInMemStorage(opts ...InMemStorageOption) TranslationStorage {
 	return storage
 }
 
-// AddTranslations adds new translations for a given language to the storage.
-func (t *inMemTranslatorStorage) AddTranslations(lang string, data map[string]string) {
+// Add adds new translations for a given language to the storage.
+func (t *inMemTranslatorStorage) Add(lang string, data map[string]string) {
 	if _, ok := t.translations[lang]; !ok {
 		t.translations[lang] = data
 	}
@@ -33,8 +33,8 @@ func (t *inMemTranslatorStorage) AddTranslations(lang string, data map[string]st
 	}
 }
 
-// GetTranslated returns the translated value for a given format and language preferences.
-func (t *inMemTranslatorStorage) GetTranslated(prefer []string, format string, args ...any) string {
+// Get returns the translated value for a given format and language preferences.
+func (t *inMemTranslatorStorage) Get(prefer []string, format string, args ...any) string {
 	translatedFormat := format
 	for _, preferLang := range prefer {
 		langFormat, ok := t.translations[preferLang][format]
