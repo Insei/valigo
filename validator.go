@@ -61,11 +61,11 @@ func New(opts ...Option) *Validator {
 // It creates a new instance of type T, allocates values for all fields recursively,
 // creates a Configurator instance for the type T, calls the provided function fn with the Configurator
 // instance and the instance of type T, and appends any user-defined validators to the Configurator instance.
-func Configure[T any](v *Validator, fn func(builder Configurator[T], obj *T)) {
-	obj := new(T)
+func Configure[T any](v *Validator, fn func(builder Configurator[T], m *T)) {
+	model := new(T)
 	// allocate all pointer fields values recursively
-	mustZero(obj)
-	b := configure[T](v, obj, nil)
+	mustZero(model)
+	b := configure[T](v, model, nil)
 	// Append users validators
-	fn(b, obj)
+	fn(b, model)
 }
