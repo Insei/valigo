@@ -1,0 +1,15 @@
+---
+validation:
+  string:
+    "Should be fulfilled": Должно быть заполнено
+    "Cannot be longer than %d characters": Не может быть длиннее %d символов
+    "Cannot be shorter than %d characters": Не может быть короче %d символов
+    "Doesn't match required regexp pattern": Не соответствует regexp шаблону
+    "Only %s values is allowed": Только %s значения разрешены
+  num:
+    "Cannot be less than %v": Не может быть меньше %v
+    "Cannot be greater than %v": Не может быть больше %v
+    "Should be fulfilled": Должно быть заполнено
+    "Only %v values is allowed": Только %v значения разрешены
+    "Only interval[%v - %v] is allowed": Значение должно входить в интервал [%v - %v]
+    "Invalid value": Невалидное значение
