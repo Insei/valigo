@@ -25,11 +25,23 @@ func NewInMemStorage(opts ...InMemStorageOption) Storage {
 
 // Add adds new translations for a given language to the storage.
 func (t *inMemTranslatorStorage) Add(lang string, data map[string]string) {
+	if data == nil {
+		return
+	}
 	if _, ok := t.translations[lang]; !ok {
 		t.translations[lang] = data
 	}
 	for key, value := range data {
 		t.translations[lang][key] = value
+	}
+}
+
+func (t *inMemTranslatorStorage) Merge(locales map[string]map[string]string) {
+	if t.translations == nil {
+		return
+	}
+	for lang, data := range locales {
+		t.Add(lang, data)
 	}
 }
 

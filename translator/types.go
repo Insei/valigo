@@ -25,6 +25,8 @@ type Storage interface {
 
 	// Add adds translations for a specific language.
 	Add(lang string, data map[string]string)
+	// Merge already existing translations with new
+	Merge(locales map[string]map[string]string)
 }
 
 // Option interface defines a method for applying options to a translator.
