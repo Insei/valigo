@@ -16,6 +16,9 @@ const (
 	requiredLocaleKey  = "validation:string:Should be fulfilled"
 	regexpLocaleKey    = "validation:string:Doesn't match required regexp pattern"
 	anyOfLocaleKey     = "validation:string:Only %s values is allowed"
+	emailLocaleKey     = "validation:string:Should be email address"
+
+	emailRegexp = `^[^\s,@#$%^&*!()]+@([a-zA-Z0-9]+[.])+[a-zA-Z]{2,8}$`
 )
 
 type baseConfigurator[T strPtr] struct {
@@ -90,6 +93,15 @@ func (i *baseConfigurator[T]) AnyOf(allowed ...string) BaseConfigurator {
 	i.c.Append(func(v T) bool {
 		return slices.Contains(allowed, *v)
 	}, anyOfLocaleKey)
+	return i
+}
+
+// Email checks is the string value is email.
+func (i *baseConfigurator[T]) Email() BaseConfigurator {
+	i.c.Append(func(v T) bool {
+		r := regexp.MustCompile(emailRegexp)
+		return r.MatchString(*v)
+	}, emailLocaleKey)
 	return i
 }
 
