@@ -92,7 +92,7 @@ func (i *baseConfigurator[T]) Regexp(regexp *regexp.Regexp, opts ...RegexpOption
 func (i *baseConfigurator[T]) AnyOf(allowed ...string) BaseConfigurator {
 	i.c.Append(func(v T) bool {
 		return slices.Contains(allowed, *v)
-	}, anyOfLocaleKey)
+	}, anyOfLocaleKey, allowed)
 	return i
 }
 
