@@ -52,3 +52,19 @@ func (s *StringSliceFieldConfigurator) Regexp(regexp *regexp.Regexp, opts ...Reg
 	})
 	return s
 }
+
+func (s *StringSliceFieldConfigurator) Email() *StringSliceFieldConfigurator {
+	s.Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v []*any) []shared.Error {
+		values := shared.UnsafeValigoSliceCast[string](v)
+		var errs []shared.Error
+		r := regexp.MustCompile(emailRegexp)
+		for _, val := range values {
+			if !r.MatchString(*val) {
+				errs = append(errs, h.ErrorT(ctx, *val, emailLocaleKey))
+			}
+		}
+
+		return errs
+	})
+	return s
+}

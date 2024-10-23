@@ -18,6 +18,8 @@ type Sender struct {
 	SMTPPort      string
 	HTTPAddress   string
 	HTTPDestParam string
+	Email         string
+	Emails        []string
 	Description   *string
 	Int           int
 	Id            uuid.UUID
@@ -50,6 +52,8 @@ func main() {
 		builder.String(&obj.SMTPHost).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
 		builder.UUID(&obj.Id).Required()
+		builder.String(&obj.Email).Email()
+		builder.StringSlice(&obj.Emails).Email()
 		builder.String(&obj.Description).Trim()
 		builder.StringSlice(&obj.Templates).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
@@ -67,6 +71,8 @@ func main() {
 		SMTPPort:      uuid.New().String() + " ",
 		HTTPAddress:   uuid.New().String() + " ",
 		HTTPDestParam: uuid.New().String() + "  ",
+		Email:         "correct@email.com",
+		Emails:        []string{"correct@email.com", "incorrect.email.com"},
 		Id:            id,
 		Int:           2,
 	}

@@ -6,6 +6,7 @@ validation:
     "Cannot be shorter than %d characters": Не может быть короче %d символов
     "Doesn't match required regexp pattern": Не соответствует regexp шаблону
     "Only %s values is allowed": Только %s значения разрешены
+    "Should be email address": Должно быть электронным адресом
   num:
     "Cannot be less than %v": Не может быть меньше %v
     "Cannot be greater than %v": Не может быть больше %v

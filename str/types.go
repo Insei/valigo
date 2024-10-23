@@ -28,6 +28,9 @@ type BaseConfigurator interface {
 	// MinLen checks if the string length is not less than the given minimum length.
 	MinLen(int) BaseConfigurator
 
+	// Email checks is the string is email address
+	Email() BaseConfigurator
+
 	// When allows for conditional validation based on a given condition.
 	When(whenFn func(ctx context.Context, value any) bool) BaseConfigurator
 }
