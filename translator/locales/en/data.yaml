@@ -6,6 +6,7 @@ validation:
     "Cannot be shorter than %d characters": Cannot be shorter than %d characters
     "Doesn't match required regexp pattern": Doesn't match required regexp pattern
     "Only %s values is allowed": Only %s values is allowed
+    "Should be email address": Should be email address
   num:
     "Cannot be less than %v": Cannot be less than %v
     "Cannot be greater than %v": Cannot be greater than %v
