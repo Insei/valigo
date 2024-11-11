@@ -18,11 +18,11 @@ const (
 )
 
 func minT[T numbers](val T, min T) bool {
-	return val > min
+	return val >= min
 }
 
 func maxT[T numbers](val T, max T) bool {
-	return val < max
+	return val <= max
 }
 
 func anyOfT[T numbers](val T, allowed []T) bool {
