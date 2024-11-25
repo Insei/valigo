@@ -1,10 +1,12 @@
 package valigo
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/insei/fmap/v3"
 
+	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/translator"
 )
 
@@ -76,5 +78,23 @@ func TestOptionApplyWithMultipleOptions(t *testing.T) {
 	}
 	if v.helper.getFieldLocation == nil {
 		t.Errorf("expected getFieldLocation to be set")
+	}
+}
+
+func TestWithMultipleOptionsWithErrorsTransformer(t *testing.T) {
+	transformer := func(errs []shared.Error) []error {
+		var newErrs []error
+		for _, err := range errs {
+			newErrs = append(newErrs, fmt.Errorf("test: %v", err))
+		}
+		return newErrs
+	}
+	opt := WithErrorsTransformer(transformer)
+
+	v := New(opt)
+	opt.apply(v)
+
+	if v.helper.transformError == nil {
+		t.Errorf("expected transformError to be set")
 	}
 }

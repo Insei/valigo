@@ -36,6 +36,9 @@ func (v *Validator) Validate(ctx context.Context, obj any) []error {
 	for i, err := range errsTyped {
 		errs[i] = err
 	}
+	if v.helper.transformError != nil {
+		return v.helper.transformError(errsTyped)
+	}
 	return errs
 }
 
