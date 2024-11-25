@@ -6,7 +6,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/insei/fmap/v3 v3.1.1
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa
 	gopkg.in/yaml.v3 v3.0.1
 )
 

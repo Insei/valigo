@@ -2,6 +2,7 @@ package valigo
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"regexp"
 	"testing"
@@ -150,10 +151,11 @@ func TestValidatorValidateTyped(t *testing.T) {
 
 func TestValidatorValidate(t *testing.T) {
 	tests := []struct {
-		name         string
-		obj          any
-		validator    func(ctx context.Context, h shared.Helper, obj any) []shared.Error
-		expectedErrs int
+		name           string
+		obj            any
+		validator      func(ctx context.Context, h shared.Helper, obj any) []shared.Error
+		transformError func(errs []shared.Error) []error
+		expectedErrs   int
 	}{
 		{
 			name: "single error",
@@ -195,12 +197,24 @@ func TestValidatorValidate(t *testing.T) {
 			},
 			expectedErrs: 0,
 		},
+		{
+			name: "transform error",
+			obj:  struct{}{},
+			validator: func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
+				return []shared.Error{{Message: "test error"}}
+			},
+			transformError: func(errs []shared.Error) []error {
+				return []error{fmt.Errorf("transformed error")}
+			},
+			expectedErrs: 1,
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			v := New()
 			v.storage.validators[reflect.TypeOf(test.obj)] = []structValidationFn{test.validator}
+			v.helper.transformError = test.transformError
 			errs := v.Validate(context.Background(), test.obj)
 			if len(errs) != test.expectedErrs {
 				t.Errorf("expected %d errors, got %d", test.expectedErrs, len(errs))
