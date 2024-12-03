@@ -21,7 +21,7 @@ func main() {
 		// Custom on struct type
 		c.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *User) []shared.Error {
 			if obj.Name != "Rebecca" {
-				format := "Only Rebecca name is allowed" // you can add translations if you want, see translations example
+				format := "Only Rebecca name is allowed" // you can add translations if you want, see translation example
 				return []shared.Error{h.ErrorT(ctx, &obj.Name, obj.Name, format)}
 			}
 			return nil
@@ -31,7 +31,7 @@ func main() {
 		c.String(&obj.LastName).
 			Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
 				if *value != "Rebecca" {
-					localeKey := "Only \"Rebecca\" is allowed" // you can add translations if you want, see translations example
+					localeKey := "Only Rebecca is allowed" // you can add translations if you want, see translation example
 					return []shared.Error{h.ErrorT(ctx, value, localeKey)}
 				}
 				return nil

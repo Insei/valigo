@@ -214,7 +214,9 @@ func TestValidatorValidate(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			v := New()
 			v.storage.validators[reflect.TypeOf(test.obj)] = []structValidationFn{test.validator}
-			v.helper.transformError = test.transformError
+			if test.transformError != nil {
+				v.transformError = test.transformError
+			}
 			errs := v.Validate(context.Background(), test.obj)
 			if len(errs) != test.expectedErrs {
 				t.Errorf("expected %d errors, got %d", test.expectedErrs, len(errs))
