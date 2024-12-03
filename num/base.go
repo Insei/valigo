@@ -126,13 +126,7 @@ func (i *baseConfigurator[T]) When(whenFn func(ctx context.Context, value any) b
 	if whenFn == nil {
 		return i
 	}
-	base := i.c.NewWithWhen(func(ctx context.Context, value any) bool {
-		v, ok := value.(**T)
-		if !ok {
-			return false
-		}
-		return whenFn(ctx, v)
-	})
+	base := i.c.NewWithWhen(whenFn)
 	return &baseConfigurator[T]{
 		c:     base,
 		field: i.field,

@@ -79,6 +79,7 @@ func (i *FieldConfigurator[T]) NewWithWhen(whenFn func(ctx context.Context, valu
 			}
 			i.appendFn(fnWithEnabler)
 		},
+		mk: i.mk,
 	}
 }
 

@@ -48,13 +48,19 @@ func main() {
 	allowedClientID := uuid.New()
 	valigo.Configure[Sender](v, func(builder valigo.Configurator[Sender], obj *Sender) {
 		builder.Number(&obj.Int).AnyOf(2)
-		builder.String(&obj.Type).Trim()
+		builder.String(&obj.Type).When(func(ctx context.Context, value any) bool {
+			return true
+		}).Trim()
+		builder.String(&obj.Description).When(func(ctx context.Context, value any) bool {
+			return true
+		}).Trim()
 		builder.String(&obj.SMTPHost).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
-		builder.UUID(&obj.Id).Required()
+		builder.UUID(&obj.Id).When(func(ctx context.Context, value any) bool {
+			return true
+		}).AnyOf(uuid.Nil)
 		builder.String(&obj.Email).Email()
 		builder.StringSlice(&obj.Emails).Email()
-		builder.String(&obj.Description).Trim()
 		builder.StringSlice(&obj.Templates).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
 		builder.UUIDSlice(&obj.ClientIDs).AnyOf(allowedClientID)
@@ -63,8 +69,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	desc := "desc        "
 	sender := &Sender{
-		Type:          "123@123       ",
+		Type:          "type        ",
+		Description:   &desc,
 		Templates:     []string{"  correct  ", "incorrect&"},
 		ClientIDs:     []*uuid.UUID{&id},
 		SMTPHost:      uuid.New().String() + "   ",
@@ -74,10 +82,10 @@ func main() {
 		Email:         "correct@email.com",
 		Emails:        []string{"correct@email.com", "incorrect.email.com"},
 		Id:            id,
-		Int:           2,
+		Int:           5,
 	}
+
 	errs := v.Validate(context.Background(), sender)
 	errsJson, _ := json.Marshal(errs)
 	fmt.Println(string(errsJson))
-	fmt.Println(sender)
 }
