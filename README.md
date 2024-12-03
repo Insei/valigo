@@ -19,7 +19,6 @@ Valigo is a powerfull, zero allocations validation engine with localizations, co
 * [x] Error translations
 * [x] Strings (MaxLen, MinLen, Required, Regexp Pattern, AnyOf, Custom) and Strings Slices validation
 * [x] UUID and UUID Slices validation
-* [x] Num Validation (int(8,16,32,64), uint(8,16,32,64))
-* [ ] Float validation
+* [x] Num Validation (int(8,16,32,64), uint(8,16,32,64), float(32,64))
 * [ ] Other default types validations
 * [ ] Create validation rules based on default validations tags
