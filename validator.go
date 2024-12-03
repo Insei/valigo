@@ -9,8 +9,9 @@ import (
 
 // Validator is a struct that holds a storage and a helper object.
 type Validator struct {
-	storage *storage
-	helper  *helper
+	storage        *storage
+	helper         *helper
+	transformError func(errs []shared.Error) []error
 }
 
 // ValidateTyped validates an object of any type using validators from the storage.
@@ -32,14 +33,7 @@ func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
 // objects instead of shared.Error objects.
 func (v *Validator) Validate(ctx context.Context, obj any) []error {
 	errsTyped := v.ValidateTyped(ctx, obj)
-	errs := make([]error, len(errsTyped))
-	for i, err := range errsTyped {
-		errs[i] = err
-	}
-	if v.helper.transformError != nil {
-		return v.helper.transformError(errsTyped)
-	}
-	return errs
+	return v.transformError(errsTyped)
 }
 
 // GetHelper returns the helper object associated with the Validator instance.
@@ -53,6 +47,13 @@ func New(opts ...Option) *Validator {
 	v := &Validator{
 		storage: newStorage(),
 		helper:  newHelper(),
+		transformError: func(errs []shared.Error) []error {
+			errsNew := make([]error, len(errs))
+			for i, err := range errs {
+				errsNew[i] = err
+			}
+			return errsNew
+		},
 	}
 	for _, opt := range opts {
 		opt.apply(v)

@@ -89,12 +89,30 @@ func TestWithMultipleOptionsWithErrorsTransformer(t *testing.T) {
 		}
 		return newErrs
 	}
-	opt := WithErrorsTransformer(transformer)
 
-	v := New(opt)
-	opt.apply(v)
+	testCases := []struct {
+		name        string
+		transformer func([]shared.Error) []error
+	}{
+		{
+			name:        "Transformer set",
+			transformer: transformer,
+		},
+		{
+			name:        "Transformer not set",
+			transformer: nil,
+		},
+	}
 
-	if v.helper.transformError == nil {
-		t.Errorf("expected transformError to be set")
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			opt := WithErrorsTransformer(tc.transformer)
+			v := New(opt)
+			opt.apply(v)
+
+			if v.transformError == nil {
+				t.Errorf("expected function, but got nil")
+			}
+		})
 	}
 }

@@ -13,7 +13,6 @@ import (
 type helper struct {
 	t                translator.Translator
 	getFieldLocation func(field fmap.Field) string
-	transformError   func(errs []shared.Error) []error
 }
 
 // ErrorT returns a shared.Error with the given location, message, and value.
