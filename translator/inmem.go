@@ -29,7 +29,7 @@ func (t *inMemTranslatorStorage) Add(lang string, data map[string]string) {
 		return
 	}
 	if _, ok := t.translations[lang]; !ok {
-		t.translations[lang] = data
+		t.translations[lang] = make(map[string]string, len(data))
 	}
 	for key, value := range data {
 		t.translations[lang][key] = value

@@ -64,3 +64,16 @@ func TestInMemTranslatorStorage_GetTranslated_NoPrefer(t *testing.T) {
 		t.Errorf("expected translated string to be empty, got '%s'", translated)
 	}
 }
+
+func TestInMemTranslatorStorageAddCopiesNewLang(t *testing.T) {
+	storage := NewInMemStorage()
+	first := map[string]string{"a": "A"}
+	storage.Add("de", first)
+	storage.Add("de", map[string]string{"b": "B"})
+	if len(first) != 1 {
+		t.Errorf("the map passed to Add was modified: %v", first)
+	}
+	if got := storage.Get([]string{"de"}, "b"); got != "B" {
+		t.Errorf("expected B, got %q", got)
+	}
+}
