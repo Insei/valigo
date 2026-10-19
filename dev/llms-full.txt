@@ -883,6 +883,8 @@ Output:
 
 The message of the error is translated by the plural forms of the built-in key, and the client gets the code `string.max_runes` with the `max` of the tenant.
 
+The module [`examples/limits`](https://github.com/Insei/valigo/tree/main/examples/limits) is a fuller example: the limits of a title and of the number of tags by the plan of the tenant from a store that changes at runtime, and the rules of a field enabled by a feature flag.
+
 # Errors
 
 ## Validate and ValidateTyped
