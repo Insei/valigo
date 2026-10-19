@@ -183,6 +183,10 @@ storage.Add("ru", map[string]string{"Should be in the future": "Должно б�
 v := valigo.New(valigo.WithTranslator(translator.New(translator.WithStorage(storage))))
 ```
 
+## Rules from data
+
+Rules are configured once, but a `Custom` closure can read its limits from a database, a cache or the settings of a tenant on every validation, it gets the context of the request; a `When` condition too. Reuse a built-in message for the translation and the code: `h.ErrorMsg(ctx, v, shared.M("string.max_runes", "validation:string:Cannot be longer than %d characters", shared.P("max", maxLen)))`.
+
 ## Common mistakes
 
 - `b.Field(&m.Score).As(num.Of)` for `Score *int` doesn't compile: use `b.Field(&m.Score).As(num.Ptr)`.
