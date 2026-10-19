@@ -58,3 +58,9 @@ func TestLocalesFromFSErrors(t *testing.T) {
 	_, err = LocalesFromFS(fstest.MapFS{"locales/en/data.yaml/x": {Data: []byte("")}})
 	assert.ErrorContains(t, err, "locales/en/data.yaml")
 }
+
+func TestNewInMemStorageInvalidLocalesPanics(t *testing.T) {
+	assert.Panics(t, func() {
+		newInMemStorage(fstest.MapFS{"locales/en/data.yaml": {Data: []byte("a: [")}})
+	})
+}

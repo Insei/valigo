@@ -1,6 +1,9 @@
 package translator
 
-import "fmt"
+import (
+	"fmt"
+	"io/fs"
+)
 
 // inMemTranslatorStorage represents an in-memory storage for translations.
 // It maps languages to maps of translation keys to translated values.
@@ -12,7 +15,12 @@ type inMemTranslatorStorage struct {
 // It loads initial data from the embedded locales YAML file.
 // If an error occurs during loading, it panics.
 func NewInMemStorage(opts ...InMemStorageOption) Storage {
-	data, err := LocalesFromFS(EmbedFSLocalesYAML)
+	return newInMemStorage(EmbedFSLocalesYAML, opts...)
+}
+
+// newInMemStorage creates a new in-memory translation storage with the locales of fsys, it panics on invalid locales.
+func newInMemStorage(fsys fs.FS, opts ...InMemStorageOption) Storage {
+	data, err := LocalesFromFS(fsys)
 	if err != nil {
 		panic(err)
 	}
