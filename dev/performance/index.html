@@ -1668,7 +1668,7 @@
 </tr>
 <tr>
 <td>valigo</td>
-<td><strong>458</strong></td>
+<td><strong>407</strong></td>
 <td><strong>0</strong></td>
 <td><strong>0</strong></td>
 </tr>
@@ -1753,7 +1753,7 @@
 </tr>
 </tbody>
 </table>
-<p>valigo is about 1.6 times slower than the same rules written by hand on a valid object, it pays for the closures of the rules and the generic reading of the fields; it doesn't allocate either. Code generators of validators produce code like the hand-written one, so they are expected to be about as fast as it.</p>
+<p>valigo is about 1.4 times slower than the same rules written by hand on a valid object, it pays for the closures of the rules; it doesn't allocate either. The fields are read by the offsets of fmap without reflect, following the pointers of nested structs. Code generators of validators produce code like the hand-written one, so they are expected to be about as fast as it.</p>
 <ul>
 <li>valigo builds the rules once in <code>Configure</code> and reads the fields by precomputed accessors, so valid objects cost no allocations; go-playground/validator parses the tags once too, but works through <code>reflect</code> on every call, ozzo-validation builds its rules on every call of <code>Validate</code>.</li>
 <li>gookit/validate creates a validation per call, it is its API, and reports the errors of the elements of a slice under one key <code>Tags.*</code>; zog builds the messages of its issues.</li>

@@ -19,7 +19,7 @@ A valid object:
 | Library                            | ns/op   | B/op  | allocs/op |
 | ---------------------------------- | ------- | ----- | --------- |
 | hand-written code, the lower bound | 286     | 0     | 0         |
-| valigo                             | **458** | **0** | **0**     |
+| valigo                             | **407** | **0** | **0**     |
 | zog                                | 1 690   | 6     | 2         |
 | go-playground/validator            | 1 785   | 296   | 16        |
 | ozzo-validation                    | 2 950   | 2 000 | 38        |
@@ -37,7 +37,7 @@ An invalid object with 6 errors:
 | ozzo-validation, with `Error()`                        | 12 665    | 11 026    | 140       |
 | gookit/validate                                        | 13 250    | 9 569     | 120       |
 
-valigo is about 1.6 times slower than the same rules written by hand on a valid object, it pays for the closures of the rules and the generic reading of the fields; it doesn't allocate either. Code generators of validators produce code like the hand-written one, so they are expected to be about as fast as it.
+valigo is about 1.4 times slower than the same rules written by hand on a valid object, it pays for the closures of the rules; it doesn't allocate either. The fields are read by the offsets of fmap without reflect, following the pointers of nested structs. Code generators of validators produce code like the hand-written one, so they are expected to be about as fast as it.
 
 - valigo builds the rules once in `Configure` and reads the fields by precomputed accessors, so valid objects cost no allocations; go-playground/validator parses the tags once too, but works through `reflect` on every call, ozzo-validation builds its rules on every call of `Validate`.
 - gookit/validate creates a validation per call, it is its API, and reports the errors of the elements of a slice under one key `Tags.*`; zog builds the messages of its issues.
