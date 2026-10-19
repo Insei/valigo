@@ -235,3 +235,18 @@ func TestMustZero(t *testing.T) {
 
 	mustZero("hello")
 }
+
+func TestZeroRecursiveTypes(t *testing.T) {
+	type node struct {
+		Name string
+		Next *node
+		Meta *struct{ Parent *node }
+	}
+	obj := &node{}
+	if err := zero(obj); err != nil {
+		t.Fatalf("zero() error = %v", err)
+	}
+	if obj.Next != nil || obj.Meta == nil || obj.Meta.Parent != nil {
+		t.Errorf("zero() must allocate non recursive pointers only, got %+v", obj)
+	}
+}
