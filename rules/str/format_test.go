@@ -29,6 +29,7 @@ func TestIsURL(t *testing.T) {
 		"https://example.com/path/to?q=1&b=2#frag",
 		"https://example.com:8443/path",
 		"ftp://user:pass@files.example.com/dir",
+		"https://a%20b:p~$&'()*+,;=@example.com",
 		"https://127.0.0.1:80",
 		"https://[::1]:8080/x",
 		"https://[2001:db8::1]",
@@ -57,6 +58,11 @@ func TestIsURL(t *testing.T) {
 		"https://[nope]",
 		"https://-bad-.com",
 		"https://us er@example.com",
+		"a://\"@example.com",
+		"https://us<er@example.com",
+		"https://u%zz@example.com",
+		"https://[fe80::1%25en0]/",
+		"https://[::0%00]",
 	})
 }
 

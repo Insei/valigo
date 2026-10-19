@@ -24,7 +24,7 @@ func isURL(s string) bool {
 		authority, tail = rest[:end], rest[end:]
 	}
 	if i := strings.LastIndexByte(authority, '@'); i >= 0 {
-		if !isURLText(authority[:i]) {
+		if !isUserinfo(authority[:i]) {
 			return false
 		}
 		authority = authority[i+1:]
@@ -38,7 +38,8 @@ func isURL(s string) bool {
 			return false
 		}
 		addr, err := netip.ParseAddr(host[1 : len(host)-1])
-		return err == nil && addr.Is6() && isURLText(tail)
+		// the zones of the addresses aren't allowed, url.Parse needs them escaped as %25
+		return err == nil && addr.Is6() && addr.Zone() == "" && isURLText(tail)
 	}
 	return (isHostname(host) || isIPv4(host)) && isURLText(tail)
 }
@@ -80,6 +81,25 @@ func isPort(s string) bool {
 		n = n*10 + int(s[i]-'0')
 	}
 	return n <= 65535
+}
+
+// isUserinfo reports whether s is the userinfo of RFC 3986: unreserved characters, sub-delims, ":" and percent
+// escapes, like url.Parse accepts, "@" too.
+func isUserinfo(s string) bool {
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		switch {
+		case isASCIILetter(c) || isASCIIDigit(c) || strings.IndexByte("-._:~!$&'()*+,;=@", c) >= 0:
+		case c == '%':
+			if i+2 >= len(s) || !isHex(s[i+1]) || !isHex(s[i+2]) {
+				return false
+			}
+			i += 2
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 // isURLText reports whether s has no whitespace or control characters and its percent escapes are valid.
