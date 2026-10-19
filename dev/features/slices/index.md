@@ -2,11 +2,13 @@
 
 `b.Slice(&m.X)` returns the configurator of a `[]E` field with the rules of the slice itself. `As` converts it to a typed slice configurator, the rules of the slice stay available after the conversion:
 
-| Configurator       | Elements                           | Rules on elements                                                                                                                 |
-| ------------------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `b.Slice(&m.X)`    | any `E`                            | `Each` with `*shared.Field[E]`: `Check`, `Required`, `Modify`, `Custom`, `When`, and `As` to convert the element                  |
-| `.As(str.Slice)`   | `string`, `*string`, named strings | `Each` with the [string configurator](https://insei.github.io/valigo/latest/features/strings/index.md), `Trim`, `Regexp`, `Email` |
-| `.As(vuuid.Slice)` | `uuid.UUID`, `*uuid.UUID`          | `Each` with the [uuid configurator](https://insei.github.io/valigo/latest/features/uuid/index.md), `AnyOf`                        |
+| Configurator                        | Elements                           | Rules on elements                                                                                                                                                                                             |
+| ----------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `b.Slice(&m.X)`                     | any `E`                            | `Each` with `*shared.Field[E]`: `Check`, `Required`, `Modify`, `Custom`, `When`, and `As` to convert the element                                                                                              |
+| `.As(str.Slice)`                    | `string`, `*string`, named strings | `Each` with the [string configurator](https://insei.github.io/valigo/latest/features/strings/index.md), `Trim`, `Regexp`, `Email`                                                                             |
+| `.As(num.Slice)`                    | numbers and named numbers          | `Each` with the [number configurator](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                                                                        |
+| `.As(timex.Slice)`, `.As(eq.Slice)` | times, comparable values           | `Each` with the [time](https://insei.github.io/valigo/latest/features/time/index.md) and the [equality](https://insei.github.io/valigo/latest/features/values/index.md) configurators, `Unique` of `eq.Slice` |
+| `.As(vuuid.Slice)`                  | `uuid.UUID`, `*uuid.UUID`          | `Each` with the [uuid configurator](https://insei.github.io/valigo/latest/features/uuid/index.md), `AnyOf`                                                                                                    |
 
 A pointer to a slice, `*[]E`, is converted from its field: `b.Field(&m.Tags).As(shared.SlicePtr).As(str.Slice)`, a nil pointer is [absent](https://insei.github.io/valigo/latest/features/absent/index.md).
 
@@ -21,7 +23,7 @@ The rules of the configurator check **the slice itself**, the rules inside `Each
 | `MaxLen(n)`  | the slice has more than `n` elements | Cannot contain more than %d elements      |
 | `Each(fn)`   | —                                    | `fn` configures the rules of the elements |
 
-`Trim`, `Regexp` and `Email` of `str.Slice` and `AnyOf` of `uuid.Slice` are shortcuts for the same rules in `Each`. Any element is converted in `Each` too, e.g. the numbers: `e.As(num.Of).Min(1)`.
+`Trim`, `Regexp` and `Email` of `str.Slice` and `AnyOf` of `uuid.Slice` are shortcuts for the same rules in `Each`. Any element of `b.Slice` is converted in `Each` too: `e.As(num.Ptr).Max(100)` for `[]*int`.
 
 ```go
 package main

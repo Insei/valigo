@@ -539,6 +539,8 @@
       
         
       
+        
+      
     
     
     
@@ -723,6 +725,34 @@
     
   
     Custom rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fields/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules on other fields
   
 
     
@@ -1199,7 +1229,7 @@
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Stock</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Max</span><span class="p">(</span><span class="nx">limit</span><span class="p">)</span><span class="w"> </span><span class="c1">// doesn't compile: int32 isn't int</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Discount</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Of</span><span class="p">)</span><span class="w">         </span><span class="c1">// doesn't compile: *uint8 isn't a number, use num.Ptr</span>
 </span></code></pre></div>
-<p>Slices of numbers are configured by <code>Slice</code> with the conversion of the elements: <code>b.Slice(&amp;p.Sizes).Each(func(e *shared.Field[int]) { e.As(num.Of).Min(1) })</code>, see <a href="../slices/">Slices</a>.</p>
+<p>Slices of numbers are converted by <code>num.Slice</code>: <code>b.Slice(&amp;p.Sizes).As(num.Slice).Each(func(e *num.BaseConfigurator[int]) { e.Min(1) })</code>, see <a href="../slices/">Slices</a>.</p>
 <h2 id="rules">Rules<a class="headerlink" href="#rules" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1224,6 +1254,11 @@
 <td><code>Max(n)</code></td>
 <td>the value is greater than <code>n</code></td>
 <td>Cannot be greater than %v</td>
+</tr>
+<tr>
+<td><code>MinField(&amp;m.X)</code>, <code>MaxField(&amp;m.X)</code></td>
+<td>the value is less or greater than the value of the field <code>X</code>, see <a href="../fields/">Rules on other fields</a></td>
+<td>Cannot be less than %v, Cannot be greater than %v</td>
 </tr>
 <tr>
 <td><code>AnyOf(values...)</code></td>

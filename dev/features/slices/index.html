@@ -539,6 +539,8 @@
       
         
       
+        
+      
     
     
     
@@ -723,6 +725,34 @@
     
   
     Custom rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fields/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules on other fields
   
 
     
@@ -1222,6 +1252,16 @@
 <td><code>Each</code> with the <a href="../strings/">string configurator</a>, <code>Trim</code>, <code>Regexp</code>, <code>Email</code></td>
 </tr>
 <tr>
+<td><code>.As(num.Slice)</code></td>
+<td>numbers and named numbers</td>
+<td><code>Each</code> with the <a href="../numbers/">number configurator</a></td>
+</tr>
+<tr>
+<td><code>.As(timex.Slice)</code>, <code>.As(eq.Slice)</code></td>
+<td>times, comparable values</td>
+<td><code>Each</code> with the <a href="../time/">time</a> and the <a href="../values/">equality</a> configurators, <code>Unique</code> of <code>eq.Slice</code></td>
+</tr>
+<tr>
 <td><code>.As(vuuid.Slice)</code></td>
 <td><code>uuid.UUID</code>, <code>*uuid.UUID</code></td>
 <td><code>Each</code> with the <a href="../uuid/">uuid configurator</a>, <code>AnyOf</code></td>
@@ -1262,7 +1302,7 @@
 </tr>
 </tbody>
 </table>
-<p><code>Trim</code>, <code>Regexp</code> and <code>Email</code> of <code>str.Slice</code> and <code>AnyOf</code> of <code>uuid.Slice</code> are shortcuts for the same rules in <code>Each</code>. Any element is converted in <code>Each</code> too, e.g. the numbers: <code>e.As(num.Of).Min(1)</code>.</p>
+<p><code>Trim</code>, <code>Regexp</code> and <code>Email</code> of <code>str.Slice</code> and <code>AnyOf</code> of <code>uuid.Slice</code> are shortcuts for the same rules in <code>Each</code>. Any element of <code>b.Slice</code> is converted in <code>Each</code> too: <code>e.As(num.Ptr).Max(100)</code> for <code>[]*int</code>.</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>

@@ -539,6 +539,8 @@
       
         
       
+        
+      
     
     
     
@@ -723,6 +725,34 @@
     
   
     Custom rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fields/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules on other fields
   
 
     
@@ -1222,6 +1252,11 @@
 <td>Should be between %s and %s</td>
 </tr>
 <tr>
+<td><code>BeforeField(&amp;m.X)</code>, <code>AfterField(&amp;m.X)</code></td>
+<td>the value isn't before or after the time of the field <code>X</code>, see <a href="../fields/">Rules on other fields</a></td>
+<td>Should be before %s, Should be after %s</td>
+</tr>
+<tr>
 <td><code>InPast()</code></td>
 <td>the value isn't before the moment of the validation</td>
 <td>Should be in the past</td>
@@ -1243,7 +1278,7 @@
 </tr>
 </tbody>
 </table>
-<p>The times in the messages are formatted by RFC 3339. <code>Before</code>, <code>After</code> and <code>Between</code> take the bounds of the configuration; for a bound from another field of the object use a <a href="../custom/#struct-rules">struct custom rule</a>.</p>
+<p>The times in the messages are formatted by RFC 3339. <code>Before</code>, <code>After</code> and <code>Between</code> take the bounds of the configuration, <code>BeforeField</code> and <code>AfterField</code> — of another field of the object.</p>
 <h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>

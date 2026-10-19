@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://insei.github.io/valigo/dev/features/strings/">
       
       
-        <link rel="prev" href="../custom/">
+        <link rel="prev" href="../fields/">
       
       
         <link rel="next" href="../numbers/">
@@ -539,6 +539,8 @@
       
         
       
+        
+      
     
     
     
@@ -723,6 +725,34 @@
     
   
     Custom rules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fields/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rules on other fields
   
 
     
@@ -1278,6 +1308,11 @@
 <td><code>AnyOf(values...)</code></td>
 <td>the value isn't one of <code>values</code></td>
 <td>Only %s values is allowed</td>
+</tr>
+<tr>
+<td><code>EqualField(&amp;m.X)</code></td>
+<td>the value isn't equal to the value of the string field <code>X</code>, see <a href="../fields/">Rules on other fields</a></td>
+<td>Should be equal to %s</td>
 </tr>
 <tr>
 <td><code>Prefix(s)</code>, <code>Suffix(s)</code>, <code>Contains(s)</code></td>
