@@ -8,6 +8,7 @@ valigo validates Go structs by rules configured once with pointers to the fields
 
 - [Get started](https://insei.github.io/valigo/latest/index.md): installation and the first validator
 - [Why valigo?](https://insei.github.io/valigo/latest/why-valigo/index.md): what it gives compared to tag based validators
+- [Performance](https://insei.github.io/valigo/latest/performance/index.md): benchmarks with go-playground/validator and ozzo-validation
 - [Upgrading from v0.0.x](https://insei.github.io/valigo/latest/upgrading/index.md): upgrading from v0.0.x
 - [For AI agents](https://insei.github.io/valigo/latest/ai-agents/index.md): the skill for AI agents
 

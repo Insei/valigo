@@ -288,6 +288,25 @@
   
   
     <li class="md-tabs__item">
+      <a href="../performance/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Performance
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
       <a href="../ai-agents/" class="md-tabs__link">
         
   
@@ -630,6 +649,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ai-agents/" class="md-nav__link">
         
   
@@ -706,7 +752,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -728,14 +774,14 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_6" id="__nav_6_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1200,7 +1246,7 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <div class="md-nav__link md-nav__container">
@@ -1223,8 +1269,8 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1413,7 +1459,7 @@
 <h3 id="any-type-without-changes-of-the-library">Any type, without changes of the library<a class="headerlink" href="#any-type-without-changes-of-the-library" title="Permanent link">&para;</a></h3>
 <p>The configurator knows nothing about strings, numbers or uuids: they are conversions in their packages. A type of your domain, <code>time.Time</code> or a uuid of another package gets its rules by a conversion function of a few lines, see <a href="../features/conversions/">Types and conversions</a>.</p>
 <h3 id="validation-of-valid-objects-doesnt-allocate">Validation of valid objects doesn't allocate<a class="headerlink" href="#validation-of-valid-objects-doesnt-allocate" title="Permanent link">&para;</a></h3>
-<p>The rules are built once by <code>Configure</code>. <code>Validate</code> reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it.</p>
+<p>The rules are built once by <code>Configure</code>. <code>Validate</code> reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it. On the same rules a valid object is validated about 3.8 times faster than by go-playground/validator, see <a href="../performance/">Performance</a>.</p>
 <h3 id="absent-values-are-handled-not-panicked-on">Absent values are handled, not panicked on<a class="headerlink" href="#absent-values-are-handled-not-panicked-on" title="Permanent link">&para;</a></h3>
 <p>A nil pointer field, a nil pointer to a slice and the fields of a nil nested struct are <em>absent</em>: every rule skips them, only <code>Required</code> fails. Optional fields need no special code:</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Phone</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Regexp</span><span class="p">(</span><span class="nx">phoneRe</span><span class="p">)</span><span class="w">    </span><span class="c1">// nil Phone is valid, a set one must match</span>
