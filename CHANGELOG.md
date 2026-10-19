@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.2.0] - 2026-10-19
+
+### CI / Build
+
+- Lint, test and cover the goi18n module (fe6f4e7)
+
+### Documentation
+
+- Describe the sources of translations and the goi18n module (b277714)
+
+### Features
+
+- **goi18n:** Translate the messages by a bundle of go-i18n (126f0b3)
+- **translator:** Look the translations up in a chain of sources (7a18459)
 ## [0.1.0] - 2026-10-19
 
 ### Bug Fixes
@@ -127,6 +141,7 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 ### Misc
 
+- **release:** Prepare v0.1.0 (2f1c9be)
 - **changelog:** Mark breaking changes in the changelog (e1d197f)
 - Add git-cliff config for the changelog (7c7260b)
 
