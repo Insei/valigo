@@ -77,6 +77,7 @@ What happens here:
 - [Why valigo?](why-valigo.md) — what it gives compared to tag based validators.
 - [Features](features/index.md) — the rules of every type, conditions, custom rules, errors, translations.
 - [How it works](architecture/index.md) — the model, the field pointers and why valid objects don't allocate.
-- [Performance](performance.md) — benchmarks with go-playground/validator and ozzo-validation.
+- [Performance](performance.md) — benchmarks with go-playground/validator, ozzo-validation, zog, gookit/validate and hand-written code.
+- [HTTP problem details](features/problem.md) and [huma](features/huma.md) — valigo in HTTP APIs.
 - [Upgrading from v0.0.x](upgrading.md) — the configurator API has changed.
 - [For AI agents](ai-agents.md) — the skill and the documentation in one file.
