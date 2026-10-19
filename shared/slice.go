@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"iter"
 	"reflect"
+	"strconv"
 	"unsafe"
 
 	"github.com/insei/fmap/v3"
@@ -84,13 +85,18 @@ func ElemsGetter[E any](field fmap.Field) func(obj any) (Elems[E], bool) {
 }
 
 // EachSource applies checks to every element of the slice read by get.
+// Locations of the elements errors are suffixed with the element index, e.g. Tags[1].
 func EachSource[E any](add func(fn ValidationFn), get func(obj any) (Elems[E], bool)) func(fn CheckFn[E]) {
 	return func(fn CheckFn[E]) {
 		add(func(ctx context.Context, h Helper, obj any) []Error {
 			elems, _ := get(obj)
 			var errs []Error
 			for i := range elems.n {
+				n := len(errs)
 				errs = append(errs, fn(ctx, h, elems.At(i))...)
+				for j := n; j < len(errs); j++ {
+					errs[j].Location += "[" + strconv.Itoa(i) + "]"
+				}
 			}
 			return errs
 		})
