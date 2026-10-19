@@ -2,10 +2,9 @@ package translator
 
 import (
 	"embed"
+	"errors"
 	"fmt"
-	"io"
 	"io/fs"
-	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -39,14 +38,13 @@ func LocalesFromFS(fsys fs.FS) (map[string]map[string]string, error) {
 
 	langMap := make(map[string]map[string]string)
 	for _, locale := range rootDir {
-		file, err := fsys.Open(fmt.Sprintf("locales/%s/data.yaml", locale.Name()))
-		if err != nil && os.IsNotExist(err) {
+		fileBytes, err := fs.ReadFile(fsys, fmt.Sprintf("locales/%s/data.yaml", locale.Name()))
+		if errors.Is(err, fs.ErrNotExist) {
 			continue
 		}
 		if err != nil {
 			return nil, fmt.Errorf("%w:%s", err, fmt.Sprintf("can't read locales/%s/data.yaml", locale.Name()))
 		}
-		fileBytes, err := io.ReadAll(file)
 		localeData := make(map[string]any)
 		err = yaml.Unmarshal(fileBytes, &localeData)
 		if err != nil {
