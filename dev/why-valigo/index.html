@@ -551,10 +551,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#translated-messages" class="md-nav__link">
+  <a href="#messages-in-the-language-of-the-user-or-codes-for-the-client" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Translated messages
+        Messages in the language of the user, or codes for the client
       
     </span>
   </a>
@@ -1337,10 +1337,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#translated-messages" class="md-nav__link">
+  <a href="#messages-in-the-language-of-the-user-or-codes-for-the-client" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Translated messages
+        Messages in the language of the user, or codes for the client
       
     </span>
   </a>
@@ -1427,8 +1427,57 @@
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nx">smtp</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Port</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">AnyOfInterval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">65535</span><span class="p">)</span>
 </span></code></pre></div>
 <p>See <a href="../features/conditions/">Conditions</a> and <a href="../features/custom/">Custom rules</a>.</p>
-<h3 id="translated-messages">Translated messages<a class="headerlink" href="#translated-messages" title="Permanent link">&para;</a></h3>
-<p>Messages of the built-in rules are translated to English, German, Spanish, French and Russian, your own messages are added to the same storage. The language is taken from the context, <code>NewAcceptLanguageMiddleware</code> puts the languages of the <code>Accept-Language</code> header there. See <a href="../features/translations/">Translations</a>.</p>
+<h3 id="messages-in-the-language-of-the-user-or-codes-for-the-client">Messages in the language of the user, or codes for the client<a class="headerlink" href="#messages-in-the-language-of-the-user-or-codes-for-the-client" title="Permanent link">&para;</a></h3>
+<p>One validator serves all languages: the language of every request comes from the context, <code>NewAcceptLanguageMiddleware</code> puts the languages of the <code>Accept-Language</code> header there. The messages of the built-in rules are translated to English, German, Spanish, French and Russian with plural forms, your own messages are added to the same storage and work untranslated until you add translations. A client with its own locales gets a stable <code>Code</code> and named <code>Params</code> of every error instead. See <a href="../features/translations/">Translations</a> and <a href="../features/errors/#codes-for-clients">Codes for clients</a>.</p>
+<p>How the libraries compare, by their documentation:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>valigo</th>
+<th>go-playground/validator</th>
+<th>ozzo-validation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Translations out of the box</td>
+<td>en, de, es, fr, ru</td>
+<td>many languages, the packages of <code>validator/translations</code></td>
+<td>English messages</td>
+</tr>
+<tr>
+<td>Language of a request</td>
+<td>from the context, one validator for all languages</td>
+<td>a translator of <code>universal-translator</code> is picked and passed to <code>Translate</code> for every request</td>
+<td>the messages are global</td>
+</tr>
+<tr>
+<td>Setup</td>
+<td>none, <code>valigo.New()</code></td>
+<td>a translator per language and the registration of the translations of every tag</td>
+<td>replacing the message templates of the errors</td>
+</tr>
+<tr>
+<td>Plural forms</td>
+<td>CLDR categories in the locale files</td>
+<td>cardinal rules of <code>universal-translator</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Codes for clients</td>
+<td><code>Code</code> and named <code>Params</code> of every error</td>
+<td>the tag and one string parameter of a field error</td>
+<td>the code and the parameters of an error</td>
+</tr>
+<tr>
+<td>Messages of own rules</td>
+<td>the message is its locale key, translated when a translation is added</td>
+<td>a translation is registered for every tag</td>
+<td>the message of the error</td>
+</tr>
+</tbody>
+</table>
 <h3 id="errors-that-point-to-the-field">Errors that point to the field<a class="headerlink" href="#errors-that-point-to-the-field" title="Permanent link">&para;</a></h3>
 <p>Every error has the message, the location and the value: <code>Tags[1]</code> for an element of a slice, <code>Address.City</code> for a nested field, or the JSON path of the field with a custom location function. See <a href="../features/errors/">Errors</a>.</p>
 <h2 id="when-valigo-is-not-the-right-tool">When valigo is not the right tool<a class="headerlink" href="#when-valigo-is-not-the-right-tool" title="Permanent link">&para;</a></h2>
