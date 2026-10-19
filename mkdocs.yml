@@ -73,6 +73,7 @@ nav:
   - Get started: index.md
   - Why valigo?: why-valigo.md
   - Upgrading from v0.0.x: upgrading.md
+  - Performance: performance.md
   - For AI agents: ai-agents.md
   - Features:
       - features/index.md
@@ -111,6 +112,7 @@ plugins:
         Start:
           - index.md: installation and the first validator
           - why-valigo.md: what it gives compared to tag based validators
+          - performance.md: benchmarks with go-playground/validator and ozzo-validation
           - upgrading.md: upgrading from v0.0.x
           - ai-agents.md: the skill for AI agents
         Features:
