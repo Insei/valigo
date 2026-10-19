@@ -45,6 +45,8 @@ validation:
     "Only %v values is allowed": Seules les valeurs %v sont autorisées
     "Only interval[%v - %v] is allowed": Seul l'intervalle [%v - %v] est autorisé
     "Invalid value": Valeur invalide
+    "Should be latitude": Doit être une latitude
+    "Should be longitude": Doit être une longitude
   time:
     "Should be fulfilled": Doit être renseigné
     "Should be before %s": Doit être antérieur à %s

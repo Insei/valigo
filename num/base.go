@@ -13,6 +13,8 @@ const (
 	requiredLocaleKey     = "validation:num:Should be fulfilled"
 	anyOfLocaleKey        = "validation:num:Only %v values is allowed"
 	anyOfIntervalLocalKey = "validation:num:Only interval[%v - %v] is allowed"
+	latitudeLocaleKey     = "validation:num:Should be latitude"
+	longitudeLocaleKey    = "validation:num:Should be longitude"
 )
 
 // Number is a constraint for numeric types supported by BaseConfigurator.
@@ -87,6 +89,18 @@ func (i *BaseConfigurator[N]) AnyOf(allowed ...N) *BaseConfigurator[N] {
 // AnyOfInterval checks if the number is within [begin, end] interval, both ends inclusive.
 func (i *BaseConfigurator[N]) AnyOfInterval(begin, end N) *BaseConfigurator[N] {
 	i.f.CheckMsg(func(v N) bool { return v >= begin && v <= end }, shared.M("number.interval", anyOfIntervalLocalKey, shared.P("min", begin), shared.P("max", end)))
+	return i
+}
+
+// Latitude checks if the number is a latitude in degrees, within [-90, 90].
+func (i *BaseConfigurator[N]) Latitude() *BaseConfigurator[N] {
+	i.f.CheckMsg(func(v N) bool { return float64(v) >= -90 && float64(v) <= 90 }, shared.M("number.latitude", latitudeLocaleKey))
+	return i
+}
+
+// Longitude checks if the number is a longitude in degrees, within [-180, 180].
+func (i *BaseConfigurator[N]) Longitude() *BaseConfigurator[N] {
+	i.f.CheckMsg(func(v N) bool { return float64(v) >= -180 && float64(v) <= 180 }, shared.M("number.longitude", longitudeLocaleKey))
 	return i
 }
 

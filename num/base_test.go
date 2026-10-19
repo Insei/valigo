@@ -77,6 +77,10 @@ func TestRules(t *testing.T) {
 		{"slice", func(c valigo.Configurator[numbers], m *numbers) {
 			c.Slice(&m.Sizes).As(num.Slice).MaxLen(2).Each(func(e *num.BaseConfigurator[int]) { e.Min(1).MaxField(&m.Max) })
 		}, &numbers{Sizes: []int{1, 0, 9}, Max: 5}, []string{"Cannot contain more than 2 elements", "Cannot be less than 1", "Cannot be greater than Max"}},
+		{"latitude", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Float64).As(num.Of).Latitude() }, &numbers{Float64: 90.5}, []string{"Should be latitude"}},
+		{"latitude ok", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Float64).As(num.Of).Latitude() }, &numbers{Float64: -90}, nil},
+		{"longitude", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Float64).As(num.Of).Longitude() }, &numbers{Float64: -180.1}, []string{"Should be longitude"}},
+		{"longitude ok", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Int).As(num.Of).Longitude() }, &numbers{Int: 180}, nil},
 		{"when true", func(c valigo.Configurator[numbers], m *numbers) {
 			c.Field(&m.Int).As(num.Of).When(func(_ context.Context, v int) bool { return v > 10 }).Max(20)
 		}, &numbers{Int: 21}, []string{"Cannot be greater than 20"}},
@@ -121,10 +125,11 @@ func TestCodes(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[numbers](v, func(c valigo.Configurator[numbers], m *numbers) {
 		c.Field(&m.Int).As(num.Of).Required().Min(5).Max(-1).MinField(&m.Min).MaxField(&m.Max).AnyOf(7).AnyOfInterval(1, 2)
+		c.Field(&m.Float64).As(num.Of).Latitude().Longitude()
 	})
 	var codes []string
-	for _, err := range v.ValidateTyped(context.Background(), &numbers{Min: 1, Max: -1}) {
+	for _, err := range v.ValidateTyped(context.Background(), &numbers{Min: 1, Max: -1, Float64: 200}) {
 		codes = append(codes, err.Code)
 	}
-	assert.Equal(t, []string{"number.required", "number.min", "number.max", "number.min_field", "number.max_field", "number.any_of", "number.interval"}, codes)
+	assert.Equal(t, []string{"number.required", "number.min", "number.max", "number.min_field", "number.max_field", "number.any_of", "number.interval", "number.latitude", "number.longitude"}, codes)
 }
