@@ -38,6 +38,17 @@ validation:
     "Should be ISO 4217 currency code": Muss ein Währungscode nach ISO 4217 sein
     "Should have valid Luhn checksum": Muss eine gültige Luhn-Prüfsumme haben
     "Should be credit card number": Muss eine Kreditkartennummer sein
+    "Should contain only letters": "Darf nur Buchstaben enthalten"
+    "Should contain only digits": "Darf nur Ziffern enthalten"
+    "Should be a number": "Muss eine Zahl sein"
+    "Should be hexadecimal": "Muss hexadezimal sein"
+    "Cannot contain %s": "Darf %s nicht enthalten"
+    "Should contain any of the characters %s": "Muss eines der Zeichen %s enthalten"
+    "Cannot contain the characters %s": "Darf die Zeichen %s nicht enthalten"
+    "Should be equal to %s ignoring case": "Muss ohne Beachtung der Groß- und Kleinschreibung gleich %s sein"
+    "Cannot start with %s": "Darf nicht mit %s beginnen"
+    "Cannot end with %s": "Darf nicht mit %s enden"
+    "Cannot be equal to %s": "Darf nicht gleich %s sein"
   num:
     "Cannot be less than %v": Darf nicht kleiner als %v sein
     "Cannot be greater than %v": Darf nicht größer als %v sein
@@ -47,6 +58,8 @@ validation:
     "Invalid value": Ungültiger Wert
     "Should be latitude": Muss ein Breitengrad sein
     "Should be longitude": Muss ein Längengrad sein
+    "Should be greater than %v": "Muss größer als %v sein"
+    "Should be less than %v": "Muss kleiner als %v sein"
   time:
     "Should be fulfilled": Muss ausgefüllt sein
     "Should be before %s": Muss vor %s liegen
@@ -62,6 +75,7 @@ validation:
     "Should be %v": Muss %v sein
     "Cannot be %v": Darf nicht %v sein
     "Should contain unique values": Darf nur eindeutige Werte enthalten
+    "Cannot be equal to %s": "Darf nicht gleich %s sein"
   uuid:
     "Should be fulfilled": Muss ausgefüllt sein
     "Only %s values is allowed": Nur die Werte %s sind erlaubt

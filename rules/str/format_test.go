@@ -186,3 +186,10 @@ func TestCodesDontAllocate(t *testing.T) {
 		}
 	}
 }
+
+func TestNumberFormats(t *testing.T) {
+	check(t, "numeric", isNumeric, []string{"1", "+1", "-1.5", "0042"}, []string{"", "1.", ".5", "-", "1.2.3", "1e3"})
+	check(t, "hexadecimal", isHexadecimal, []string{"0x1f", "FF", "0X0", "0"}, []string{"", "0x", "g", "0xg"})
+	check(t, "alpha", isAlpha, []string{"abc", "XyZ"}, []string{"", "a1", "é"})
+	check(t, "digits", isDigits, []string{"0", "0042"}, []string{"", "-1", "1.5"})
+}

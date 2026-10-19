@@ -38,6 +38,17 @@ validation:
     "Should be ISO 4217 currency code": Should be ISO 4217 currency code
     "Should have valid Luhn checksum": Should have valid Luhn checksum
     "Should be credit card number": Should be credit card number
+    "Should contain only letters": "Should contain only letters"
+    "Should contain only digits": "Should contain only digits"
+    "Should be a number": "Should be a number"
+    "Should be hexadecimal": "Should be hexadecimal"
+    "Cannot contain %s": "Cannot contain %s"
+    "Should contain any of the characters %s": "Should contain any of the characters %s"
+    "Cannot contain the characters %s": "Cannot contain the characters %s"
+    "Should be equal to %s ignoring case": "Should be equal to %s ignoring case"
+    "Cannot start with %s": "Cannot start with %s"
+    "Cannot end with %s": "Cannot end with %s"
+    "Cannot be equal to %s": "Cannot be equal to %s"
   num:
     "Cannot be less than %v": Cannot be less than %v
     "Cannot be greater than %v": Cannot be greater than %v
@@ -47,6 +58,8 @@ validation:
     "Invalid value": Invalid value
     "Should be latitude": Should be latitude
     "Should be longitude": Should be longitude
+    "Should be greater than %v": "Should be greater than %v"
+    "Should be less than %v": "Should be less than %v"
   time:
     "Should be fulfilled": Should be fulfilled
     "Should be before %s": Should be before %s
@@ -62,6 +75,7 @@ validation:
     "Should be %v": Should be %v
     "Cannot be %v": Cannot be %v
     "Should contain unique values": Should contain unique values
+    "Cannot be equal to %s": "Cannot be equal to %s"
   uuid:
     "Should be fulfilled": Should be fulfilled
     "Only %s values is allowed": Only %s values is allowed

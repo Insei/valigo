@@ -12,39 +12,50 @@ import (
 )
 
 const (
-	minLengthLocaleKey = "validation:string:Cannot be shorter than %d characters"
-	maxLengthLocaleKey = "validation:string:Cannot be longer than %d characters"
-	requiredLocaleKey  = "validation:string:Should be fulfilled"
-	regexpLocaleKey    = "validation:string:Doesn't match required regexp pattern"
-	anyOfLocaleKey     = "validation:string:Only %s values is allowed"
-	emailLocaleKey     = "validation:string:Should be email address"
-	urlLocaleKey       = "validation:string:Should be URL"
-	ipLocaleKey        = "validation:string:Should be IP address"
-	ipv4LocaleKey      = "validation:string:Should be IPv4 address"
-	ipv6LocaleKey      = "validation:string:Should be IPv6 address"
-	hostnameLocaleKey  = "validation:string:Should be hostname"
-	uuidLocaleKey      = "validation:string:Should be UUID"
-	alnumLocaleKey     = "validation:string:Should contain only letters and digits"
-	prefixLocaleKey    = "validation:string:Should start with %s"
-	suffixLocaleKey    = "validation:string:Should end with %s"
-	containsLocaleKey  = "validation:string:Should contain %s"
-	equalFieldKey      = "validation:string:Should be equal to %s"
-	base64LocaleKey    = "validation:string:Should be base64 encoded"
-	base64URLLocaleKey = "validation:string:Should be base64url encoded"
-	jsonLocaleKey      = "validation:string:Should be JSON"
-	semverLocaleKey    = "validation:string:Should be semantic version"
-	cidrLocaleKey      = "validation:string:Should be CIDR"
-	macLocaleKey       = "validation:string:Should be MAC address"
-	e164LocaleKey      = "validation:string:Should be E.164 phone number"
-	hexColorLocaleKey  = "validation:string:Should be hex color"
-	asciiLocaleKey     = "validation:string:Should contain only ASCII characters"
-	lowercaseLocaleKey = "validation:string:Should be lowercase"
-	uppercaseLocaleKey = "validation:string:Should be uppercase"
-	datetimeLocaleKey  = "validation:string:Should be date and time in %s format"
-	countryLocaleKey   = "validation:string:Should be ISO 3166-1 alpha-2 country code"
-	currencyLocaleKey  = "validation:string:Should be ISO 4217 currency code"
-	luhnLocaleKey      = "validation:string:Should have valid Luhn checksum"
-	cardLocaleKey      = "validation:string:Should be credit card number"
+	minLengthLocaleKey   = "validation:string:Cannot be shorter than %d characters"
+	maxLengthLocaleKey   = "validation:string:Cannot be longer than %d characters"
+	requiredLocaleKey    = "validation:string:Should be fulfilled"
+	regexpLocaleKey      = "validation:string:Doesn't match required regexp pattern"
+	anyOfLocaleKey       = "validation:string:Only %s values is allowed"
+	emailLocaleKey       = "validation:string:Should be email address"
+	urlLocaleKey         = "validation:string:Should be URL"
+	ipLocaleKey          = "validation:string:Should be IP address"
+	ipv4LocaleKey        = "validation:string:Should be IPv4 address"
+	ipv6LocaleKey        = "validation:string:Should be IPv6 address"
+	hostnameLocaleKey    = "validation:string:Should be hostname"
+	uuidLocaleKey        = "validation:string:Should be UUID"
+	alnumLocaleKey       = "validation:string:Should contain only letters and digits"
+	prefixLocaleKey      = "validation:string:Should start with %s"
+	suffixLocaleKey      = "validation:string:Should end with %s"
+	containsLocaleKey    = "validation:string:Should contain %s"
+	equalFieldKey        = "validation:string:Should be equal to %s"
+	base64LocaleKey      = "validation:string:Should be base64 encoded"
+	base64URLLocaleKey   = "validation:string:Should be base64url encoded"
+	jsonLocaleKey        = "validation:string:Should be JSON"
+	semverLocaleKey      = "validation:string:Should be semantic version"
+	cidrLocaleKey        = "validation:string:Should be CIDR"
+	macLocaleKey         = "validation:string:Should be MAC address"
+	e164LocaleKey        = "validation:string:Should be E.164 phone number"
+	hexColorLocaleKey    = "validation:string:Should be hex color"
+	asciiLocaleKey       = "validation:string:Should contain only ASCII characters"
+	lowercaseLocaleKey   = "validation:string:Should be lowercase"
+	uppercaseLocaleKey   = "validation:string:Should be uppercase"
+	datetimeLocaleKey    = "validation:string:Should be date and time in %s format"
+	countryLocaleKey     = "validation:string:Should be ISO 3166-1 alpha-2 country code"
+	currencyLocaleKey    = "validation:string:Should be ISO 4217 currency code"
+	luhnLocaleKey        = "validation:string:Should have valid Luhn checksum"
+	cardLocaleKey        = "validation:string:Should be credit card number"
+	alphaLocaleKey       = "validation:string:Should contain only letters"
+	digitsLocaleKey      = "validation:string:Should contain only digits"
+	numericLocaleKey     = "validation:string:Should be a number"
+	hexLocaleKey         = "validation:string:Should be hexadecimal"
+	excludesLocaleKey    = "validation:string:Cannot contain %s"
+	containsAnyLocaleKey = "validation:string:Should contain any of the characters %s"
+	excludesAnyLocaleKey = "validation:string:Cannot contain the characters %s"
+	equalFoldLocaleKey   = "validation:string:Should be equal to %s ignoring case"
+	notPrefixLocaleKey   = "validation:string:Cannot start with %s"
+	notSuffixLocaleKey   = "validation:string:Cannot end with %s"
+	notEqualFieldKey     = "validation:string:Cannot be equal to %s"
 )
 
 var emailRegexp = regexp.MustCompile(`^[^\s,@#$%^&*!()]+@([a-zA-Z0-9]+[.])+[a-zA-Z]{2,8}$`)
@@ -220,6 +231,77 @@ func (i *BaseConfigurator) Suffix(suffix string) *BaseConfigurator {
 func (i *BaseConfigurator) Contains(substr string) *BaseConfigurator {
 	i.f.Schema("pattern", regexp.QuoteMeta(substr))
 	i.f.CheckMsg(func(v string) bool { return strings.Contains(v, substr) }, shared.M("string.contains", containsLocaleKey, shared.P("substring", substr)))
+	return i
+}
+
+// Excludes checks if the string doesn't contain substr.
+func (i *BaseConfigurator) Excludes(substr string) *BaseConfigurator {
+	i.f.CheckMsg(func(v string) bool { return !strings.Contains(v, substr) }, shared.M("string.excludes", excludesLocaleKey, shared.P("substring", substr)))
+	return i
+}
+
+// ContainsAny checks if the string contains any of the characters of chars.
+func (i *BaseConfigurator) ContainsAny(chars string) *BaseConfigurator {
+	i.f.CheckMsg(func(v string) bool { return strings.ContainsAny(v, chars) }, shared.M("string.contains_any", containsAnyLocaleKey, shared.P("chars", chars)))
+	return i
+}
+
+// ExcludesAny checks if the string contains none of the characters of chars.
+func (i *BaseConfigurator) ExcludesAny(chars string) *BaseConfigurator {
+	i.f.CheckMsg(func(v string) bool { return !strings.ContainsAny(v, chars) }, shared.M("string.excludes_any", excludesAnyLocaleKey, shared.P("chars", chars)))
+	return i
+}
+
+// NotPrefix checks if the string doesn't start with prefix.
+func (i *BaseConfigurator) NotPrefix(prefix string) *BaseConfigurator {
+	i.f.CheckMsg(func(v string) bool { return !strings.HasPrefix(v, prefix) }, shared.M("string.not_prefix", notPrefixLocaleKey, shared.P("prefix", prefix)))
+	return i
+}
+
+// NotSuffix checks if the string doesn't end with suffix.
+func (i *BaseConfigurator) NotSuffix(suffix string) *BaseConfigurator {
+	i.f.CheckMsg(func(v string) bool { return !strings.HasSuffix(v, suffix) }, shared.M("string.not_suffix", notSuffixLocaleKey, shared.P("suffix", suffix)))
+	return i
+}
+
+// EqualFold checks if the string is equal to value ignoring case, by Unicode case folding.
+func (i *BaseConfigurator) EqualFold(value string) *BaseConfigurator {
+	i.f.CheckMsg(func(v string) bool { return strings.EqualFold(v, value) }, shared.M("string.equal_fold", equalFoldLocaleKey, shared.P("value", value)))
+	return i
+}
+
+// NotEqualField checks if the string differs from the value of another string field of the object:
+// b.Field(&m.NewPassword).As(str.Of).NotEqualField(&m.OldPassword).
+func (i *BaseConfigurator) NotEqualField(other *string) *BaseConfigurator {
+	i.f.CheckWithMsg(other, func(v, o string) bool { return v != o }, shared.M("string.not_equal_field", notEqualFieldKey))
+	return i
+}
+
+// Alpha checks if the string is not empty and has only ASCII letters.
+func (i *BaseConfigurator) Alpha() *BaseConfigurator {
+	i.f.Schema("pattern", "^[a-zA-Z]+$")
+	i.f.CheckMsg(isAlpha, shared.M("string.alpha", alphaLocaleKey))
+	return i
+}
+
+// Digits checks if the string is not empty and has only ASCII digits: 0042.
+func (i *BaseConfigurator) Digits() *BaseConfigurator {
+	i.f.Schema("pattern", "^[0-9]+$")
+	i.f.CheckMsg(isDigits, shared.M("string.digits", digitsLocaleKey))
+	return i
+}
+
+// Numeric checks if the string is a decimal number with an optional sign and fraction: -12, +3.5.
+func (i *BaseConfigurator) Numeric() *BaseConfigurator {
+	i.f.Schema("pattern", `^[-+]?[0-9]+(\.[0-9]+)?$`)
+	i.f.CheckMsg(isNumeric, shared.M("string.numeric", numericLocaleKey))
+	return i
+}
+
+// Hexadecimal checks if the string is a hexadecimal number with an optional 0x prefix: ff, 0x1A.
+func (i *BaseConfigurator) Hexadecimal() *BaseConfigurator {
+	i.f.Schema("pattern", "^(0[xX])?[0-9a-fA-F]+$")
+	i.f.CheckMsg(isHexadecimal, shared.M("string.hexadecimal", hexLocaleKey))
 	return i
 }
 
