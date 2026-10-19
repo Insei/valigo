@@ -58,7 +58,7 @@ jobs:
     - name: Check 100% coverage of every package
       run: scripts/check-coverage.sh
 
-    - uses: codecov/codecov-action@v4
+    - uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./coverage.txt,./coverage-uuid.txt
