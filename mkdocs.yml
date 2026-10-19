@@ -94,6 +94,7 @@ nav:
       - Translations: features/translations.md
       - HTTP problem details: features/problem.md
       - huma: features/huma.md
+      - gin: features/gin.md
   - Architecture:
       - How it works: architecture/index.md
 
