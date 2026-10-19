@@ -43,6 +43,10 @@ validation:
   uuid:
     "Should be fulfilled": Should be fulfilled
     "Only %s values is allowed": Only %s values is allowed
+  map:
+    "Should be fulfilled": Should be fulfilled
+    "Cannot contain more than %d elements": Cannot contain more than %d elements
+    "Cannot contain less than %d elements": Cannot contain less than %d elements
   slice:
     "Should be fulfilled": Should be fulfilled
     "Cannot contain more than %d elements": Cannot contain more than %d elements

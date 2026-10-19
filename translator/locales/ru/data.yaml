@@ -43,6 +43,10 @@ validation:
   uuid:
     "Should be fulfilled": Должно быть заполнено
     "Only %s values is allowed": Только %s значения разрешены
+  map:
+    "Should be fulfilled": Должно быть заполнено
+    "Cannot contain more than %d elements": Не может содержать больше %d элементов
+    "Cannot contain less than %d elements": Не может содержать меньше %d элементов
   slice:
     "Should be fulfilled": Должно быть заполнено
     "Cannot contain more than %d elements": Не может содержать больше %d элементов

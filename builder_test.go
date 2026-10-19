@@ -215,6 +215,35 @@ func TestOtherFieldLocationByNamingFn(t *testing.T) {
 	assert.Equal(t, []shared.Error{{Location: "repeat", Message: "Should be equal to password", Value: "b"}}, errs)
 }
 
+func TestMap(t *testing.T) {
+	type service struct {
+		Labels map[string]string
+		Ports  map[string]int
+	}
+	v := New()
+	Configure[service](v, func(c Configurator[service], m *service) {
+		c.Map(&m.Labels).Required().MaxLen(3).
+			EachKey(func(k *shared.Field[string]) { k.As(str.Of).Alphanumeric() }).
+			EachValue(func(v *shared.Field[string]) { v.As(str.Of).MaxLen(5) })
+		c.Map(&m.Ports).EachValue(func(p *shared.Field[int]) { p.As(num.Of).AnyOfInterval(1, 65535) })
+	})
+	errs := v.ValidateTyped(context.Background(), &service{
+		Labels: map[string]string{"app": "valigo-api", "tier!": "web"},
+		Ports:  map[string]int{"http": 80, "admin": 0},
+	})
+	assert.Equal(t, []shared.Error{
+		{Location: "Labels[tier!]", Message: "Should contain only letters and digits", Value: "tier!"},
+		{Location: "Labels[app]", Message: "Cannot be longer than 5 characters", Value: "valigo-api"},
+		{Location: "Ports[admin]", Message: "Only interval[1 - 65535] is allowed", Value: 0},
+	}, errs)
+
+	valid := &service{Labels: map[string]string{"app": "api"}, Ports: map[string]int{"http": 80}}
+	assert.Nil(t, v.Validate(context.Background(), valid))
+	if !testenv.RaceEnabled {
+		assert.Zero(t, testing.AllocsPerRun(100, func() { v.Validate(context.Background(), valid) }))
+	}
+}
+
 func TestReconfigureReplacesRules(t *testing.T) {
 	v := New()
 	for range 3 {
