@@ -2,7 +2,7 @@ package translator
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"slices"
 )
 
@@ -25,7 +25,7 @@ func (t *translator) getLanguages(ctx context.Context) []string {
 
 // ErrorT returns a translated error message.
 func (t *translator) ErrorT(ctx context.Context, format string, args ...any) error {
-	return fmt.Errorf(t.storage.Get(t.getLanguages(ctx), format, args...))
+	return errors.New(t.storage.Get(t.getLanguages(ctx), format, args...))
 }
 
 // T returns a translated string.
