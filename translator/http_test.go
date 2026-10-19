@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -50,6 +51,22 @@ func TestGetPriorityLanguages(t *testing.T) {
 		sort.Strings(test.expected)
 		if strings.Join(result, "") != strings.Join(test.expected, "") {
 			t.Errorf("expected %v, got %v", test.expected, result)
+		}
+	}
+}
+
+func TestGetPriorityLanguagesOrder(t *testing.T) {
+	tests := []struct {
+		acceptLanguage string
+		expected       []string
+	}{
+		{acceptLanguage: "en-US, ru;q=0.8", expected: []string{"en", "ru"}},
+		{acceptLanguage: "fr ; q=0.5 , de", expected: []string{"de", "fr"}},
+		{acceptLanguage: "RU-ru,en;q=0.9", expected: []string{"ru", "en"}},
+	}
+	for _, test := range tests {
+		if result := getPriorityLanguages(test.acceptLanguage); !slices.Equal(result, test.expected) {
+			t.Errorf("%q: expected %v, got %v", test.acceptLanguage, test.expected, result)
 		}
 	}
 }
