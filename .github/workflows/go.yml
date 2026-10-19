@@ -26,6 +26,11 @@ jobs:
 
     - name: Test
       run: go test -v -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./...
+    - name: Test examples
+      run: |
+        for dir in examples/*/; do
+          (cd "$dir" && go vet ./... && go test ./...)
+        done
     - uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
