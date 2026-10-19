@@ -31,7 +31,7 @@ func (t *typedSlice) NotEmpty() *typedSlice {
 
 func TestFieldAs(t *testing.T) {
 	var r rules
-	f := NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add)
+	f := NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add, nil)
 	got := f.As(func(f *Field[string]) *Field[string] { return f.Check(notEmpty, "required") })
 	assert.Same(t, f, got)
 	assert.Len(t, r.validate(&sample{}), 1)
@@ -39,7 +39,7 @@ func TestFieldAs(t *testing.T) {
 
 func TestDeref(t *testing.T) {
 	var r rules
-	NewValueField[*string](sampleField(t, "TextPtr"), pathHelper{}, sampleFields, r.add).As(Deref).Required(notEmpty, "required")
+	NewValueField[*string](sampleField(t, "TextPtr"), pathHelper{}, sampleFields, r.add, nil).As(Deref).Required(notEmpty, "required")
 	assert.Equal(t, []Error{{Location: "TextPtr", Message: "required"}}, r.validate(&sample{}), "nil pointer is absent")
 	assert.Equal(t, []Error{{Location: "TextPtr", Message: "required", Value: ""}}, r.validate(&sample{TextPtr: ptr("")}))
 	assert.Empty(t, r.validate(&sample{TextPtr: ptr("a")}))
@@ -47,38 +47,38 @@ func TestDeref(t *testing.T) {
 
 func TestDerefOfNilNestedStruct(t *testing.T) {
 	var r rules
-	NewValueField[*string](sampleField(t, "Inner.TextPtr"), pathHelper{}, sampleFields, r.add).As(Deref).Check(notEmpty, "required")
+	NewValueField[*string](sampleField(t, "Inner.TextPtr"), pathHelper{}, sampleFields, r.add, nil).As(Deref).Check(notEmpty, "required")
 	assert.Empty(t, r.validate(&sample{}))
 }
 
 func TestRetype(t *testing.T) {
 	var r rules
-	named := NewValueField[label](sampleField(t, "Label"), pathHelper{}, sampleFields, r.add)
+	named := NewValueField[label](sampleField(t, "Label"), pathHelper{}, sampleFields, r.add, nil)
 	Retype[label, string](named).Check(func(v string) bool { return v == "ok" }, "bad")
 	assert.Equal(t, []Error{{Location: "Label", Message: "bad", Value: "no"}}, r.validate(&sample{Label: "no"}))
 
-	text := NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add)
+	text := NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add, nil)
 	assert.Same(t, text, Retype[string, string](text), "the same type isn't wrapped")
 	assert.PanicsWithValue(t, "valigo: field Num has type int, string expected", func() {
-		Retype[int, string](NewValueField[int](sampleField(t, "Num"), pathHelper{}, sampleFields, r.add))
+		Retype[int, string](NewValueField[int](sampleField(t, "Num"), pathHelper{}, sampleFields, r.add, nil))
 	})
 }
 
 func TestRetypeSlice(t *testing.T) {
 	var r rules
-	NewSliceFieldConfigurator[*string](sampleField(t, "TextPtrs"), pathHelper{}, sampleFields, r.add).As(toTypedSlice).Required().NotEmpty()
+	NewSliceFieldConfigurator[*string](sampleField(t, "TextPtrs"), pathHelper{}, sampleFields, r.add, nil).As(toTypedSlice).Required().NotEmpty()
 	assert.Equal(t, []Error{
 		{Location: "TextPtrs[1]", Message: "required"},
 		{Location: "TextPtrs[2]", Message: "required", Value: ""},
 	}, r.validate(&sample{TextPtrs: []*string{ptr("a"), nil, ptr("")}}))
 
-	texts := NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add)
+	texts := NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add, nil)
 	assert.Same(t, texts, RetypeSlice[string, string](texts), "the same type isn't wrapped")
 }
 
 func TestSlicePtr(t *testing.T) {
 	var r rules
-	NewValueField[*[]string](sampleField(t, "TextsPtr"), pathHelper{}, sampleFields, r.add).As(SlicePtr).As(toTypedSlice).MaxLen(1).NotEmpty()
+	NewValueField[*[]string](sampleField(t, "TextsPtr"), pathHelper{}, sampleFields, r.add, nil).As(SlicePtr).As(toTypedSlice).MaxLen(1).NotEmpty()
 	assert.Empty(t, r.validate(&sample{}), "nil pointer to slice is absent")
 	assert.Equal(t, []Error{
 		{Location: "TextsPtr", Message: "validation:slice:Cannot contain more than 1 elements", Value: 2},
@@ -88,7 +88,7 @@ func TestSlicePtr(t *testing.T) {
 
 func TestSlicePtrAfterWhenPanics(t *testing.T) {
 	var r rules
-	f := NewValueField[*[]string](sampleField(t, "TextsPtr"), pathHelper{}, sampleFields, r.add)
+	f := NewValueField[*[]string](sampleField(t, "TextsPtr"), pathHelper{}, sampleFields, r.add, nil)
 	assert.PanicsWithValue(t, "valigo: SlicePtr of field TextsPtr must be called before When and other conversions", func() {
 		SlicePtr(f.When(func(context.Context, *[]string) bool { return true }))
 	})
@@ -117,7 +117,7 @@ func TestSliceRules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var r rules
-			tt.setup(NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add).As(toTypedSlice))
+			tt.setup(NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add, nil).As(toTypedSlice))
 			assert.Equal(t, tt.want, r.validate(tt.obj))
 		})
 	}

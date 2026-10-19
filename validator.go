@@ -1,7 +1,9 @@
 package valigo
 
 import (
+	"cmp"
 	"context"
+	"maps"
 	"reflect"
 	"slices"
 	"sync"
@@ -15,6 +17,7 @@ import (
 // Validator holds validation rules of the configured types.
 type Validator struct {
 	validators     map[reflect.Type][]shared.ValidationFn
+	constraints    map[reflect.Type][]shared.Constraint
 	helper         *helper
 	transformError func(errs []shared.Error) []error
 }
@@ -79,6 +82,18 @@ func dataPtr(v any) unsafe.Pointer {
 	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1]
 }
 
+// Constraints returns the rules of the configured structs that JSON Schema can express, see shared.Constraint,
+// for the generators of the schemas of the API. The structs are sorted by their names, the rules are in the order
+// of the configuration.
+func (v *Validator) Constraints() []shared.Constraint {
+	types := slices.SortedFunc(maps.Keys(v.constraints), func(a, b reflect.Type) int { return cmp.Compare(a.String(), b.String()) })
+	var result []shared.Constraint
+	for _, t := range types {
+		result = append(result, v.constraints[t]...)
+	}
+	return result
+}
+
 // GetHelper returns the helper object associated with the Validator instance.
 func (v *Validator) GetHelper() shared.Helper {
 	return v.helper
@@ -88,8 +103,9 @@ func (v *Validator) GetHelper() shared.Helper {
 // It also applies any options passed to the function to the new instance.
 func New(opts ...Option) *Validator {
 	v := &Validator{
-		validators: make(map[reflect.Type][]shared.ValidationFn),
-		helper:     newHelper(),
+		validators:  make(map[reflect.Type][]shared.ValidationFn),
+		constraints: make(map[reflect.Type][]shared.Constraint),
+		helper:      newHelper(),
 		transformError: func(errs []shared.Error) []error {
 			errsNew := make([]error, len(errs))
 			for i, err := range errs {
@@ -110,6 +126,7 @@ func New(opts ...Option) *Validator {
 // call it on application start and not concurrently with Validate.
 func Configure[T any](v *Validator, fn func(builder Configurator[T], m *T)) {
 	delete(v.validators, reflect.TypeFor[*T]())
+	delete(v.constraints, reflect.TypeFor[T]())
 	model := new(T)
 	fields, err := fmap.GetFrom(model)
 	if err != nil {

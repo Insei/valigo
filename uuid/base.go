@@ -35,12 +35,14 @@ func Of[U uuid.UUID | *uuid.UUID](f *shared.Field[U]) *BaseConfigurator {
 
 // Required checks if the uuid is present and not uuid.Nil.
 func (i *BaseConfigurator) Required() *BaseConfigurator {
+	i.f.Schema(shared.KeywordRequired, true)
 	i.f.RequiredMsg(func(v uuid.UUID) bool { return v != uuid.Nil }, shared.M("uuid.required", requiredLocaleKey))
 	return i
 }
 
 // AnyOf checks if the uuid value is one of the allowed values.
 func (i *BaseConfigurator) AnyOf(allowed ...uuid.UUID) *BaseConfigurator {
+	i.f.Schema("enum", shared.Values(allowed))
 	i.f.CheckMsg(func(v uuid.UUID) bool { return slices.Contains(allowed, v) }, shared.M("uuid.any_of", anyOfLocaleKey, shared.P("values", allowed)))
 	return i
 }

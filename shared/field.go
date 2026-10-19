@@ -29,13 +29,33 @@ type Field[T any] struct {
 	// root registers validation functions of the struct field itself, nil for the fields derived by When,
 	// conversions and for slice elements
 	root func(fn ValidationFn)
+	// rootDescribe describes the constraints of the struct field itself for SlicePtr
+	rootDescribe Describe
+	schema       constraints
 }
 
 // NewValueField creates a Field for the struct field of type T or *T,
 // named types with the same underlying layout are allowed.
-// fields resolves the pointers to other fields of the model, add registers a validation function of the configured struct.
-func NewValueField[T any](field fmap.Field, h Helper, fields Fields, add func(fn ValidationFn)) *Field[T] {
-	return &Field[T]{field: field, h: h, fields: fields, add: fieldSource(add, valueGetter[T](field)), root: add}
+// fields resolves the pointers to other fields of the model, add registers a validation function of the configured struct,
+// describe registers the constraints of its rules, it can be nil.
+func NewValueField[T any](field fmap.Field, h Helper, fields Fields, add func(fn ValidationFn), describe Describe) *Field[T] {
+	return &Field[T]{field: field, h: h, fields: fields, add: fieldSource(add, valueGetter[T](field)), root: add,
+		rootDescribe: describe, schema: newConstraints(describe, field)}
+}
+
+// newConstraints returns the constraints of the struct field, describe can be nil.
+func newConstraints(describe Describe, field fmap.Field) constraints {
+	if describe == nil {
+		return constraints{}
+	}
+	return constraints{describe: describe, field: field, modified: new(bool)}
+}
+
+// Schema describes the rules of the value by the keyword of JSON Schema with the value, e.g. Schema("maxLength", 64),
+// see Constraint. The conversions call it for their rules that JSON Schema can express.
+func (f *Field[T]) Schema(keyword string, value any) *Field[T] {
+	f.schema.add(keyword, value)
+	return f
 }
 
 // Check adds a rule that fails when ok returns false. Absent values are skipped.
@@ -80,6 +100,9 @@ func (f *Field[T]) RequiredMsg(ok func(v T) bool, msg Msg) *Field[T] {
 
 // Modify adds a step that changes the value in place, e.g. trims a string. Absent values are skipped.
 func (f *Field[T]) Modify(fn func(v *T)) *Field[T] {
+	if f.schema.modified != nil {
+		*f.schema.modified = true
+	}
 	f.add(func(_ context.Context, _ Helper, _ any, v *T, errs []Error) []Error {
 		if v != nil {
 			fn(v)

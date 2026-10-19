@@ -34,7 +34,7 @@ func TestMessages(t *testing.T) {
 		{
 			name: "check by a key",
 			setup: func(r *rules) {
-				NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add).Check(notEmpty, "required %s", "x")
+				NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add, nil).Check(notEmpty, "required %s", "x")
 			},
 			obj:  &sample{},
 			want: []Error{{Location: "Text", Message: "required x", Value: "", Code: "required %s"}},
@@ -42,7 +42,7 @@ func TestMessages(t *testing.T) {
 		{
 			name: "check by a message",
 			setup: func(r *rules) {
-				NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add).CheckMsg(notEmpty, M("string.required", "required"))
+				NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add, nil).CheckMsg(notEmpty, M("string.required", "required"))
 			},
 			obj:  &sample{},
 			want: []Error{{Location: "Text", Message: "required", Value: "", Code: "string.required"}},
@@ -50,7 +50,7 @@ func TestMessages(t *testing.T) {
 		{
 			name: "required by a message",
 			setup: func(r *rules) {
-				NewValueField[*string](sampleField(t, "TextPtr"), pathHelper{}, sampleFields, r.add).As(Deref).RequiredMsg(notEmpty, M("string.required", "required"))
+				NewValueField[*string](sampleField(t, "TextPtr"), pathHelper{}, sampleFields, r.add, nil).As(Deref).RequiredMsg(notEmpty, M("string.required", "required"))
 			},
 			obj:  &sample{},
 			want: []Error{{Location: "TextPtr", Message: "required", Code: "string.required"}},
@@ -58,7 +58,7 @@ func TestMessages(t *testing.T) {
 		{
 			name: "check with another field",
 			setup: func(r *rules) {
-				NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add).
+				NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add, nil).
 					CheckWithMsg(&sampleModel.Label2, func(v, o string) bool { return v == o }, M("string.equal_field", "equal to %s"))
 			},
 			obj:  &sample{Text: "a", Label2: "b"},
@@ -67,7 +67,7 @@ func TestMessages(t *testing.T) {
 		{
 			name: "slice length",
 			setup: func(r *rules) {
-				NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add).MinLen(2).MaxLen(0)
+				NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add, nil).MinLen(2).MaxLen(0)
 			},
 			obj: &sample{Texts: []string{"a"}},
 			want: []Error{
@@ -78,7 +78,7 @@ func TestMessages(t *testing.T) {
 		{
 			name: "slice required",
 			setup: func(r *rules) {
-				NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add).Required()
+				NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add, nil).Required()
 			},
 			obj:  &sample{},
 			want: []Error{{Location: "Texts", Message: "validation:slice:Should be fulfilled", Code: "slice.required"}},
@@ -86,7 +86,7 @@ func TestMessages(t *testing.T) {
 		{
 			name: "custom of an element by a message",
 			setup: func(r *rules) {
-				NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add).Each(func(e *Field[string]) {
+				NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add, nil).Each(func(e *Field[string]) {
 					e.Custom(func(ctx context.Context, h *FieldCustomHelper, v string) []Error {
 						return []Error{h.ErrorMsg(ctx, v, M("tag.reserved", "reserved %v", P("tag", v)))}
 					})
