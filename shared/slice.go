@@ -2,179 +2,187 @@ package shared
 
 import (
 	"context"
+	"fmt"
+	"iter"
 	"reflect"
 	"unsafe"
 
 	"github.com/insei/fmap/v3"
 )
 
-func UnsafeValigoSliceCast[T any](slice []*any) []*T {
-	var val any = slice
-	ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&val)))[1]
-	arr := (*[]*T)(ptr)
-	if arr == nil {
-		return nil
-	}
-	return *arr
+const (
+	sliceRequiredLocaleKey = "validation:slice:Should be fulfilled"
+	sliceMaxLenLocaleKey   = "validation:slice:Cannot contain more than %d elements"
+	sliceMinLenLocaleKey   = "validation:slice:Cannot contain less than %d elements"
+)
+
+// Elems is a view over the elements of a slice field, the slice can be []E or []*E.
+type Elems[E any] struct {
+	data unsafe.Pointer
+	n    int
+	ptrs bool
 }
 
-type SliceFieldConfigurator struct {
-	field  fmap.Field
-	helper Helper
-	c      *FieldConfigurator[[]*any]
+// Len returns the number of elements.
+func (e Elems[E]) Len() int {
+	return e.n
 }
 
-func makeGetValueSliceFn(field fmap.Field) func(value any) ([]*any, bool) {
-	fType := field.GetType()
-	ptrToSlice := 1 // All values that comes to validator is a pointer
-	ptrToSliceElem := 0
-	for fType.Kind() == reflect.Ptr {
-		ptrToSlice++
-		fType = fType.Elem()
+// At returns a pointer to the i-th element, nil for nil elements of []*E.
+func (e Elems[E]) At(i int) *E {
+	if e.ptrs {
+		return *(**E)(unsafe.Add(e.data, uintptr(i)*unsafe.Sizeof(uintptr(0))))
 	}
-	if fType.Kind() != reflect.Slice {
-		panic("field value is not a slice")
-	}
-	sliceElemType := fType.Elem()
-	for sliceElemType.Kind() == reflect.Ptr {
-		ptrToSliceElem++
-		sliceElemType = sliceElemType.Elem()
-	}
-	if ptrToSlice > 2 || ptrToSliceElem > 1 {
-		panic("Are you sure about that? (c)")
-	}
-	switch {
-	case ptrToSlice == 1 && ptrToSliceElem == 0:
-		return func(value any) ([]*any, bool) {
-			var convertedArr []*any
-			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
-			arr := (*[]any)(ptr)
-			for i, _ := range *arr {
-				convertedArr = append(convertedArr, &(*arr)[i])
-			}
-			return convertedArr, true
-		}
-	case ptrToSlice == 2 && ptrToSliceElem == 0:
-		return func(value any) ([]*any, bool) {
-			var convertedArr []*any
-			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
-			arr := (**[]any)(ptr)
-			if *arr == nil || **arr == nil {
-				return nil, false
-			}
-			for i, _ := range **arr {
-				convertedArr = append(convertedArr, &(**arr)[i])
-			}
-			return convertedArr, true
-		}
-	case ptrToSlice == 1 && ptrToSliceElem == 1:
-		return func(value any) ([]*any, bool) {
-			var convertedArr []*any
-			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
-			arr := (*[]*any)(ptr)
-			for _, v := range *arr {
-				convertedArr = append(convertedArr, &(*v))
-			}
-			return convertedArr, true
-		}
-	case ptrToSlice == 2 && ptrToSliceElem == 1:
-		return func(value any) ([]*any, bool) {
-			var convertedArr []*any
-			ptr := ((*[2]unsafe.Pointer)(unsafe.Pointer(&value)))[1]
-			arr := (**[]*any)(ptr)
-			if *arr == nil || **arr == nil {
-				return nil, false
-			}
-			for _, v := range **arr {
-				convertedArr = append(convertedArr, &(*v))
-			}
-			return convertedArr, true
-		}
-	}
-	//ptr := unsafe.Pointer(&convertedArr)
-	//ee := *((*[]*string)(ptr))
-	//for _, v := range ee {
-	//	*v = "222"
-	//}
-	//fmt.Println(ee)
-	return nil
+	return (*E)(unsafe.Add(e.data, uintptr(i)*unsafe.Sizeof(*new(E))))
 }
 
-type SliceFieldConfiguratorParams struct {
-	Field    fmap.Field
-	Helper   Helper
-	AppendFn func(fn FieldValidationFn)
+// All iterates over indexes and pointers to the elements, see At.
+func (e Elems[E]) All() iter.Seq2[int, *E] {
+	return func(yield func(int, *E) bool) {
+		for i := range e.n {
+			if !yield(i, e.At(i)) {
+				return
+			}
+		}
+	}
 }
 
-func NewSliceFieldConfigurator(p SliceFieldConfiguratorParams) *SliceFieldConfigurator {
-	getValueFn := makeGetValueSliceFn(p.Field)
-	mk := NewSimpleFieldFnMaker(SimpleFieldFnMakerParams[[]*any]{
-		GetValue: getValueFn,
-		Field:    p.Field,
-		Helper:   p.Helper,
+// ElemsGetter returns a function that reads elements of the slice field from obj.
+// The field type can be []E, *[]E, []*E or *[]*E, named types with the same underlying layout are allowed.
+// The returned function reports false when the slice is absent.
+func ElemsGetter[E any](field fmap.Field) func(obj any) (Elems[E], bool) {
+	t := field.GetType()
+	slicePtr := t.Kind() == reflect.Pointer
+	if slicePtr {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("valigo: field %s has type %s, slice expected", field.GetStructPath(), field.GetType()))
+	}
+	elem := t.Elem()
+	ptrs := elem.Kind() == reflect.Pointer
+	if ptrs {
+		elem = elem.Elem()
+	}
+	mustLayout[E](field, elem)
+	return func(obj any) (Elems[E], bool) {
+		p := DataPtr(field.GetPtr(obj))
+		if p != nil && slicePtr {
+			p = *(*unsafe.Pointer)(p)
+		}
+		if p == nil {
+			return Elems[E]{}, false
+		}
+		if ptrs {
+			s := *(*[]*E)(p)
+			return Elems[E]{data: unsafe.Pointer(unsafe.SliceData(s)), n: len(s), ptrs: true}, true
+		}
+		s := *(*[]E)(p)
+		return Elems[E]{data: unsafe.Pointer(unsafe.SliceData(s)), n: len(s)}, true
+	}
+}
+
+// EachSource applies checks to every element of the slice read by get.
+func EachSource[E any](add func(fn ValidationFn), get func(obj any) (Elems[E], bool)) func(fn CheckFn[E]) {
+	return func(fn CheckFn[E]) {
+		add(func(ctx context.Context, h Helper, obj any) []Error {
+			elems, _ := get(obj)
+			var errs []Error
+			for i := range elems.n {
+				errs = append(errs, fn(ctx, h, elems.At(i))...)
+			}
+			return errs
+		})
+	}
+}
+
+// SliceFieldConfigurator configures rules for the slice itself, e.g. its length.
+type SliceFieldConfigurator[E any] struct {
+	field fmap.Field
+	h     Helper
+	get   func(obj any) (Elems[E], bool)
+	add   func(fn ValidationFn)
+}
+
+// NewSliceFieldConfigurator creates a new SliceFieldConfigurator.
+func NewSliceFieldConfigurator[E any](field fmap.Field, h Helper, get func(obj any) (Elems[E], bool), add func(fn ValidationFn)) *SliceFieldConfigurator[E] {
+	return &SliceFieldConfigurator[E]{field: field, h: h, get: get, add: add}
+}
+
+// Each configures rules applied to every element of the slice.
+func (s *SliceFieldConfigurator[E]) Each(fn func(elem *Field[E])) *SliceFieldConfigurator[E] {
+	fn(s.EachField())
+	return s
+}
+
+// EachField returns a Field that applies rules to every element of the slice.
+func (s *SliceFieldConfigurator[E]) EachField() *Field[E] {
+	return NewField(s.field, s.h, EachSource(s.add, s.get))
+}
+
+func (s *SliceFieldConfigurator[E]) check(ok func(n int) bool, localeKey string, args ...any) {
+	field, get := s.field, s.get
+	s.add(func(ctx context.Context, h Helper, obj any) []Error {
+		elems, present := get(obj)
+		if !present || ok(elems.n) {
+			return nil
+		}
+		return []Error{h.ErrorT(ctx, field, elems.n, localeKey, args...)}
 	})
-	return &SliceFieldConfigurator{
-		field:  p.Field,
-		helper: p.Helper,
-		c: NewFieldConfigurator(FieldConfiguratorParams[[]*any]{
-			Maker:    mk,
-			AppendFn: p.AppendFn,
-		}),
-	}
 }
 
-func (s *SliceFieldConfigurator) MaxLen(maxLen int) *SliceFieldConfigurator {
-	s.c.Append(func(v []*any) bool {
-		if len(v) > maxLen {
-			return false
+// MaxLen checks that the slice contains no more than maxLen elements. Absent slice is skipped.
+func (s *SliceFieldConfigurator[E]) MaxLen(maxLen int) *SliceFieldConfigurator[E] {
+	s.check(func(n int) bool { return n <= maxLen }, sliceMaxLenLocaleKey, maxLen)
+	return s
+}
+
+// MinLen checks that the slice contains at least minLen elements. Absent slice is skipped.
+func (s *SliceFieldConfigurator[E]) MinLen(minLen int) *SliceFieldConfigurator[E] {
+	s.check(func(n int) bool { return n >= minLen }, sliceMinLenLocaleKey, minLen)
+	return s
+}
+
+// Required checks that the slice is present and not empty.
+func (s *SliceFieldConfigurator[E]) Required() *SliceFieldConfigurator[E] {
+	field, get := s.field, s.get
+	s.add(func(ctx context.Context, h Helper, obj any) []Error {
+		if elems, _ := get(obj); elems.n > 0 {
+			return nil
 		}
-		return true
-	}, "max len error")
+		return []Error{h.ErrorT(ctx, field, nil, sliceRequiredLocaleKey)}
+	})
 	return s
 }
 
-func (s *SliceFieldConfigurator) MinLen(MinLen int) *SliceFieldConfigurator {
-	s.c.Append(func(v []*any) bool {
-		if len(v) < MinLen {
-			return false
+// Custom allows for custom validation logic. Absent slice is skipped.
+func (s *SliceFieldConfigurator[E]) Custom(f func(ctx context.Context, h *FieldCustomHelper, value Elems[E]) []Error) *SliceFieldConfigurator[E] {
+	customHelper := NewFieldCustomHelper(s.field, s.h)
+	get := s.get
+	s.add(func(ctx context.Context, _ Helper, obj any) []Error {
+		elems, present := get(obj)
+		if !present {
+			return nil
 		}
-		return true
-	}, "min len error")
+		return f(ctx, customHelper, elems)
+	})
 	return s
 }
 
-func (s *SliceFieldConfigurator) Required() *SliceFieldConfigurator {
-	s.c.Append(func(v []*any) bool {
-		if v == nil {
-			return false
-		}
-		return true
-	}, "required error")
-	return s
-}
-
-// Custom allows for custom validation logic.
-func (s *SliceFieldConfigurator) Custom(f func(ctx context.Context, h *FieldCustomHelper, value []*any) []Error) *SliceFieldConfigurator {
-	customHelper := NewFieldCustomHelper(s.field, s.helper)
-	s.c.appendFn(s.c.mk.CustomMake(func(ctx context.Context, h Helper, value any) []Error {
-		return f(ctx, customHelper, value.([]*any))
-	}))
-	return s
-}
-
-// When allows for conditional validation based on a given condition.
-func (s *SliceFieldConfigurator) When(whenFn func(ctx context.Context, value []*any) bool) *SliceFieldConfigurator {
+// When returns a SliceFieldConfigurator whose rules are applied only if whenFn returns true.
+// whenFn receives empty Elems when the slice is absent.
+func (s *SliceFieldConfigurator[E]) When(whenFn func(ctx context.Context, value Elems[E]) bool) *SliceFieldConfigurator[E] {
 	if whenFn == nil {
 		return s
 	}
-	s.c.appendFn = func(fn FieldValidationFn) {
-		fnWithEnabler := func(ctx context.Context, h Helper, v any) []Error {
-			if !whenFn(ctx, v.([]*any)) {
+	add, get := s.add, s.get
+	return NewSliceFieldConfigurator(s.field, s.h, get, func(fn ValidationFn) {
+		add(func(ctx context.Context, h Helper, obj any) []Error {
+			elems, _ := get(obj)
+			if !whenFn(ctx, elems) {
 				return nil
 			}
-			return fn(ctx, h, v)
-		}
-		s.c.appendFn(fnWithEnabler)
-	}
-	return s
+			return fn(ctx, h, obj)
+		})
+	})
 }

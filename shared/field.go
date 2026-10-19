@@ -2,95 +2,139 @@ package shared
 
 import (
 	"context"
+	"fmt"
+	"reflect"
+	"unsafe"
 
 	"github.com/insei/fmap/v3"
 )
 
-type ValidationFnMaker[T any] interface {
-	Make(validationFn func(v T) bool, format string, args ...any) FieldValidationFn
-	CustomMake(func(ctx context.Context, h Helper, value any) []Error) FieldValidationFn
+// ValidationFn validates an object, obj is a pointer to the configured struct.
+type ValidationFn func(ctx context.Context, h Helper, obj any) []Error
+
+// CheckFn checks a single value: a struct field or a slice element.
+// v is nil when the value is absent, i.e. a nil pointer field or a field of a nil nested struct.
+type CheckFn[T any] func(ctx context.Context, h Helper, v *T) []Error
+
+// Field is a typed rules set for a single value.
+// It doesn't know where the value comes from, the source is hidden behind the add function.
+type Field[T any] struct {
+	field fmap.Field
+	h     Helper
+	add   func(fn CheckFn[T])
 }
 
-type simpleFieldFnMaker[T any] struct {
-	getValue func(value any) (T, bool)
-	field    fmap.Field
-	helper   Helper
+// NewField creates a new Field, add registers a check on the value source (see FieldSource and EachSource).
+func NewField[T any](field fmap.Field, h Helper, add func(fn CheckFn[T])) *Field[T] {
+	return &Field[T]{field: field, h: h, add: add}
 }
 
-type SimpleFieldFnMakerParams[T any] struct {
-	GetValue func(value any) (T, bool)
-	Field    fmap.Field
-	Helper   Helper
-}
-
-func NewSimpleFieldFnMaker[T any](p SimpleFieldFnMakerParams[T]) ValidationFnMaker[T] {
-	return &simpleFieldFnMaker[T]{
-		getValue: p.GetValue,
-		field:    p.Field,
-		helper:   p.Helper,
-	}
-}
-
-func (i *simpleFieldFnMaker[T]) CustomMake(f func(ctx context.Context, h Helper, value any) []Error) FieldValidationFn {
-	return func(ctx context.Context, h Helper, val any) []Error {
-		v, isValid := i.getValue(val)
-		if !isValid {
-			return []Error{i.helper.ErrorT(ctx, i.field, val, "failed to read value")}
+// Check adds a rule that fails when ok returns false. Absent values are skipped.
+func (f *Field[T]) Check(ok func(v T) bool, localeKey string, args ...any) {
+	field := f.field
+	f.add(func(ctx context.Context, h Helper, v *T) []Error {
+		if v == nil || ok(*v) {
+			return nil
 		}
-		return f(ctx, h, v)
-	}
+		return []Error{h.ErrorT(ctx, field, *v, localeKey, args...)}
+	})
 }
 
-func (i *simpleFieldFnMaker[T]) Make(validationFn func(v T) bool, format string, args ...any) FieldValidationFn {
-	return func(ctx context.Context, h Helper, val any) []Error {
-		v, isValid := i.getValue(val)
-		if !isValid {
-			return []Error{i.helper.ErrorT(ctx, i.field, val, format, args...)}
+// Required adds a rule that fails when the value is absent or ok returns false.
+func (f *Field[T]) Required(ok func(v T) bool, localeKey string) {
+	field := f.field
+	f.add(func(ctx context.Context, h Helper, v *T) []Error {
+		if v != nil && ok(*v) {
+			return nil
 		}
-		isValid = validationFn(v)
-		if !isValid {
-			return []Error{h.ErrorT(ctx, i.field, v, format, args...)}
+		var val any
+		if v != nil {
+			val = *v
+		}
+		return []Error{h.ErrorT(ctx, field, val, localeKey)}
+	})
+}
+
+// Modify adds a step that changes the value in place, e.g. trims a string. Absent values are skipped.
+func (f *Field[T]) Modify(fn func(v *T)) {
+	f.add(func(_ context.Context, _ Helper, v *T) []Error {
+		if v != nil {
+			fn(v)
 		}
 		return nil
+	})
+}
+
+// Custom adds a user defined rule. Absent values are skipped.
+func (f *Field[T]) Custom(fn func(ctx context.Context, h *FieldCustomHelper, value T) []Error) {
+	customHelper := NewFieldCustomHelper(f.field, f.h)
+	f.add(func(ctx context.Context, _ Helper, v *T) []Error {
+		if v == nil {
+			return nil
+		}
+		return fn(ctx, customHelper, *v)
+	})
+}
+
+// When returns a Field whose rules are applied only if cond returns true.
+// cond receives the zero value when the value is absent.
+func (f *Field[T]) When(cond func(ctx context.Context, value T) bool) *Field[T] {
+	if cond == nil {
+		return f
 	}
-}
-
-type FieldConfigurator[T any] struct {
-	appendFn func(fn FieldValidationFn)
-	mk       ValidationFnMaker[T]
-}
-
-func (i *FieldConfigurator[T]) Append(validationFn func(v T) bool, format string, args ...any) {
-	i.appendFn(i.mk.Make(validationFn, format, args...))
-}
-
-func (i *FieldConfigurator[T]) CustomAppend(fn FieldValidationFn) {
-	i.appendFn(fn)
-}
-
-func (i *FieldConfigurator[T]) NewWithWhen(whenFn func(ctx context.Context, value any) bool) *FieldConfigurator[T] {
-	return &FieldConfigurator[T]{
-		appendFn: func(fn FieldValidationFn) {
-			fnWithEnabler := func(ctx context.Context, h Helper, v any) []Error {
-				if !whenFn(ctx, v) {
-					return nil
-				}
-				return fn(ctx, h, v)
+	add := f.add
+	return NewField(f.field, f.h, func(fn CheckFn[T]) {
+		add(func(ctx context.Context, h Helper, v *T) []Error {
+			var val T
+			if v != nil {
+				val = *v
 			}
-			i.appendFn(fnWithEnabler)
-		},
-		mk: i.mk,
+			if !cond(ctx, val) {
+				return nil
+			}
+			return fn(ctx, h, v)
+		})
+	})
+}
+
+// FieldSource applies checks to the struct field value read by get.
+func FieldSource[T any](add func(fn ValidationFn), get func(obj any) *T) func(fn CheckFn[T]) {
+	return func(fn CheckFn[T]) {
+		add(func(ctx context.Context, h Helper, obj any) []Error {
+			return fn(ctx, h, get(obj))
+		})
 	}
 }
 
-type FieldConfiguratorParams[T any] struct {
-	Maker    ValidationFnMaker[T]
-	AppendFn func(fn FieldValidationFn)
+// ValueGetter returns a function that reads a pointer to the T value of the field from obj.
+// The field type must be T or *T, named types with the same underlying layout are allowed.
+// The returned function returns nil when the value is absent.
+func ValueGetter[T any](field fmap.Field) func(obj any) *T {
+	isPtr := field.GetType().Kind() == reflect.Pointer
+	mustLayout[T](field, field.GetDereferencedType())
+	if isPtr {
+		return func(obj any) *T {
+			p := (**T)(DataPtr(field.GetPtr(obj)))
+			if p == nil {
+				return nil
+			}
+			return *p
+		}
+	}
+	return func(obj any) *T {
+		return (*T)(DataPtr(field.GetPtr(obj)))
+	}
 }
 
-func NewFieldConfigurator[T any](p FieldConfiguratorParams[T]) *FieldConfigurator[T] {
-	return &FieldConfigurator[T]{
-		appendFn: p.AppendFn,
-		mk:       p.Maker,
+// DataPtr returns the data pointer of the interface value, i.e. the pointer itself for pointer values.
+func DataPtr(v any) unsafe.Pointer {
+	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1]
+}
+
+// mustLayout panics if values of type t can't be read as T.
+func mustLayout[T any](field fmap.Field, t reflect.Type) {
+	want := reflect.TypeFor[T]()
+	if t.Kind() != want.Kind() || t.Size() != want.Size() {
+		panic(fmt.Sprintf("valigo: field %s has type %s, %s expected", field.GetStructPath(), field.GetType(), want))
 	}
 }
