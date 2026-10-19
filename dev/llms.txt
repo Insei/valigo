@@ -21,6 +21,7 @@ valigo validates Go structs by rules configured once with pointers to the fields
 - [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md): When on the struct and on fields, conditional requiredness
 - [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md): Custom rules, rules from data
 - [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md): rules on other fields
+- [Rules from tags](https://insei.github.io/valigo/latest/features/tags/index.md): the rules of the tags of go-playground/validator, a migration from it
 
 ## Rules
 

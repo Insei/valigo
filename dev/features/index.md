@@ -14,6 +14,7 @@ How the rules are configured and composed.
 | [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md)             | `When` on the struct and on a field, conditional requiredness                                       |
 | [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)               | `Custom` on a field, on a slice and on the struct, rules with limits from data                      |
 | [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md)      | `EqualField`, `MinField`, `MaxField`, `BeforeField`, `AfterField` by the pointer of the other field |
+| [Rules from tags](https://insei.github.io/valigo/latest/features/tags/index.md)              | `Tags`: the tags of go-playground/validator, `validate:"required,max=64"`, for a migration          |
 
 ## Rules
 

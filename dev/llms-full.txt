@@ -214,6 +214,7 @@ An invalid object with 6 errors:
 
 valigo is about 1.4 times slower than the same rules written by hand on a valid object, it pays for the closures of the rules; it doesn't allocate either. The fields are read by the offsets of fmap without reflect, following the pointers of nested structs. Code generators of validators produce code like the hand-written one, so they are expected to be about as fast as it.
 
+- The [rules from tags](https://insei.github.io/valigo/latest/features/tags/index.md) are the same rules: in one run a valid object took 392 ns by the tags of go-playground/validator and 373 ns by the rules in code, 0 allocations both; `max=64` is `MaxRunes`, `gte` and `lte` are two rules instead of one `AnyOfInterval`.
 - valigo builds the rules once in `Configure` and reads the fields by precomputed accessors, so valid objects cost no allocations; go-playground/validator parses the tags once too, but works through `reflect` on every call, ozzo-validation builds its rules on every call of `Validate`.
 - gookit/validate creates a validation per call, it is its API, and reports the errors of the elements of a slice under one key `Tags.*`; zog builds the messages of its issues.
 - valigo builds the translated messages of the errors at once, go-playground/validator returns the errors without messages and builds them by `Error` or `Translate`: compare valigo with the row "with `Error()`".
@@ -306,6 +307,7 @@ How the rules are configured and composed.
 | [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md)             | `When` on the struct and on a field, conditional requiredness                                       |
 | [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)               | `Custom` on a field, on a slice and on the struct, rules with limits from data                      |
 | [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md)      | `EqualField`, `MinField`, `MaxField`, `BeforeField`, `AfterField` by the pointer of the other field |
+| [Rules from tags](https://insei.github.io/valigo/latest/features/tags/index.md)              | `Tags`: the tags of go-playground/validator, `validate:"required,max=64"`, for a migration          |
 
 ## Rules
 
@@ -1060,6 +1062,90 @@ Should be equal to Password (Repeat: Secret)
 ```
 
 For a comparison of several fields that doesn't fit one rule, use a [struct custom rule](https://insei.github.io/valigo/latest/features/custom/#struct-rules).
+
+# Rules from tags
+
+`b.Tags("validate")` configures the rules of the tags of the fields of the struct and of its nested structs in the syntax of [go-playground/validator](https://github.com/go-playground/validator): `validate:"required,max=64"`. It is for a migration: the structs keep their tags, and the rules move to code one by one — the tags and the rules in code are mixed in one `Configure`.
+
+The rules of the tags are the rules of valigo: the same messages in the languages of the users, the [codes](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients), the [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md) and the speed — a valid object is validated without allocations, see [Performance](https://insei.github.io/valigo/latest/performance/index.md).
+
+## Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/str"
+)
+
+type Address struct {
+    City string `validate:"required,max=32"`
+}
+
+type SignUp struct {
+    Email    string   `validate:"required,email"`
+    Password string   `validate:"required,min=8"`
+    Confirm  string   `validate:"eqfield=Password"`
+    Age      int      `validate:"omitempty,gte=18,lte=120"`
+    Tags     []string `validate:"max=3,dive,required,max=16"`
+    Address  *Address // the rules of City apply when the address is present
+    Nick     string
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[SignUp](v, func(b valigo.Configurator[SignUp], s *SignUp) {
+        b.Tags("validate")
+        // the rules in code with the tags
+        b.Field(&s.Nick).As(str.Of).Trim().Alphanumeric()
+    })
+
+    errs := v.ValidateTyped(context.Background(), &SignUp{
+        Email: "ann", Password: "secret", Confirm: "secrets", Age: 16, Tags: []string{"go", ""}, Nick: " a b ",
+    })
+    for _, err := range errs {
+        fmt.Println(err.Location, "-", err.Message, "-", err.Code)
+    }
+}
+```
+
+Output:
+
+```text
+Email - Should be email address - string.email
+Password - Cannot be shorter than 8 characters - string.min_runes
+Confirm - Should be equal to Password - string.equal_field
+Age - Cannot be less than 18 - number.min
+Tags[1] - Should be fulfilled - string.required
+Nick - Should contain only letters and digits - string.alphanumeric
+```
+
+## Rules
+
+| Fields                     | Rules                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| all                        | `required`, `omitempty` — the next rules are skipped for the zero value                                                                                                                                                                                                                                                                                                                                          |
+| strings                    | `min`, `max`, `len` in characters, `eq`, `oneof=a b`, `startswith`, `endswith`, `contains`, `email`, `url`, `http_url`, `uuid`, `ip`, `ipv4`, `ipv6`, `hostname`, `hostname_rfc1123`, `alphanum`, `ascii`, `lowercase`, `uppercase`, `e164`, `base64`, `base64url`, `json`, `semver`, `cidr`, `mac`, `hexcolor`, `iso3166_1_alpha2`, `iso4217`, `credit_card`, `luhn_checksum`, `datetime=2006-01-02`, `eqfield` |
+| numbers                    | `min`, `gte`, `max`, `lte`, `eq`, `oneof=1 2`, `latitude`, `longitude`, `gtefield`, `ltefield`                                                                                                                                                                                                                                                                                                                   |
+| `bool`                     | `required`: `true`                                                                                                                                                                                                                                                                                                                                                                                               |
+| `time.Time`                | `required`, `gtfield`, `ltfield`                                                                                                                                                                                                                                                                                                                                                                                 |
+| slices                     | `required`, `min`, `max`, `len` of the length, `unique`, `dive` — the next rules are the rules of the elements                                                                                                                                                                                                                                                                                                   |
+| maps                       | `required`, `min`, `max`, `len` of the length, `dive` — the next rules are the rules of the values of `map[string]V`                                                                                                                                                                                                                                                                                             |
+| pointers to nested structs | `required`; the fields have their own tags                                                                                                                                                                                                                                                                                                                                                                       |
+
+Pointers to the values have the rules of the values, a nil pointer is absent. `eqfield`, `gtefield` and the other rules on fields take the name of a field of the same struct, or its nested field `Inner.Field`.
+
+## Differences from go-playground/validator
+
+- `required` is `Required` of valigo: a string is not empty, a number is not zero, a slice and a map have elements — go-playground/validator accepts an empty non-nil slice.
+- The fields of a nil nested struct are skipped, like by go-playground/validator. The rules in code check `Required` of these fields, see [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md).
+- `dive` into the elements of structs, `keys`/`endkeys`, the alternatives `|`, `gt`/`lt` of numbers and the custom tags of go-playground/validator aren't supported: write these rules in code, with `When` and `Custom`.
+- An unknown rule panics in `Configure`, like an invalid rule in code, so a typo doesn't turn into a missing check.
+- The rules after `omitempty` aren't in the JSON Schema: they don't apply to every value.
 # Rules
 
 # Strings
