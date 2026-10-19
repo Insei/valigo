@@ -84,11 +84,14 @@ Output:
 | `string.any_of` | `values` |
 | `string.prefix`, `string.suffix`, `string.contains` | `prefix`, `suffix`, `substring` |
 | `string.equal_field` | `field` |
+| `string.base64`, `string.base64url`, `string.json`, `string.semver`, `string.cidr`, `string.mac`, `string.e164`, `string.hex_color`, `string.ascii`, `string.lowercase`, `string.uppercase`, `string.country_code`, `string.currency_code`, `string.luhn`, `string.credit_card` | — |
+| `string.datetime` | `layout` |
 | `number.required` | — |
 | `number.min`, `number.max` | `min`, `max` |
 | `number.min_field`, `number.max_field` | `field` |
 | `number.any_of` | `values` |
 | `number.interval` | `min`, `max` |
+| `number.latitude`, `number.longitude` | — |
 | `time.required`, `time.in_past`, `time.in_future` | — |
 | `time.before`, `time.after` | `time` (RFC 3339) |
 | `time.between` | `from`, `to` (RFC 3339) |
