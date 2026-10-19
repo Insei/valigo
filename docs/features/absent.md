@@ -17,6 +17,9 @@ import (
 	"fmt"
 
 	"github.com/insei/valigo"
+	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/shared"
+	"github.com/insei/valigo/str"
 )
 
 type Address struct {
@@ -33,10 +36,10 @@ type Order struct {
 func main() {
 	v := valigo.New()
 	valigo.Configure[Order](v, func(b valigo.Configurator[Order], o *Order) {
-		b.String(&o.Comment).MaxLen(200)
-		b.NumberPtr(&o.Discount).AnyOfInterval(1, 50)
-		b.StringSlice(&o.Coupons).MaxLen(3)
-		b.String(&o.Delivery.City).Required()
+		b.Field(&o.Comment).As(str.Of).MaxLen(200)
+		b.Field(&o.Discount).As(num.Ptr).AnyOfInterval(1, 50)
+		b.Field(&o.Coupons).As(shared.SlicePtr).As(str.Slice).MaxLen(3)
+		b.Field(&o.Delivery.City).As(str.Of).Required()
 	})
 
 	// nothing is set: only the Required rule fails
@@ -58,13 +61,13 @@ Output:
 
 What `Required` checks depends on the type:
 
-| Configurator | Fails on |
+| Conversion | Fails on |
 |---|---|
-| `String` | absent value, empty string |
-| `Number` | zero |
-| `NumberPtr` | absent value; zero is a valid value of a pointer |
-| `UUID` | absent value, `uuid.Nil` |
-| `Slice`, `StringSlice`, `UUIDSlice` | absent slice, empty slice |
+| `str.Of` | absent value, empty string |
+| `num.Of` | zero |
+| `num.Ptr` | absent value; zero is a valid value of a pointer |
+| `uuid.Of` | absent value, `uuid.Nil` |
+| `Slice`, `str.Slice`, `uuid.Slice` | absent slice, empty slice |
 
 Nil slices of value fields (`[]string(nil)`) are present and empty: length rules check them, `Each` has nothing to check.
 

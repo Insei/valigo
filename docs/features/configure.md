@@ -20,13 +20,13 @@ All options are optional, a `nil` argument keeps the default.
 
 ```go
 valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
-	b.String(&u.Name).Required()
+	b.Field(&u.Name).As(str.Of).Required()
 })
 ```
 
 The function is called once, with:
 
-- `b` — the configurator of `T`, its methods return the configurators of fields: [`String`](strings.md), [`Number` and `NumberPtr`](numbers.md), [`UUID`](uuid.md), [`Slice`, `StringSlice` and `UUIDSlice`](slices.md), and [`When`](conditions.md) and [`Custom`](custom.md) of the struct;
+- `b` — the configurator of `T`: `Field` and `Slice` return the base configurators of fields, converted to the configurators of their types by `As`, see [Types and conversions](conversions.md); [`When`](conditions.md) and [`Custom`](custom.md) are the rules of the struct;
 - `u` — the *model*, a `*User` created by `Configure`. Rules are bound to the fields of the model by their pointers.
 
 The rules are applied to objects of type `*T`: `v.Validate(ctx, &user)`. A struct value is validated too, by a copy, see [Errors](errors.md#validate-and-validatetyped).
@@ -39,15 +39,15 @@ A field pointer must point to a field of the model passed to the function:
 
 ```go
 valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
-	b.String(&u.Name)       // a field of the model
-	b.String(&u.Address.City) // a field of a nested struct of the model
+	b.Field(&u.Name)         // a field of the model
+	b.Field(&u.Address.City) // a field of a nested struct of the model
 
 	var name string
-	b.String(&name)         // panic: *string is not a pointer to a field of *main.User: field not found
+	b.Field(&name)           // panic: *string is not a pointer to a field of *main.User: field not found
 })
 ```
 
-Types of the fields are checked by the compiler: `String` accepts `*string`, `**string` and pointers to named string types, `Number` accepts pointers to numbers, and so on. Rules can't be configured on a field of a wrong type.
+Types of the fields are checked by the compiler: `b.Field(&u.Age).As(str.Of)` doesn't compile for an `int` field, the conversions accept only the types they support.
 
 ## Nested structs
 
@@ -61,6 +61,7 @@ import (
 	"fmt"
 
 	"github.com/insei/valigo"
+	"github.com/insei/valigo/str"
 )
 
 type Address struct {
@@ -77,8 +78,8 @@ type User struct {
 func main() {
 	v := valigo.New()
 	valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
-		b.String(&u.Home.City).Required()
-		b.String(&u.Work.City).Required()
+		b.Field(&u.Home.City).As(str.Of).Required()
+		b.Field(&u.Work.City).As(str.Of).Required()
 	})
 
 	fmt.Println(v.Validate(context.Background(), &User{Work: &Address{}}))
@@ -103,7 +104,7 @@ Rules of nested types aren't inherited: configuring `Address` doesn't add its ru
 
 ```go
 func addressRules[T any](b valigo.Configurator[T], a *Address) {
-	b.String(&a.City).Required()
+	b.Field(&a.City).As(str.Of).Required()
 }
 
 valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {

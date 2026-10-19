@@ -1,6 +1,6 @@
 # Numbers
 
-`Number` configures the rules of a numeric field, `NumberPtr` — of a pointer to a numeric field. Supported types are `int`, `int8`, `int16`, `int32`, `int64`, `uint`, `uint8`, `uint16`, `uint32`, `uint64`, `float32`, `float64` and named types based on them.
+`num.Of` converts a numeric field to the number configurator, `num.Ptr` — a pointer to a numeric field. Supported types are `int`, `int8`, `int16`, `int32`, `int64`, `uint`, `uint8`, `uint16`, `uint32`, `uint64`, `float32`, `float64` and named types based on them.
 
 The arguments of the rules have the type of the field. Untyped constants fit any numeric type, a value of another type doesn't compile:
 
@@ -14,20 +14,23 @@ type Product struct {
 	Discount *uint8
 }
 
-b.Number(&p.Stock).Min(0)
-b.Number(&p.Price).AnyOfInterval(1, 1_000_000) // the arguments are Price
-b.Number(&p.Rating).Max(5)
-b.NumberPtr(&p.Discount).Max(90)               // a nil Discount is skipped
+b.Field(&p.Stock).As(num.Of).Min(0)
+b.Field(&p.Price).As(num.Of).AnyOfInterval(1, 1_000_000) // the arguments are Price
+b.Field(&p.Rating).As(num.Of).Max(5)
+b.Field(&p.Discount).As(num.Ptr).Max(90)                 // a nil Discount is skipped
 
 var limit int32 = 10
-b.Number(&p.Stock).Max(limit) // doesn't compile: int32 isn't int
+b.Field(&p.Stock).As(num.Of).Max(limit) // doesn't compile: int32 isn't int
+b.Field(&p.Discount).As(num.Of)         // doesn't compile: *uint8 isn't a number, use num.Ptr
 ```
+
+Slices of numbers are configured by `Slice` with the conversion of the elements: `b.Slice(&p.Sizes).Each(func(e *shared.Field[int]) { e.As(num.Of).Min(1) })`, see [Slices](slices.md).
 
 ## Rules
 
 | Rule | Fails when | Message |
 |---|---|---|
-| `Required()` | `Number`: the value is zero; `NumberPtr`: the value is absent | Should be fulfilled |
+| `Required()` | `num.Of`: the value is zero; `num.Ptr`: the value is absent | Should be fulfilled |
 | `Min(n)` | the value is less than `n` | Cannot be less than %v |
 | `Max(n)` | the value is greater than `n` | Cannot be greater than %v |
 | `AnyOf(values...)` | the value isn't one of `values` | Only %v values is allowed |
@@ -37,7 +40,7 @@ b.Number(&p.Stock).Max(limit) // doesn't compile: int32 isn't int
 
 ## Zero and absent
 
-Zero is a valid value of a pointer: `NumberPtr(&p.Discount).Required()` passes for a pointer to `0` and fails for `nil`. Use a pointer field when zero must be distinguished from "not set", e.g. in PATCH requests:
+Zero is a valid value of a pointer: `b.Field(&p.Discount).As(num.Ptr).Required()` passes for a pointer to `0` and fails for `nil`. Use a pointer field when zero must be distinguished from "not set", e.g. in PATCH requests:
 
 ```go
 package main
@@ -47,6 +50,7 @@ import (
 	"fmt"
 
 	"github.com/insei/valigo"
+	"github.com/insei/valigo/num"
 )
 
 type UpdateProduct struct {
@@ -56,7 +60,7 @@ type UpdateProduct struct {
 func main() {
 	v := valigo.New()
 	valigo.Configure[UpdateProduct](v, func(b valigo.Configurator[UpdateProduct], p *UpdateProduct) {
-		b.NumberPtr(&p.Stock).Min(0)
+		b.Field(&p.Stock).As(num.Ptr).Min(0)
 	})
 
 	zero, negative := 0, -1

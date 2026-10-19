@@ -7,6 +7,7 @@ Reference of valigo capabilities grouped by area.
 | Page | What's inside |
 |---|---|
 | [Validator and Configure](configure.md) | `New` and its options, `Configure`, the model, field pointers, nested and recursive structs |
+| [Types and conversions](conversions.md) | `Field`, `Slice` and `As`, the built-in conversions, conversions of your types |
 | [Absent values](absent.md) | nil pointers, nil slices and nil nested structs: which rules skip them |
 | [Conditions](conditions.md) | `When` on the struct and on a field |
 | [Custom rules](custom.md) | `Custom` on a field, on a slice and on the struct |
@@ -15,10 +16,10 @@ Reference of valigo capabilities grouped by area.
 
 | Page | What's inside |
 |---|---|
-| [Strings](strings.md) | `String`: `Required`, `MinLen`, `MaxLen`, `AnyOf`, `Regexp`, `Email`, `Trim` |
-| [Numbers](numbers.md) | `Number` and `NumberPtr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval` |
-| [UUID](uuid.md) | `UUID`: `Required`, `AnyOf` |
-| [Slices](slices.md) | `Slice`, `StringSlice`, `UUIDSlice`: length rules, `Each` for elements |
+| [Strings](strings.md) | `str.Of`: `Required`, `MinLen`, `MaxLen`, `AnyOf`, `Regexp`, `Email`, `Trim` |
+| [Numbers](numbers.md) | `num.Of` and `num.Ptr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval` |
+| [UUID](uuid.md) | `uuid.Of` of the separate module: `Required`, `AnyOf` |
+| [Slices](slices.md) | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements |
 
 ## Results
 
