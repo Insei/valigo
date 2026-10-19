@@ -211,6 +211,15 @@ func valueGetter[T any](field fmap.Field) func(obj any) *T {
 	}
 }
 
+// InStruct returns a function that reports whether the nested structs stored by pointer, which the field is in,
+// are allocated in obj, a pointer to the configured struct: false for the fields of a nil nested struct.
+func InStruct(field fmap.Field) func(obj any) bool {
+	addr := fieldAddr(field)
+	return func(obj any) bool {
+		return addr(dataPtr(obj)) != nil
+	}
+}
+
 // fieldAddr returns a function that computes the address of the field in the struct at root by the offsets of fmap,
 // without reflect: the offset of a field is from the root struct or from the struct of its nearest ancestor stored
 // by pointer, so the address follows the pointers of these ancestors. It returns nil if one of them is nil.

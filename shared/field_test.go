@@ -315,3 +315,10 @@ func TestCheckWithForeignPointerPanics(t *testing.T) {
 		NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add, nil).CheckWith(&foreign, func(string, string) bool { return true }, "bad")
 	})
 }
+
+func TestInStruct(t *testing.T) {
+	present := InStruct(sampleField(t, "Inner.Text"))
+	assert.True(t, present(&sample{Inner: &inner{}}))
+	assert.False(t, present(&sample{}))
+	assert.True(t, InStruct(sampleField(t, "Text"))(&sample{}))
+}
