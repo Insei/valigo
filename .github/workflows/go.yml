@@ -46,6 +46,7 @@ jobs:
           go.sum
           */go.sum
           rules/*/go.sum
+          integrations/*/go.sum
 
     - name: Build
       run: |
@@ -90,7 +91,7 @@ jobs:
         cache-dependency-path: |
           go.sum
           rules/uuid/go.sum
-          huma/go.sum
+          integrations/*/go.sum
           examples/*/go.sum
 
     - name: Build and run the programs of the documentation and the skill

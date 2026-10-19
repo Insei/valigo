@@ -80,7 +80,7 @@ and a conversion that doesn't fit the field doesn't compile:
 * Messages in English, German, Spanish, French and Russian with plural forms, the language of every request from the context, an `Accept-Language` middleware
 * `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers
 * The rules as the keywords of JSON Schema, `vhuma.OpenAPI` puts them into the OpenAPI document of huma: the clients see `maxLength`, `format`, `enum` of the rules
-* `github.com/insei/valigo/huma`, `github.com/insei/valigo/gin`, `github.com/insei/valigo/echo`: the rules of valigo in [huma](https://huma.rocks), [gin](https://gin-gonic.com) and [echo](https://echo.labstack.com)
+* `github.com/insei/valigo/integrations/huma`, `github.com/insei/valigo/integrations/gin`, `github.com/insei/valigo/integrations/echo`: the rules of valigo in [huma](https://huma.rocks), [gin](https://gin-gonic.com) and [echo](https://echo.labstack.com)
 
 # Performance
 The same struct and rules, Intel Core i9-14900HX, Go 1.27.0, see [Performance](https://insei.github.io/valigo/latest/performance/):

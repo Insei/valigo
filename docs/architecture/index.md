@@ -47,7 +47,7 @@ The rules append their errors to one pooled buffer of the validation, and `Valid
 | `rules/str`, `rules/num`, `rules/timex`, `rules/eq` | configurators of strings, numbers, times and comparable values built on `shared.Field[T]`, their conversions `str.Of`, `num.Of`, `num.Ptr`, `timex.Of`, `eq.Of`... and slice conversions |
 | `problem` | the problem details of RFC 9457 |
 | `github.com/insei/valigo/rules/uuid` | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package |
-| `github.com/insei/valigo/huma` | the separate module of the inputs of huma operations |
+| `github.com/insei/valigo/integrations/huma`, `integrations/gin`, `integrations/echo` | the separate modules of huma, gin and echo |
 | `translator` | translator, in-memory storage, built-in locales, `Accept-Language` middleware |
 
 ## Contributing

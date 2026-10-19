@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/insei/valigo"
-	vecho "github.com/insei/valigo/echo"
+	vecho "github.com/insei/valigo/integrations/echo"
 	"github.com/insei/valigo/rules/str"
 	"github.com/insei/valigo/shared"
 )

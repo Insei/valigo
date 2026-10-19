@@ -1,8 +1,8 @@
-module github.com/insei/valigo/echo
+module github.com/insei/valigo/integrations/echo
 
 go 1.27
 
-replace github.com/insei/valigo => ../
+replace github.com/insei/valigo => ../../
 
 require (
 	github.com/insei/valigo v0.1.0

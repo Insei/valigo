@@ -6,6 +6,7 @@ Rules are still configured by pointers to the fields of the model, but the confi
 |---|---|
 | `github.com/insei/valigo/str`, `github.com/insei/valigo/num` | `github.com/insei/valigo/rules/str`, `github.com/insei/valigo/rules/num`, also `rules/eq` and `rules/timex` |
 | `github.com/insei/valigo/uuid` of the core module | the separate module `github.com/insei/valigo/rules/uuid` |
+| — | the integrations are the separate modules `github.com/insei/valigo/integrations/huma`, `integrations/gin`, `integrations/echo` |
 | `b.String(&u.Name)` | `b.Field(&u.Name).As(str.Of)` |
 | `b.Number(&u.Age)` | `b.Field(&u.Age).As(num.Of)` |
 | `b.Number(&u.Score)` for `*int` | `b.Field(&u.Score).As(num.Ptr)` |
