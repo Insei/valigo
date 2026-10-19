@@ -177,6 +177,10 @@ func main() {
 
 `valigo.New(valigo.WithErrorsTransformer(problem.Transformer()))` makes `Validate` return one `*problem.Details` of RFC 9457, write it by `problem.From(errs).Write(w)`: 422, `application/problem+json`, `errors` with `detail`, `pointer` (`#/tags/1`), `location`, `code`, `params`. Options: `problem.WithType`, `WithTitle`, `WithStatus`, `WithDetail`.
 
+## huma
+
+The module `github.com/insei/valigo/huma` (`vhuma`): `valigo.New(valigo.WithFieldLocationNamingFn(vhuma.Location))` gives the locations of huma (`body.email`, `query.limit`, `path.id`), `func (i *Input) Resolve(ctx huma.Context) []error { return vhuma.Resolve(ctx, validator, i) }` validates the input with the languages of `Accept-Language`.
+
 ## Translations
 
 The built-in messages are in English, German, Spanish, French and Russian, with plural forms. The language comes from the context: wrap the HTTP handler with `translator.NewAcceptLanguageMiddleware()`, or pass `translator.WithPreferredLanguagesFn(fn)` to `translator.New`. Messages of your rules are locale keys: a key without a translation is printed as is, translations are added to a storage:

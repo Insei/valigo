@@ -93,6 +93,7 @@ nav:
       - Errors: features/errors.md
       - Translations: features/translations.md
       - HTTP problem details: features/problem.md
+      - huma: features/huma.md
   - Architecture:
       - How it works: architecture/index.md
 
