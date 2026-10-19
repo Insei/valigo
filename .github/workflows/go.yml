@@ -26,13 +26,12 @@ jobs:
     - name: Lint the core module
       run: golangci-lint run ./...
 
-    - name: Lint the uuid module
-      working-directory: uuid
-      run: golangci-lint run --config ../.golangci.yml ./...
-
-    - name: Lint the huma module
-      working-directory: huma
-      run: golangci-lint run --config ../.golangci.yml ./...
+    - name: Lint the modules
+      run: |
+        . scripts/modules.sh
+        for module in $MODULES; do
+          (cd "$module" && golangci-lint run --config ../.golangci.yml ./...)
+        done
 
   test:
     runs-on: ubuntu-latest
@@ -45,24 +44,29 @@ jobs:
         go-version: '1.27'
         cache-dependency-path: |
           go.sum
-          uuid/go.sum
-          huma/go.sum
+          */go.sum
 
     - name: Build
       run: |
         go build -v ./...
-        (cd uuid && go build -v ./...)
+        . scripts/modules.sh
+        for module in $MODULES; do
+          (cd "$module" && go build -v ./...)
+        done
 
     - name: Test the core module
       run: go test -v -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./...
 
-    - name: Test the uuid module
-      working-directory: uuid
-      run: go test -v -race -coverprofile=../coverage-uuid.txt -covermode=atomic ./...
-
-    - name: Test the huma module
-      working-directory: huma
-      run: go test -v -race -coverprofile=../coverage-huma.txt -covermode=atomic ./...
+    - name: Test the modules
+      id: modules
+      run: |
+        . scripts/modules.sh
+        files=./coverage.txt
+        for module in $MODULES; do
+          (cd "$module" && go test -v -race -coverprofile="../coverage-$module.txt" -covermode=atomic ./...)
+          files="$files,./coverage-$module.txt"
+        done
+        echo "coverage=$files" >> "$GITHUB_OUTPUT"
 
     - name: Check 100% coverage of every package
       run: scripts/check-coverage.sh
@@ -70,7 +74,7 @@ jobs:
     - uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./coverage.txt,./coverage-uuid.txt,./coverage-huma.txt
+        files: ${{ steps.modules.outputs.coverage }}
 
   examples:
     runs-on: ubuntu-latest
