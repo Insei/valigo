@@ -85,15 +85,24 @@ func ElemsGetter[E any](field fmap.Field) func(obj any) (Elems[E], bool) {
 }
 
 // EachSource applies checks to every element of the slice read by get.
+// All checks are registered as a single validation function, so the slice is read once.
 // Locations of the elements errors are suffixed with the element index, e.g. Tags[1].
 func EachSource[E any](add func(fn ValidationFn), get func(obj any) (Elems[E], bool)) func(fn CheckFn[E]) {
+	var checks []CheckFn[E]
 	return func(fn CheckFn[E]) {
+		checks = append(checks, fn)
+		if len(checks) > 1 {
+			return
+		}
 		add(func(ctx context.Context, h Helper, obj any) []Error {
 			elems, _ := get(obj)
 			var errs []Error
 			for i := range elems.n {
+				v := elems.At(i)
 				n := len(errs)
-				errs = append(errs, fn(ctx, h, elems.At(i))...)
+				for _, check := range checks {
+					errs = append(errs, check(ctx, h, v)...)
+				}
 				for j := n; j < len(errs); j++ {
 					errs[j].Location += "[" + strconv.Itoa(i) + "]"
 				}

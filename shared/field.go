@@ -94,10 +94,21 @@ func (f *Field[T]) When(cond func(ctx context.Context, value T) bool) *Field[T] 
 }
 
 // FieldSource applies checks to the struct field value read by get.
+// All checks of the field are registered as a single validation function, so the value is read once.
 func FieldSource[T any](add func(fn ValidationFn), get func(obj any) *T) func(fn CheckFn[T]) {
+	var checks []CheckFn[T]
 	return func(fn CheckFn[T]) {
+		checks = append(checks, fn)
+		if len(checks) > 1 {
+			return
+		}
 		add(func(ctx context.Context, h Helper, obj any) []Error {
-			return fn(ctx, h, get(obj))
+			v := get(obj)
+			var errs []Error
+			for _, check := range checks {
+				errs = append(errs, check(ctx, h, v)...)
+			}
+			return errs
 		})
 	}
 }
