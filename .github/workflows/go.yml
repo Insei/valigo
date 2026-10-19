@@ -30,6 +30,9 @@ jobs:
       working-directory: uuid
       run: go test -v -race -coverprofile=../coverage-uuid.txt -covermode=atomic ./...
 
+    - name: Check 100% coverage of every package
+      run: scripts/check-coverage.sh
+
     - name: Build and run the programs of the documentation and the skill
       run: scripts/check-examples.sh
 
