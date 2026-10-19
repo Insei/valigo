@@ -80,6 +80,12 @@ jobs:
     - name: Build and run the programs of the documentation and the skill
       run: scripts/check-examples.sh
 
+    - name: Test the bench module
+      working-directory: bench
+      run: |
+        go vet ./...
+        go test -bench . -benchtime 100x ./...
+
     - name: Test the examples modules
       run: |
         for dir in examples/*/; do
