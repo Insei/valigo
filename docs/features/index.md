@@ -19,6 +19,7 @@ Reference of valigo capabilities grouped by area.
 | [Strings](strings.md) | `str.Of`: `Required`, lengths, `AnyOf`, `Prefix`, `Suffix`, `Contains`, `Regexp`, `Email`, `URL`, `IP`, `Hostname`, `UUID`, `Alphanumeric`, `Trim` |
 | [Numbers](numbers.md) | `num.Of` and `num.Ptr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval` |
 | [Time](time.md) | `timex.Of`: `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture` |
+| [Comparable values](values.md) | `eq.Of`, `eq.Ptr`, `eq.Slice`: enums, bools — `Required`, `OneOf`, `NotOneOf`, `Equal`, `NotEqual`, `Unique` |
 | [UUID](uuid.md) | `uuid.Of` of the separate module: `Required`, `AnyOf` |
 | [Slices](slices.md) | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements |
 
