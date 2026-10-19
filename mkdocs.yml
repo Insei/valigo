@@ -81,6 +81,7 @@ nav:
       - Absent values: features/absent.md
       - Conditions: features/conditions.md
       - Custom rules: features/custom.md
+      - Rules on other fields: features/fields.md
       - Strings: features/strings.md
       - Numbers: features/numbers.md
       - Time: features/time.md

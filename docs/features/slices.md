@@ -6,6 +6,8 @@
 |---|---|---|
 | `b.Slice(&m.X)` | any `E` | `Each` with `*shared.Field[E]`: `Check`, `Required`, `Modify`, `Custom`, `When`, and `As` to convert the element |
 | `.As(str.Slice)` | `string`, `*string`, named strings | `Each` with the [string configurator](strings.md), `Trim`, `Regexp`, `Email` |
+| `.As(num.Slice)` | numbers and named numbers | `Each` with the [number configurator](numbers.md) |
+| `.As(timex.Slice)`, `.As(eq.Slice)` | times, comparable values | `Each` with the [time](time.md) and the [equality](values.md) configurators, `Unique` of `eq.Slice` |
 | `.As(vuuid.Slice)` | `uuid.UUID`, `*uuid.UUID` | `Each` with the [uuid configurator](uuid.md), `AnyOf` |
 
 A pointer to a slice, `*[]E`, is converted from its field: `b.Field(&m.Tags).As(shared.SlicePtr).As(str.Slice)`, a nil pointer is [absent](absent.md).
@@ -21,7 +23,7 @@ The rules of the configurator check **the slice itself**, the rules inside `Each
 | `MaxLen(n)` | the slice has more than `n` elements | Cannot contain more than %d elements |
 | `Each(fn)` | — | `fn` configures the rules of the elements |
 
-`Trim`, `Regexp` and `Email` of `str.Slice` and `AnyOf` of `uuid.Slice` are shortcuts for the same rules in `Each`. Any element is converted in `Each` too, e.g. the numbers: `e.As(num.Of).Min(1)`.
+`Trim`, `Regexp` and `Email` of `str.Slice` and `AnyOf` of `uuid.Slice` are shortcuts for the same rules in `Each`. Any element of `b.Slice` is converted in `Each` too: `e.As(num.Ptr).Max(100)` for `[]*int`.
 
 ```go
 package main

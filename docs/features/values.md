@@ -27,6 +27,7 @@ For strings and numbers [`str.Of`](strings.md) and [`num.Of`](numbers.md) have m
 | `NotOneOf(values...)` | the value is one of `values` | Values %v are not allowed |
 | `Equal(v)` | the value isn't `v` | Should be %v |
 | `NotEqual(v)` | the value is `v` | Cannot be %v |
+| `EqualField(&m.X)` | the value isn't equal to the value of the field `X`, see [Rules on other fields](fields.md) | Should be equal to %s |
 | `Custom(fn)` | `fn` returns errors | your messages, see [Custom rules](custom.md) |
 | `When(fn)` | — | the next rules are applied only if `fn` returns true, see [Conditions](conditions.md) |
 

@@ -24,12 +24,13 @@ The package is named `timex` to not shadow the standard `time`.
 | `Before(t)` | the value isn't before `t` | Should be before %s |
 | `After(t)` | the value isn't after `t` | Should be after %s |
 | `Between(from, to)` | the value is outside `[from, to]`, both ends are included | Should be between %s and %s |
+| `BeforeField(&m.X)`, `AfterField(&m.X)` | the value isn't before or after the time of the field `X`, see [Rules on other fields](fields.md) | Should be before %s, Should be after %s |
 | `InPast()` | the value isn't before the moment of the validation | Should be in the past |
 | `InFuture()` | the value isn't after the moment of the validation | Should be in the future |
 | `Custom(fn)` | `fn` returns errors | your messages, see [Custom rules](custom.md) |
 | `When(fn)` | — | the next rules are applied only if `fn` returns true, see [Conditions](conditions.md) |
 
-The times in the messages are formatted by RFC 3339. `Before`, `After` and `Between` take the bounds of the configuration; for a bound from another field of the object use a [struct custom rule](custom.md#struct-rules).
+The times in the messages are formatted by RFC 3339. `Before`, `After` and `Between` take the bounds of the configuration, `BeforeField` and `AfterField` — of another field of the object.
 
 ## Example
 

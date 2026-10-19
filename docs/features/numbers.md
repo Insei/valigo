@@ -24,7 +24,7 @@ b.Field(&p.Stock).As(num.Of).Max(limit) // doesn't compile: int32 isn't int
 b.Field(&p.Discount).As(num.Of)         // doesn't compile: *uint8 isn't a number, use num.Ptr
 ```
 
-Slices of numbers are configured by `Slice` with the conversion of the elements: `b.Slice(&p.Sizes).Each(func(e *shared.Field[int]) { e.As(num.Of).Min(1) })`, see [Slices](slices.md).
+Slices of numbers are converted by `num.Slice`: `b.Slice(&p.Sizes).As(num.Slice).Each(func(e *num.BaseConfigurator[int]) { e.Min(1) })`, see [Slices](slices.md).
 
 ## Rules
 
@@ -33,6 +33,7 @@ Slices of numbers are configured by `Slice` with the conversion of the elements:
 | `Required()` | `num.Of`: the value is zero; `num.Ptr`: the value is absent | Should be fulfilled |
 | `Min(n)` | the value is less than `n` | Cannot be less than %v |
 | `Max(n)` | the value is greater than `n` | Cannot be greater than %v |
+| `MinField(&m.X)`, `MaxField(&m.X)` | the value is less or greater than the value of the field `X`, see [Rules on other fields](fields.md) | Cannot be less than %v, Cannot be greater than %v |
 | `AnyOf(values...)` | the value isn't one of `values` | Only %v values is allowed |
 | `AnyOfInterval(begin, end)` | the value is outside `[begin, end]`, both ends are included | Only interval[%v - %v] is allowed |
 | `Custom(fn)` | `fn` returns errors | your messages, see [Custom rules](custom.md) |
