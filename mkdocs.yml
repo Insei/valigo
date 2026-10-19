@@ -97,6 +97,7 @@ nav:
       - Translations: features/translations.md
       - HTTP problem details: features/problem.md
   - Integrations:
+      - JSON Schema: features/schema.md
       - huma: features/huma.md
       - gin: features/gin.md
       - echo: features/echo.md
@@ -147,7 +148,8 @@ plugins:
           - features/translations.md: locales, plural forms, languages from the context
           - features/problem.md: problem details of RFC 9457
         Integrations:
-          - features/huma.md: huma inputs
+          - features/schema.md: the rules as the keywords of JSON Schema, Validator.Constraints
+          - features/huma.md: huma inputs, the rules in the OpenAPI document
           - features/gin.md: gin binding
           - features/echo.md: echo validator
         Architecture:
