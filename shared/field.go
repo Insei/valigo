@@ -12,21 +12,22 @@ import (
 // ValidationFn validates an object, obj is a pointer to the configured struct.
 type ValidationFn func(ctx context.Context, h Helper, obj any) []Error
 
-// CheckFn checks a single value: a struct field or a slice element.
+// checkFn checks a single value: a struct field or a slice element.
 // v is nil when the value is absent, i.e. a nil pointer field or a field of a nil nested struct.
-type CheckFn[T any] func(ctx context.Context, h Helper, v *T) []Error
+type checkFn[T any] func(ctx context.Context, h Helper, v *T) []Error
 
-// Field is a typed rules set for a single value.
-// It doesn't know where the value comes from, the source is hidden behind the add function.
+// Field is a typed rules set for a single value: a struct field or every element of a slice.
 type Field[T any] struct {
 	field fmap.Field
 	h     Helper
-	add   func(fn CheckFn[T])
+	add   func(fn checkFn[T])
 }
 
-// NewField creates a new Field, add registers a check on the value source (see FieldSource and EachSource).
-func NewField[T any](field fmap.Field, h Helper, add func(fn CheckFn[T])) *Field[T] {
-	return &Field[T]{field: field, h: h, add: add}
+// NewValueField creates a Field for the struct field of type T or *T,
+// named types with the same underlying layout are allowed.
+// add registers a validation function of the configured struct.
+func NewValueField[T any](field fmap.Field, h Helper, add func(fn ValidationFn)) *Field[T] {
+	return &Field[T]{field: field, h: h, add: fieldSource(add, valueGetter[T](field))}
 }
 
 // Check adds a rule that fails when ok returns false. Absent values are skipped.
@@ -83,21 +84,21 @@ func (f *Field[T]) When(cond func(ctx context.Context, value T) bool) *Field[T] 
 		return f
 	}
 	add := f.add
-	return NewField(f.field, f.h, func(fn CheckFn[T]) {
+	return &Field[T]{field: f.field, h: f.h, add: func(fn checkFn[T]) {
 		add(func(ctx context.Context, h Helper, v *T) []Error {
 			if v == nil || !cond(ctx, *v) {
 				return nil
 			}
 			return fn(ctx, h, v)
 		})
-	})
+	}}
 }
 
-// FieldSource applies checks to the struct field value read by get.
+// fieldSource applies checks to the struct field value read by get.
 // All checks of the field are registered as a single validation function, so the value is read once.
-func FieldSource[T any](add func(fn ValidationFn), get func(obj any) *T) func(fn CheckFn[T]) {
-	var checks []CheckFn[T]
-	return func(fn CheckFn[T]) {
+func fieldSource[T any](add func(fn ValidationFn), get func(obj any) *T) func(fn checkFn[T]) {
+	var checks []checkFn[T]
+	return func(fn checkFn[T]) {
 		checks = append(checks, fn)
 		if len(checks) > 1 {
 			return
@@ -113,15 +114,19 @@ func FieldSource[T any](add func(fn ValidationFn), get func(obj any) *T) func(fn
 	}
 }
 
-// ValueGetter returns a function that reads a pointer to the T value of the field from obj.
+// valueGetter returns a function that reads a pointer to the T value of the field from obj.
 // The field type must be T or *T, named types with the same underlying layout are allowed.
 // The returned function returns nil when the value is absent.
-func ValueGetter[T any](field fmap.Field) func(obj any) *T {
-	isPtr := field.GetType().Kind() == reflect.Pointer
-	mustLayout[T](field, field.GetDereferencedType())
+func valueGetter[T any](field fmap.Field) func(obj any) *T {
+	isPtr := field.GetType().Kind() == reflect.Pointer && reflect.TypeFor[T]().Kind() != reflect.Pointer
+	t := field.GetType()
+	if isPtr {
+		t = t.Elem()
+	}
+	mustLayout[T](field, t)
 	if isPtr {
 		return func(obj any) *T {
-			p := (**T)(DataPtr(field.GetPtr(obj)))
+			p := (**T)(dataPtr(field.GetPtr(obj)))
 			if p == nil {
 				return nil
 			}
@@ -129,12 +134,12 @@ func ValueGetter[T any](field fmap.Field) func(obj any) *T {
 		}
 	}
 	return func(obj any) *T {
-		return (*T)(DataPtr(field.GetPtr(obj)))
+		return (*T)(dataPtr(field.GetPtr(obj)))
 	}
 }
 
-// DataPtr returns the data pointer of the interface value, i.e. the pointer itself for pointer values.
-func DataPtr(v any) unsafe.Pointer {
+// dataPtr returns the data pointer of the interface value, i.e. the pointer itself for pointer values.
+func dataPtr(v any) unsafe.Pointer {
 	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1]
 }
 

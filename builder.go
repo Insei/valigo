@@ -106,45 +106,41 @@ func (c Configurator[T]) Custom(fn func(ctx context.Context, h shared.StructCust
 // String returns a configurator for a string or *string field.
 func (c Configurator[T]) String[F ~string | *string](fieldPtr *F) *str.BaseConfigurator {
 	field := c.field(fieldPtr)
-	get := shared.ValueGetter[string](field)
-	return str.NewBaseConfigurator(shared.NewField(field, c.b.v.helper, shared.FieldSource(c.add, get)))
+	return str.NewBaseConfigurator(shared.NewValueField[string](field, c.b.v.helper, c.add))
 }
 
 // Number returns a configurator for a numeric field.
 func (c Configurator[T]) Number[N num.Number](fieldPtr *N) *num.BaseConfigurator[N] {
 	field := c.field(fieldPtr)
-	get := shared.ValueGetter[N](field)
-	return num.NewBaseConfigurator(shared.NewField(field, c.b.v.helper, shared.FieldSource(c.add, get)), false)
+	return num.NewBaseConfigurator(shared.NewValueField[N](field, c.b.v.helper, c.add), false)
 }
 
 // NumberPtr returns a configurator for a pointer to numeric field, nil values are skipped by all rules except Required.
 func (c Configurator[T]) NumberPtr[N num.Number](fieldPtr **N) *num.BaseConfigurator[N] {
 	field := c.field(fieldPtr)
-	get := shared.ValueGetter[N](field)
-	return num.NewBaseConfigurator(shared.NewField(field, c.b.v.helper, shared.FieldSource(c.add, get)), true)
+	return num.NewBaseConfigurator(shared.NewValueField[N](field, c.b.v.helper, c.add), true)
 }
 
 // UUID returns a configurator for an uuid.UUID or *uuid.UUID field.
 func (c Configurator[T]) UUID[F guuid.UUID | *guuid.UUID](fieldPtr *F) *uuid.BaseConfigurator {
 	field := c.field(fieldPtr)
-	get := shared.ValueGetter[guuid.UUID](field)
-	return uuid.NewBaseConfigurator(shared.NewField(field, c.b.v.helper, shared.FieldSource(c.add, get)))
+	return uuid.NewBaseConfigurator(shared.NewValueField[guuid.UUID](field, c.b.v.helper, c.add))
 }
 
 // Slice returns a configurator for a slice field.
 func (c Configurator[T]) Slice[E any](sliceFieldPtr *[]E) *shared.SliceFieldConfigurator[E] {
 	field := c.field(sliceFieldPtr)
-	return shared.NewSliceFieldConfigurator(field, c.b.v.helper, shared.ElemsGetter[E](field), c.add)
+	return shared.NewSliceFieldConfigurator[E](field, c.b.v.helper, c.add)
 }
 
 // StringSlice returns a configurator for a slice of strings field.
 func (c Configurator[T]) StringSlice[F []string | *[]string | []*string | *[]*string](sliceFieldPtr *F) *str.StringSliceFieldConfigurator {
 	field := c.field(sliceFieldPtr)
-	return str.NewStringSliceFieldConfigurator(shared.NewSliceFieldConfigurator(field, c.b.v.helper, shared.ElemsGetter[string](field), c.add))
+	return str.NewStringSliceFieldConfigurator(shared.NewSliceFieldConfigurator[string](field, c.b.v.helper, c.add))
 }
 
 // UUIDSlice returns a configurator for a slice of uuids field.
 func (c Configurator[T]) UUIDSlice[F []guuid.UUID | *[]guuid.UUID | []*guuid.UUID | *[]*guuid.UUID](sliceFieldPtr *F) *uuid.UUIDSliceFieldConfigurator {
 	field := c.field(sliceFieldPtr)
-	return uuid.NewUUIDSliceFieldConfigurator(shared.NewSliceFieldConfigurator(field, c.b.v.helper, shared.ElemsGetter[guuid.UUID](field), c.add))
+	return uuid.NewUUIDSliceFieldConfigurator(shared.NewSliceFieldConfigurator[guuid.UUID](field, c.b.v.helper, c.add))
 }
