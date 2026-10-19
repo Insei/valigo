@@ -31,5 +31,6 @@ Reference of valigo capabilities grouped by area.
 |---|---|
 | [Errors](errors.md) | `Validate` and `ValidateTyped`, `shared.Error`, locations of fields and elements, errors transformer |
 | [HTTP problem details](problem.md) | `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers and codes |
+| [gin](gin.md) | the module `github.com/insei/valigo/gin`: the `binding.StructValidator` of gin and validation with the language of the request |
 | [huma](huma.md) | the module `github.com/insei/valigo/huma`: valigo rules in the `Resolve` of huma inputs |
 | [Translations](translations.md) | Built-in locales, own messages, languages from the context, `Accept-Language` middleware |
