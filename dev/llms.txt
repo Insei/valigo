@@ -2,7 +2,7 @@
 
 > Typed, zero allocation validation of Go structs, rules are configured by pointers to the fields
 
-valigo validates Go structs by rules configured once with pointers to the fields of a model: b.Field(&u.Name).As(str.Of).Required().MaxLen(64). The configurator has Field, Slice, Map, When and Custom, As converts a field to the configurator of its type by a conversion with a type constraint (str.Of, num.Of, num.Ptr, timex.Of, eq.Of, str.Slice...), so the compiler checks the field types and the rule arguments (Go 1.27 generic methods). Validation of valid objects doesn't allocate, absent values are skipped by all rules except Required, errors have field locations, translated messages (en, de, es, fr, ru), stable codes and named params; the problem package writes RFC 9457 problem details, the github.com/insei/valigo/huma module validates huma inputs. The module path is github.com/insei/valigo.
+valigo validates Go structs by rules configured once with pointers to the fields of a model: b.Field(&u.Name).As(str.Of).Required().MaxLen(64). The configurator has Field, Slice, Map, When and Custom, As converts a field to the configurator of its type by a conversion with a type constraint (str.Of, num.Of, num.Ptr, timex.Of, eq.Of, str.Slice...), so the compiler checks the field types and the rule arguments (Go 1.27 generic methods). Validation of valid objects doesn't allocate, absent values are skipped by all rules except Required, errors have field locations, translated messages (en, de, es, fr, ru), stable codes and named params; the problem package writes RFC 9457 problem details, the github.com/insei/valigo/integrations/huma module validates huma inputs. The module path is github.com/insei/valigo.
 
 ## Start
 

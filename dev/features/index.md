@@ -44,9 +44,9 @@ What a validation returns.
 
 The separate modules for the frameworks.
 
-| Page                                                                          | What's inside                                                                                                                    |
-| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md) | the rules as the keywords of JSON Schema for the generators of API schemas, `Constraints`                                        |
-| [huma](https://insei.github.io/valigo/latest/features/huma/index.md)          | `github.com/insei/valigo/huma`: the rules in the `Resolve` of huma inputs with the locations of huma and in its OpenAPI document |
-| [gin](https://insei.github.io/valigo/latest/features/gin/index.md)            | `github.com/insei/valigo/gin`: the `binding.StructValidator` of gin and validation with the language of the request              |
-| [echo](https://insei.github.io/valigo/latest/features/echo/index.md)          | `github.com/insei/valigo/echo`: the `echo.Validator` and validation with the language of the request                             |
+| Page                                                                          | What's inside                                                                                                                                 |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md) | the rules as the keywords of JSON Schema for the generators of API schemas, `Constraints`                                                     |
+| [huma](https://insei.github.io/valigo/latest/features/huma/index.md)          | `github.com/insei/valigo/integrations/huma`: the rules in the `Resolve` of huma inputs with the locations of huma and in its OpenAPI document |
+| [gin](https://insei.github.io/valigo/latest/features/gin/index.md)            | `github.com/insei/valigo/integrations/gin`: the `binding.StructValidator` of gin and validation with the language of the request              |
+| [echo](https://insei.github.io/valigo/latest/features/echo/index.md)          | `github.com/insei/valigo/integrations/echo`: the `echo.Validator` and validation with the language of the request                             |

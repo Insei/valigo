@@ -1,9 +1,9 @@
 # gin
 
-The module `github.com/insei/valigo/gin` validates the requests of [gin](https://gin-gonic.com) by valigo.
+The module `github.com/insei/valigo/integrations/gin` validates the requests of [gin](https://gin-gonic.com) by valigo.
 
 ```bash
-go get github.com/insei/valigo/gin@latest
+go get github.com/insei/valigo/integrations/gin@latest
 ```
 
 - `vgin.New(v)` is the `binding.StructValidator` of gin: set `binding.Validator = vgin.New(v)`, and `c.ShouldBindJSON` and the other binding methods validate the requests by the rules of valigo. Slices are validated element by element, the location of an error has the index: `[1].email`.
@@ -26,7 +26,7 @@ import (
     "github.com/gin-gonic/gin/binding"
     "github.com/insei/fmap/v3"
     "github.com/insei/valigo"
-    vgin "github.com/insei/valigo/gin"
+    vgin "github.com/insei/valigo/integrations/gin"
     "github.com/insei/valigo/problem"
     "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"

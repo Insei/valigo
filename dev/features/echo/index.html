@@ -1678,8 +1678,8 @@
 
 
 <h1 id="echo">echo<a class="headerlink" href="#echo" title="Permanent link">&para;</a></h1>
-<p>The module <code>github.com/insei/valigo/echo</code> validates the requests of <a href="https://echo.labstack.com">echo</a> by valigo.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/insei/valigo/echo@latest
+<p>The module <code>github.com/insei/valigo/integrations/echo</code> validates the requests of <a href="https://echo.labstack.com">echo</a> by valigo.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/insei/valigo/integrations/echo@latest
 </span></code></pre></div>
 <ul>
 <li><code>vecho.New(v)</code> is the <code>echo.Validator</code>: set <code>e.Validator = vecho.New(v)</code>, and <code>c.Validate(&amp;req)</code> validates by the rules of valigo.</li>
@@ -1697,7 +1697,7 @@
 </span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="s">"strings"</span>
 </span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
 </span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nx">vecho</span><span class="w"> </span><span class="s">"github.com/insei/valigo/echo"</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nx">vecho</span><span class="w"> </span><span class="s">"github.com/insei/valigo/integrations/echo"</span>
 </span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/rules/str"</span>
 </span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/shared"</span>
 </span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="s">"github.com/labstack/echo/v4"</span>

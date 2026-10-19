@@ -1678,8 +1678,8 @@
 
 
 <h1 id="gin">gin<a class="headerlink" href="#gin" title="Permanent link">&para;</a></h1>
-<p>The module <code>github.com/insei/valigo/gin</code> validates the requests of <a href="https://gin-gonic.com">gin</a> by valigo.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/insei/valigo/gin@latest
+<p>The module <code>github.com/insei/valigo/integrations/gin</code> validates the requests of <a href="https://gin-gonic.com">gin</a> by valigo.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/insei/valigo/integrations/gin@latest
 </span></code></pre></div>
 <ul>
 <li><code>vgin.New(v)</code> is the <code>binding.StructValidator</code> of gin: set <code>binding.Validator = vgin.New(v)</code>, and <code>c.ShouldBindJSON</code> and the other binding methods validate the requests by the rules of valigo. Slices are validated element by element, the location of an error has the index: <code>[1].email</code>.</li>
@@ -1700,7 +1700,7 @@
 </span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="s">"github.com/gin-gonic/gin/binding"</span>
 </span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="s">"github.com/insei/fmap/v3"</span>
 </span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="nx">vgin</span><span class="w"> </span><span class="s">"github.com/insei/valigo/gin"</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="nx">vgin</span><span class="w"> </span><span class="s">"github.com/insei/valigo/integrations/gin"</span>
 </span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/problem"</span>
 </span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/rules/str"</span>
 </span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/shared"</span>

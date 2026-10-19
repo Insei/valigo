@@ -1,9 +1,9 @@
 # echo
 
-The module `github.com/insei/valigo/echo` validates the requests of [echo](https://echo.labstack.com) by valigo.
+The module `github.com/insei/valigo/integrations/echo` validates the requests of [echo](https://echo.labstack.com) by valigo.
 
 ```bash
-go get github.com/insei/valigo/echo@latest
+go get github.com/insei/valigo/integrations/echo@latest
 ```
 
 - `vecho.New(v)` is the `echo.Validator`: set `e.Validator = vecho.New(v)`, and `c.Validate(&req)` validates by the rules of valigo.
@@ -23,7 +23,7 @@ import (
     "strings"
 
     "github.com/insei/valigo"
-    vecho "github.com/insei/valigo/echo"
+    vecho "github.com/insei/valigo/integrations/echo"
     "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
     "github.com/labstack/echo/v4"

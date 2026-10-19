@@ -2,7 +2,7 @@
 
 > Typed, zero allocation validation of Go structs, rules are configured by pointers to the fields
 
-valigo validates Go structs by rules configured once with pointers to the fields of a model: b.Field(&u.Name).As(str.Of).Required().MaxLen(64). The configurator has Field, Slice, Map, When and Custom, As converts a field to the configurator of its type by a conversion with a type constraint (str.Of, num.Of, num.Ptr, timex.Of, eq.Of, str.Slice...), so the compiler checks the field types and the rule arguments (Go 1.27 generic methods). Validation of valid objects doesn't allocate, absent values are skipped by all rules except Required, errors have field locations, translated messages (en, de, es, fr, ru), stable codes and named params; the problem package writes RFC 9457 problem details, the github.com/insei/valigo/huma module validates huma inputs. The module path is github.com/insei/valigo.
+valigo validates Go structs by rules configured once with pointers to the fields of a model: b.Field(&u.Name).As(str.Of).Required().MaxLen(64). The configurator has Field, Slice, Map, When and Custom, As converts a field to the configurator of its type by a conversion with a type constraint (str.Of, num.Of, num.Ptr, timex.Of, eq.Of, str.Slice...), so the compiler checks the field types and the rule arguments (Go 1.27 generic methods). Validation of valid objects doesn't allocate, absent values are skipped by all rules except Required, errors have field locations, translated messages (en, de, es, fr, ru), stable codes and named params; the problem package writes RFC 9457 problem details, the github.com/insei/valigo/integrations/huma module validates huma inputs. The module path is github.com/insei/valigo.
 
 # Start
 
@@ -161,7 +161,7 @@ The rules of a slice check the slice itself and, by `Each`, every element with t
 
 ### Ready for HTTP APIs
 
-The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) and [huma](https://insei.github.io/valigo/latest/features/huma/index.md).
+The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/integrations/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) and [huma](https://insei.github.io/valigo/latest/features/huma/index.md).
 
 ### Errors that point to the field
 
@@ -233,23 +233,24 @@ Every pull request gets a comment with the benchmarks of the core compared with 
 
 Rules are still configured by pointers to the fields of the model, but the configurator is typed now and knows nothing about the types of the values: a field is converted to the configurator of its type by `As`. Go 1.27 is required.
 
-| v0.0.x                                                                             | Now                                                                                                         |
-| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `github.com/insei/valigo/str`, `github.com/insei/valigo/num`                       | `github.com/insei/valigo/rules/str`, `github.com/insei/valigo/rules/num`, also `rules/eq` and `rules/timex` |
-| `github.com/insei/valigo/uuid` of the core module                                  | the separate module `github.com/insei/valigo/rules/uuid`                                                    |
-| `b.String(&u.Name)`                                                                | `b.Field(&u.Name).As(str.Of)`                                                                               |
-| `b.Number(&u.Age)`                                                                 | `b.Field(&u.Age).As(num.Of)`                                                                                |
-| `b.Number(&u.Score)` for `*int`                                                    | `b.Field(&u.Score).As(num.Ptr)`                                                                             |
-| `b.UUID(&u.ID)`                                                                    | `b.Field(&u.ID).As(vuuid.Of)` of the separate module `github.com/insei/valigo/rules/uuid`                   |
-| `b.StringSlice(&u.Tags)`                                                           | `b.Slice(&u.Tags).As(str.Slice)`, for `*[]string`: `b.Field(&u.Tags).As(shared.SlicePtr).As(str.Slice)`     |
-| `b.UUIDSlice(&u.IDs)`                                                              | `b.Slice(&u.IDs).As(vuuid.Slice)`                                                                           |
-| `b.Slice(any)` with `Custom(func(ctx, h, value []*any) ...)`                       | `b.Slice(&u.Items)` with `Custom(func(ctx, h, value shared.Elems[E]) ...)` and `Each`                       |
-| `Configurator[T]` is an interface                                                  | a struct with generic methods, the signature of the `Configure` function is the same                        |
-| field configurators are interfaces: `str.BaseConfigurator`, `num.BaseConfigurator` | pointers to concrete types: `*str.BaseConfigurator`, `*num.BaseConfigurator[N]`, `*vuuid.BaseConfigurator`  |
-| `Max(any)`, `Min(any)`, `AnyOf(...any)`, `AnyOfInterval(any, any)`                 | the arguments have the type of the field, `Max(5)` works for `int64`                                        |
-| `Custom(func(ctx, h, value any) ...)`, `When(func(ctx, value any) bool)` of fields | the value is typed: `string`, the number type, `uuid.UUID`                                                  |
-| `StringSlice(...).MaxLen(n)`                                                       | the same: the number of elements; rules on elements are set by `Each`                                       |
-| `shared.NewSliceFieldConfigurator(params)`, `shared.FieldConfigurator`             | `shared.NewSliceFieldConfigurator(field, helper, fields, add, describe)`, `shared.Field[T]`                 |
+| v0.0.x                                                                             | Now                                                                                                                            |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `github.com/insei/valigo/str`, `github.com/insei/valigo/num`                       | `github.com/insei/valigo/rules/str`, `github.com/insei/valigo/rules/num`, also `rules/eq` and `rules/timex`                    |
+| `github.com/insei/valigo/uuid` of the core module                                  | the separate module `github.com/insei/valigo/rules/uuid`                                                                       |
+| —                                                                                  | the integrations are the separate modules `github.com/insei/valigo/integrations/huma`, `integrations/gin`, `integrations/echo` |
+| `b.String(&u.Name)`                                                                | `b.Field(&u.Name).As(str.Of)`                                                                                                  |
+| `b.Number(&u.Age)`                                                                 | `b.Field(&u.Age).As(num.Of)`                                                                                                   |
+| `b.Number(&u.Score)` for `*int`                                                    | `b.Field(&u.Score).As(num.Ptr)`                                                                                                |
+| `b.UUID(&u.ID)`                                                                    | `b.Field(&u.ID).As(vuuid.Of)` of the separate module `github.com/insei/valigo/rules/uuid`                                      |
+| `b.StringSlice(&u.Tags)`                                                           | `b.Slice(&u.Tags).As(str.Slice)`, for `*[]string`: `b.Field(&u.Tags).As(shared.SlicePtr).As(str.Slice)`                        |
+| `b.UUIDSlice(&u.IDs)`                                                              | `b.Slice(&u.IDs).As(vuuid.Slice)`                                                                                              |
+| `b.Slice(any)` with `Custom(func(ctx, h, value []*any) ...)`                       | `b.Slice(&u.Items)` with `Custom(func(ctx, h, value shared.Elems[E]) ...)` and `Each`                                          |
+| `Configurator[T]` is an interface                                                  | a struct with generic methods, the signature of the `Configure` function is the same                                           |
+| field configurators are interfaces: `str.BaseConfigurator`, `num.BaseConfigurator` | pointers to concrete types: `*str.BaseConfigurator`, `*num.BaseConfigurator[N]`, `*vuuid.BaseConfigurator`                     |
+| `Max(any)`, `Min(any)`, `AnyOf(...any)`, `AnyOfInterval(any, any)`                 | the arguments have the type of the field, `Max(5)` works for `int64`                                                           |
+| `Custom(func(ctx, h, value any) ...)`, `When(func(ctx, value any) bool)` of fields | the value is typed: `string`, the number type, `uuid.UUID`                                                                     |
+| `StringSlice(...).MaxLen(n)`                                                       | the same: the number of elements; rules on elements are set by `Each`                                                          |
+| `shared.NewSliceFieldConfigurator(params)`, `shared.FieldConfigurator`             | `shared.NewSliceFieldConfigurator(field, helper, fields, add, describe)`, `shared.Field[T]`                                    |
 
 ## Behavior changes
 
@@ -339,12 +340,12 @@ What a validation returns.
 
 The separate modules for the frameworks.
 
-| Page                                                                          | What's inside                                                                                                                    |
-| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md) | the rules as the keywords of JSON Schema for the generators of API schemas, `Constraints`                                        |
-| [huma](https://insei.github.io/valigo/latest/features/huma/index.md)          | `github.com/insei/valigo/huma`: the rules in the `Resolve` of huma inputs with the locations of huma and in its OpenAPI document |
-| [gin](https://insei.github.io/valigo/latest/features/gin/index.md)            | `github.com/insei/valigo/gin`: the `binding.StructValidator` of gin and validation with the language of the request              |
-| [echo](https://insei.github.io/valigo/latest/features/echo/index.md)          | `github.com/insei/valigo/echo`: the `echo.Validator` and validation with the language of the request                             |
+| Page                                                                          | What's inside                                                                                                                                 |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md) | the rules as the keywords of JSON Schema for the generators of API schemas, `Constraints`                                                     |
+| [huma](https://insei.github.io/valigo/latest/features/huma/index.md)          | `github.com/insei/valigo/integrations/huma`: the rules in the `Resolve` of huma inputs with the locations of huma and in its OpenAPI document |
+| [gin](https://insei.github.io/valigo/latest/features/gin/index.md)            | `github.com/insei/valigo/integrations/gin`: the `binding.StructValidator` of gin and validation with the language of the request              |
+| [echo](https://insei.github.io/valigo/latest/features/echo/index.md)          | `github.com/insei/valigo/integrations/echo`: the `echo.Validator` and validation with the language of the request                             |
 
 # Validator and Configure
 
@@ -2347,14 +2348,14 @@ func (c *RatioConfigurator) Percent() *RatioConfigurator {
 
 # huma
 
-The module `github.com/insei/valigo/huma` validates the inputs of [huma](https://huma.rocks) operations by valigo. The errors are the error details of huma with its locations — `body.email`, `query.limit`, `path.id` — in the 422 response of huma, and the messages are translated to the languages of the `Accept-Language` header.
+The module `github.com/insei/valigo/integrations/huma` validates the inputs of [huma](https://huma.rocks) operations by valigo. The errors are the error details of huma with its locations — `body.email`, `query.limit`, `path.id` — in the 422 response of huma, and the messages are translated to the languages of the `Accept-Language` header.
 
 ```bash
-go get github.com/insei/valigo/huma@latest
+go get github.com/insei/valigo/integrations/huma@latest
 ```
 
 ```go
-import vhuma "github.com/insei/valigo/huma"
+import vhuma "github.com/insei/valigo/integrations/huma"
 
 var validator = valigo.New(valigo.WithFieldLocationNamingFn(vhuma.Location))
 
@@ -2385,7 +2386,7 @@ import (
     "github.com/danielgtaylor/huma/v2"
     "github.com/danielgtaylor/huma/v2/adapters/humago"
     "github.com/insei/valigo"
-    vhuma "github.com/insei/valigo/huma"
+    vhuma "github.com/insei/valigo/integrations/huma"
     "github.com/insei/valigo/rules/num"
     "github.com/insei/valigo/rules/str"
 )
@@ -2481,7 +2482,7 @@ import (
     "github.com/danielgtaylor/huma/v2"
     "github.com/danielgtaylor/huma/v2/adapters/humago"
     "github.com/insei/valigo"
-    vhuma "github.com/insei/valigo/huma"
+    vhuma "github.com/insei/valigo/integrations/huma"
     "github.com/insei/valigo/rules/str"
 )
 
@@ -2554,10 +2555,10 @@ Output:
 
 # gin
 
-The module `github.com/insei/valigo/gin` validates the requests of [gin](https://gin-gonic.com) by valigo.
+The module `github.com/insei/valigo/integrations/gin` validates the requests of [gin](https://gin-gonic.com) by valigo.
 
 ```bash
-go get github.com/insei/valigo/gin@latest
+go get github.com/insei/valigo/integrations/gin@latest
 ```
 
 - `vgin.New(v)` is the `binding.StructValidator` of gin: set `binding.Validator = vgin.New(v)`, and `c.ShouldBindJSON` and the other binding methods validate the requests by the rules of valigo. Slices are validated element by element, the location of an error has the index: `[1].email`.
@@ -2580,7 +2581,7 @@ import (
     "github.com/gin-gonic/gin/binding"
     "github.com/insei/fmap/v3"
     "github.com/insei/valigo"
-    vgin "github.com/insei/valigo/gin"
+    vgin "github.com/insei/valigo/integrations/gin"
     "github.com/insei/valigo/problem"
     "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
@@ -2639,10 +2640,10 @@ To validate by the binding methods instead, set `binding.Validator = vgin.New(v)
 
 # echo
 
-The module `github.com/insei/valigo/echo` validates the requests of [echo](https://echo.labstack.com) by valigo.
+The module `github.com/insei/valigo/integrations/echo` validates the requests of [echo](https://echo.labstack.com) by valigo.
 
 ```bash
-go get github.com/insei/valigo/echo@latest
+go get github.com/insei/valigo/integrations/echo@latest
 ```
 
 - `vecho.New(v)` is the `echo.Validator`: set `e.Validator = vecho.New(v)`, and `c.Validate(&req)` validates by the rules of valigo.
@@ -2662,7 +2663,7 @@ import (
     "strings"
 
     "github.com/insei/valigo"
-    vecho "github.com/insei/valigo/echo"
+    vecho "github.com/insei/valigo/integrations/echo"
     "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
     "github.com/labstack/echo/v4"
@@ -2753,16 +2754,16 @@ The rules append their errors to one pooled buffer of the validation, and `Valid
 
 ## Packages
 
-| Package                                             | Contents                                                                                                                                                                                 |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `valigo`                                            | `Validator`, `Configure`, `Configurator` with `Field`, `Slice`, `Map`, `When`, `Custom` and `Tags`, options                                                                              |
-| `internal/zero`, `internal/helper`, `internal/tags` | the allocation of the models of `Configure`, the helper of the errors with the translator and the locations, the rules of the tags                                                       |
-| `shared`                                            | the rules core `Field[T]`, slice configurator and `Elems[E]`, `As` and the conversions `Deref`, `Retype`, `RetypeSlice`, `SlicePtr`, `SliceRules`, `Error`, helpers                      |
-| `rules/str`, `rules/num`, `rules/timex`, `rules/eq` | configurators of strings, numbers, times and comparable values built on `shared.Field[T]`, their conversions `str.Of`, `num.Of`, `num.Ptr`, `timex.Of`, `eq.Of`... and slice conversions |
-| `problem`                                           | the problem details of RFC 9457                                                                                                                                                          |
-| `github.com/insei/valigo/rules/uuid`                | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package                                                                                |
-| `github.com/insei/valigo/huma`                      | the separate module of the inputs of huma operations                                                                                                                                     |
-| `translator`                                        | translator, in-memory storage, built-in locales, `Accept-Language` middleware                                                                                                            |
+| Package                                                                              | Contents                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valigo`                                                                             | `Validator`, `Configure`, `Configurator` with `Field`, `Slice`, `Map`, `When`, `Custom` and `Tags`, options                                                                              |
+| `internal/zero`, `internal/helper`, `internal/tags`                                  | the allocation of the models of `Configure`, the helper of the errors with the translator and the locations, the rules of the tags                                                       |
+| `shared`                                                                             | the rules core `Field[T]`, slice configurator and `Elems[E]`, `As` and the conversions `Deref`, `Retype`, `RetypeSlice`, `SlicePtr`, `SliceRules`, `Error`, helpers                      |
+| `rules/str`, `rules/num`, `rules/timex`, `rules/eq`                                  | configurators of strings, numbers, times and comparable values built on `shared.Field[T]`, their conversions `str.Of`, `num.Of`, `num.Ptr`, `timex.Of`, `eq.Of`... and slice conversions |
+| `problem`                                                                            | the problem details of RFC 9457                                                                                                                                                          |
+| `github.com/insei/valigo/rules/uuid`                                                 | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package                                                                                |
+| `github.com/insei/valigo/integrations/huma`, `integrations/gin`, `integrations/echo` | the separate modules of huma, gin and echo                                                                                                                                               |
+| `translator`                                                                         | translator, in-memory storage, built-in locales, `Accept-Language` middleware                                                                                                            |
 
 ## Contributing
 

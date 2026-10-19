@@ -1700,10 +1700,10 @@
 
 
 <h1 id="huma">huma<a class="headerlink" href="#huma" title="Permanent link">&para;</a></h1>
-<p>The module <code>github.com/insei/valigo/huma</code> validates the inputs of <a href="https://huma.rocks">huma</a> operations by valigo. The errors are the error details of huma with its locations — <code>body.email</code>, <code>query.limit</code>, <code>path.id</code> — in the 422 response of huma, and the messages are translated to the languages of the <code>Accept-Language</code> header.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/insei/valigo/huma@latest
+<p>The module <code>github.com/insei/valigo/integrations/huma</code> validates the inputs of <a href="https://huma.rocks">huma</a> operations by valigo. The errors are the error details of huma with its locations — <code>body.email</code>, <code>query.limit</code>, <code>path.id</code> — in the 422 response of huma, and the messages are translated to the languages of the <code>Accept-Language</code> header.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/insei/valigo/integrations/huma@latest
 </span></code></pre></div>
-<div class="language-go highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nx">vhuma</span><span class="w"> </span><span class="s">"github.com/insei/valigo/huma"</span>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nx">vhuma</span><span class="w"> </span><span class="s">"github.com/insei/valigo/integrations/huma"</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kd">var</span><span class="w"> </span><span class="nx">validator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">valigo</span><span class="p">.</span><span class="nx">WithFieldLocationNamingFn</span><span class="p">(</span><span class="nx">vhuma</span><span class="p">.</span><span class="nx">Location</span><span class="p">))</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
@@ -1731,7 +1731,7 @@
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="s">"github.com/danielgtaylor/huma/v2"</span>
 </span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="s">"github.com/danielgtaylor/huma/v2/adapters/humago"</span>
 </span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="nx">vhuma</span><span class="w"> </span><span class="s">"github.com/insei/valigo/huma"</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="nx">vhuma</span><span class="w"> </span><span class="s">"github.com/insei/valigo/integrations/huma"</span>
 </span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/rules/num"</span>
 </span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/rules/str"</span>
 </span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="p">)</span>
@@ -1818,7 +1818,7 @@
 </span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="s">"github.com/danielgtaylor/huma/v2"</span>
 </span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">    </span><span class="s">"github.com/danielgtaylor/huma/v2/adapters/humago"</span>
 </span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="nx">vhuma</span><span class="w"> </span><span class="s">"github.com/insei/valigo/huma"</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">    </span><span class="nx">vhuma</span><span class="w"> </span><span class="s">"github.com/insei/valigo/integrations/huma"</span>
 </span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/rules/str"</span>
 </span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="p">)</span>
 </span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>
