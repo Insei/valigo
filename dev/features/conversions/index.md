@@ -59,7 +59,8 @@ A conversion of your type is a function that takes the base configurator and ret
 - `shared.Deref` converts the rules of `*T` to the rules of `T`, a nil pointer is absent;
 - `shared.Retype` converts the rules of `T` to the rules of `U` with the same memory layout, e.g. of a named type;
 - `shared.RetypeSlice` does the same for a slice configurator, also for the elements stored by pointer;
-- `shared.SliceRules` gives `Required`, `MinLen`, `MaxLen`, `Custom` and `When` of the slice to your slice configurator, see the source of `str.Slice`.
+- `shared.SliceRules` gives `Required`, `MinLen`, `MaxLen`, `Custom` and `When` of the slice to your slice configurator, see the source of `str.Slice`;
+- `CheckMsg` and `RequiredMsg` take a message of `shared.M` with a stable [code](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients) and named parameters: `c.f.CheckMsg(ok, shared.M("time.after", key, shared.P("time", t)))`.
 
 A configurator of `time.Time` (the built-in one is [`timex`](https://insei.github.io/valigo/latest/features/time/index.md), this one shows how it's made):
 

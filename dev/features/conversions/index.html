@@ -1388,7 +1388,8 @@
 <li><code>shared.Deref</code> converts the rules of <code>*T</code> to the rules of <code>T</code>, a nil pointer is absent;</li>
 <li><code>shared.Retype</code> converts the rules of <code>T</code> to the rules of <code>U</code> with the same memory layout, e.g. of a named type;</li>
 <li><code>shared.RetypeSlice</code> does the same for a slice configurator, also for the elements stored by pointer;</li>
-<li><code>shared.SliceRules</code> gives <code>Required</code>, <code>MinLen</code>, <code>MaxLen</code>, <code>Custom</code> and <code>When</code> of the slice to your slice configurator, see the source of <code>str.Slice</code>.</li>
+<li><code>shared.SliceRules</code> gives <code>Required</code>, <code>MinLen</code>, <code>MaxLen</code>, <code>Custom</code> and <code>When</code> of the slice to your slice configurator, see the source of <code>str.Slice</code>;</li>
+<li><code>CheckMsg</code> and <code>RequiredMsg</code> take a message of <code>shared.M</code> with a stable <a href="../errors/#codes-for-clients">code</a> and named parameters: <code>c.f.CheckMsg(ok, shared.M("time.after", key, shared.P("time", t)))</code>.</li>
 </ul>
 <p>A configurator of <code>time.Time</code> (the built-in one is <a href="../time/"><code>timex</code></a>, this one shows how it's made):</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>

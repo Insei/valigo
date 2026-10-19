@@ -1053,6 +1053,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#codes-for-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Codes for clients
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#location-of-fields" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1236,6 +1247,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#codes-for-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Codes for clients
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#location-of-fields" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1295,76 +1317,228 @@
 </ul>
 <h2 id="sharederror">shared.Error<a class="headerlink" href="#sharederror" title="Permanent link">&para;</a></h2>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Error</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nx">Message</span><span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="c1">// translated message</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nx">Location</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="c1">// location of the field, Address.City or Tags[1] by default</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nx">Value</span><span class="w">    </span><span class="kt">any</span><span class="w">    </span><span class="c1">// the checked value, nil for absent values</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nx">Message</span><span class="w">  </span><span class="kt">string</span><span class="w">         </span><span class="c1">// translated message</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nx">Location</span><span class="w"> </span><span class="kt">string</span><span class="w">         </span><span class="c1">// location of the field, Address.City or Tags[1] by default</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nx">Value</span><span class="w">    </span><span class="kt">any</span><span class="w">            </span><span class="c1">// the checked value, nil for absent values</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nx">Code</span><span class="w">     </span><span class="kt">string</span><span class="w">         </span><span class="c1">// stable code of the rule, e.g. string.max_len</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nx">Params</span><span class="w">   </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="w"> </span><span class="c1">// named parameters of the message, e.g. {"max": 64}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">}</span>
 </span></code></pre></div>
-<p><code>Error()</code> returns <code>Message (Location: Value)</code>, or <code>Message</code> alone when both the location and the value are empty. <code>Error</code> has JSON field names of its own: <code>{"Message":"...","Location":"...","Value":...}</code>, convert it to your API format by the transformer.</p>
-<h2 id="location-of-fields">Location of fields<a class="headerlink" href="#location-of-fields" title="Permanent link">&para;</a></h2>
-<p>The location is the path of the field in the struct by default: <code>Address.City</code>. <code>WithFieldLocationNamingFn</code> replaces it, e.g. with the path of the JSON tags, so the client sees the names of its request:</p>
+<p><code>Error()</code> returns <code>Message (Location: Value)</code>, or <code>Message</code> alone when both the location and the value are empty. <code>Error</code> has JSON field names of its own: <code>{"Message":"...","Location":"...","Value":...,"Code":"...","Params":{...}}</code>, <code>Code</code> and <code>Params</code> are omitted when empty. Convert it to your API format by the <a href="#errors-transformer">transformer</a>.</p>
+<h2 id="codes-for-clients">Codes for clients<a class="headerlink" href="#codes-for-clients" title="Permanent link">&para;</a></h2>
+<p>The message is translated on the backend, see <a href="../translations/">Translations</a>. A client that translates the messages itself — a web or a mobile application with its own locales — uses <code>Code</code> and <code>Params</code> instead: the code is stable, the parameters are named.</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="s">"context"</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="s">"fmt"</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="s">"github.com/insei/fmap/v3"</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/str"</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">)</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Address</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="nx">City</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"city"`</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="p">}</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="kd">type</span><span class="w"> </span><span class="nx">SignUp</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="nx">Email</span><span class="w">   </span><span class="kt">string</span><span class="w">   </span><span class="s">`json:"email"`</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="nx">Address</span><span class="w"> </span><span class="nx">Address</span><span class="w">  </span><span class="s">`json:"address"`</span>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span><span class="nx">Tags</span><span class="w">    </span><span class="p">[]</span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"tags"`</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="s">"encoding/json"</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="s">"fmt"</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="s">"time"</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/num"</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/str"</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/timex"</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="p">)</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Event</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="nx">Title</span><span class="w">    </span><span class="kt">string</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="nx">Seats</span><span class="w">    </span><span class="kt">int</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="nx">StartsAt</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span><span class="nx">EndsAt</span><span class="w">   </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span>
 </span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="p">}</span>
 </span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
 </span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">valigo</span><span class="p">.</span><span class="nx">WithFieldLocationNamingFn</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">field</span><span class="w"> </span><span class="nx">fmap</span><span class="p">.</span><span class="nx">Field</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">field</span><span class="p">.</span><span class="nx">GetTagPath</span><span class="p">(</span><span class="s">"json"</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
-</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="p">}))</span>
-</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">    </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configure</span><span class="p">[</span><span class="nx">SignUp</span><span class="p">](</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configurator</span><span class="p">[</span><span class="nx">SignUp</span><span class="p">],</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">SignUp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Email</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Email</span><span class="p">()</span>
-</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Address</span><span class="p">.</span><span class="nx">City</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">()</span>
-</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Slice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Tags</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Slice</span><span class="p">).</span><span class="nx">Email</span><span class="p">()</span>
-</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">    </span><span class="p">})</span>
-</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>
-</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">ValidateTyped</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">SignUp</span><span class="p">{</span><span class="nx">Email</span><span class="p">:</span><span class="w"> </span><span class="s">"a"</span><span class="p">,</span><span class="w"> </span><span class="nx">Tags</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"b"</span><span class="p">}})</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">Location</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">    </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configure</span><span class="p">[</span><span class="nx">Event</span><span class="p">](</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configurator</span><span class="p">[</span><span class="nx">Event</span><span class="p">],</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">*</span><span class="nx">Event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">e</span><span class="p">.</span><span class="nx">Title</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">e</span><span class="p">.</span><span class="nx">Seats</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">AnyOfInterval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">e</span><span class="p">.</span><span class="nx">EndsAt</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">timex</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">AfterField</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">e</span><span class="p">.</span><span class="nx">StartsAt</span><span class="p">)</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">    </span><span class="p">})</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">    </span><span class="nx">start</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Date</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">UTC</span><span class="p">)</span>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">ValidateTyped</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Event</span><span class="p">{</span><span class="nx">Title</span><span class="p">:</span><span class="w"> </span><span class="s">"Conference"</span><span class="p">,</span><span class="w"> </span><span class="nx">StartsAt</span><span class="p">:</span><span class="w"> </span><span class="nx">start</span><span class="p">,</span><span class="w"> </span><span class="nx">EndsAt</span><span class="p">:</span><span class="w"> </span><span class="nx">start</span><span class="p">})</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">        </span><span class="nx">body</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">"field"</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Location</span><span class="p">,</span><span class="w"> </span><span class="s">"code"</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Code</span><span class="p">,</span><span class="w"> </span><span class="s">"params"</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Params</span><span class="p">})</span>
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="kt">string</span><span class="p">(</span><span class="nx">body</span><span class="p">))</span>
 </span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Output:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>email Should be email address
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>address.city Should be fulfilled
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>tags[0] Should be email address
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>{"code":"string.max_len","field":"Title","params":{"max":5}}
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>{"code":"number.interval","field":"Seats","params":{"max":100,"min":1}}
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>{"code":"time.after_field","field":"EndsAt","params":{"field":"StartsAt"}}
+</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Params</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>string.required</code>, <code>string.email</code>, <code>string.url</code>, <code>string.ip</code>, <code>string.ipv4</code>, <code>string.ipv6</code>, <code>string.hostname</code>, <code>string.uuid</code>, <code>string.alphanumeric</code>, <code>string.regexp</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>string.min_len</code>, <code>string.min_runes</code></td>
+<td><code>min</code></td>
+</tr>
+<tr>
+<td><code>string.max_len</code>, <code>string.max_runes</code></td>
+<td><code>max</code></td>
+</tr>
+<tr>
+<td><code>string.any_of</code></td>
+<td><code>values</code></td>
+</tr>
+<tr>
+<td><code>string.prefix</code>, <code>string.suffix</code>, <code>string.contains</code></td>
+<td><code>prefix</code>, <code>suffix</code>, <code>substring</code></td>
+</tr>
+<tr>
+<td><code>string.equal_field</code></td>
+<td><code>field</code></td>
+</tr>
+<tr>
+<td><code>number.required</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>number.min</code>, <code>number.max</code></td>
+<td><code>min</code>, <code>max</code></td>
+</tr>
+<tr>
+<td><code>number.min_field</code>, <code>number.max_field</code></td>
+<td><code>field</code></td>
+</tr>
+<tr>
+<td><code>number.any_of</code></td>
+<td><code>values</code></td>
+</tr>
+<tr>
+<td><code>number.interval</code></td>
+<td><code>min</code>, <code>max</code></td>
+</tr>
+<tr>
+<td><code>time.required</code>, <code>time.in_past</code>, <code>time.in_future</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>time.before</code>, <code>time.after</code></td>
+<td><code>time</code> (RFC 3339)</td>
+</tr>
+<tr>
+<td><code>time.between</code></td>
+<td><code>from</code>, <code>to</code> (RFC 3339)</td>
+</tr>
+<tr>
+<td><code>time.before_field</code>, <code>time.after_field</code></td>
+<td><code>field</code></td>
+</tr>
+<tr>
+<td><code>value.required</code>, <code>value.unique</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>value.one_of</code>, <code>value.not_one_of</code></td>
+<td><code>values</code></td>
+</tr>
+<tr>
+<td><code>value.equal</code>, <code>value.not_equal</code></td>
+<td><code>value</code></td>
+</tr>
+<tr>
+<td><code>value.equal_field</code></td>
+<td><code>field</code></td>
+</tr>
+<tr>
+<td><code>uuid.required</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>uuid.any_of</code></td>
+<td><code>values</code></td>
+</tr>
+<tr>
+<td><code>slice.required</code>, <code>map.required</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>slice.min_len</code>, <code>map.min_len</code></td>
+<td><code>min</code></td>
+</tr>
+<tr>
+<td><code>slice.max_len</code>, <code>map.max_len</code></td>
+<td><code>max</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>field</code> parameter is the location of the other field by the location function of the validator. The errors of <a href="../custom/">custom rules</a> have the locale key as the code, or the code of <code>shared.M</code> with <code>ErrorMsg</code>.</p>
+<h2 id="location-of-fields">Location of fields<a class="headerlink" href="#location-of-fields" title="Permanent link">&para;</a></h2>
+<p>The location is the path of the field in the struct by default: <code>Address.City</code>. <code>WithFieldLocationNamingFn</code> replaces it, e.g. with the path of the JSON tags, so the client sees the names of its request:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="s">"context"</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="s">"fmt"</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="s">"github.com/insei/fmap/v3"</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/str"</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">)</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Address</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="nx">City</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"city"`</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="p">}</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="kd">type</span><span class="w"> </span><span class="nx">SignUp</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="nx">Email</span><span class="w">   </span><span class="kt">string</span><span class="w">   </span><span class="s">`json:"email"`</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">    </span><span class="nx">Address</span><span class="w"> </span><span class="nx">Address</span><span class="w">  </span><span class="s">`json:"address"`</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">    </span><span class="nx">Tags</span><span class="w">    </span><span class="p">[]</span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"tags"`</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="p">}</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">valigo</span><span class="p">.</span><span class="nx">WithFieldLocationNamingFn</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">field</span><span class="w"> </span><span class="nx">fmap</span><span class="p">.</span><span class="nx">Field</span><span class="p">)</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">field</span><span class="p">.</span><span class="nx">GetTagPath</span><span class="p">(</span><span class="s">"json"</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">    </span><span class="p">}))</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">    </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configure</span><span class="p">[</span><span class="nx">SignUp</span><span class="p">](</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configurator</span><span class="p">[</span><span class="nx">SignUp</span><span class="p">],</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">SignUp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Email</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Email</span><span class="p">()</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Address</span><span class="p">.</span><span class="nx">City</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">()</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Slice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Tags</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Slice</span><span class="p">).</span><span class="nx">Email</span><span class="p">()</span>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">    </span><span class="p">})</span>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">ValidateTyped</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">SignUp</span><span class="p">{</span><span class="nx">Email</span><span class="p">:</span><span class="w"> </span><span class="s">"a"</span><span class="p">,</span><span class="w"> </span><span class="nx">Tags</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"b"</span><span class="p">}})</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a><span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">.</span><span class="nx">Location</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Message</span><span class="p">)</span>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>email Should be email address
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>address.city Should be fulfilled
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>tags[0] Should be email address
 </span></code></pre></div>
 <p>The index of a slice element is appended to the location returned by the function.</p>
 <h2 id="errors-transformer">Errors transformer<a class="headerlink" href="#errors-transformer" title="Permanent link">&para;</a></h2>
 <p><code>WithErrorsTransformer</code> sets how <code>Validate</code> converts the errors, e.g. to one error of the API:</p>
-<div class="language-go highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">FieldError</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nx">Field</span><span class="w">   </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"field"`</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nx">Message</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"message"`</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="kd">type</span><span class="w"> </span><span class="nx">ValidationError</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nx">Fields</span><span class="w"> </span><span class="p">[]</span><span class="nx">FieldError</span><span class="w"> </span><span class="s">`json:"fields"`</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">}</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="o">*</span><span class="nx">ValidationError</span><span class="p">)</span><span class="w"> </span><span class="nx">Error</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"validation failed"</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">valigo</span><span class="p">.</span><span class="nx">WithErrorsTransformer</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">errs</span><span class="w"> </span><span class="p">[]</span><span class="nx">shared</span><span class="p">.</span><span class="nx">Error</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="nx">fields</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">FieldError</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">errs</span><span class="p">))</span>
-</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">errs</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">        </span><span class="nx">fields</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">FieldError</span><span class="p">{</span><span class="nx">Field</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Location</span><span class="p">,</span><span class="w"> </span><span class="nx">Message</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Message</span><span class="p">}</span>
-</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">[]</span><span class="kt">error</span><span class="p">{</span><span class="o">&amp;</span><span class="nx">ValidationError</span><span class="p">{</span><span class="nx">Fields</span><span class="p">:</span><span class="w"> </span><span class="nx">fields</span><span class="p">}}</span>
-</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="p">}))</span>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">FieldError</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="nx">Field</span><span class="w">   </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"field"`</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nx">Message</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="s">`json:"message"`</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">}</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="kd">type</span><span class="w"> </span><span class="nx">ValidationError</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="nx">Fields</span><span class="w"> </span><span class="p">[]</span><span class="nx">FieldError</span><span class="w"> </span><span class="s">`json:"fields"`</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p">}</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">e</span><span class="w"> </span><span class="o">*</span><span class="nx">ValidationError</span><span class="p">)</span><span class="w"> </span><span class="nx">Error</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"validation failed"</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
+</span><span id="__span-6-12"><a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">valigo</span><span class="p">.</span><span class="nx">WithErrorsTransformer</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">errs</span><span class="w"> </span><span class="p">[]</span><span class="nx">shared</span><span class="p">.</span><span class="nx">Error</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-13"><a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="nx">fields</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">FieldError</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">errs</span><span class="p">))</span>
+</span><span id="__span-6-14"><a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">errs</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-15"><a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">        </span><span class="nx">fields</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">FieldError</span><span class="p">{</span><span class="nx">Field</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Location</span><span class="p">,</span><span class="w"> </span><span class="nx">Message</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Message</span><span class="p">}</span>
+</span><span id="__span-6-16"><a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-6-17"><a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">[]</span><span class="kt">error</span><span class="p">{</span><span class="o">&amp;</span><span class="nx">ValidationError</span><span class="p">{</span><span class="nx">Fields</span><span class="p">:</span><span class="w"> </span><span class="nx">fields</span><span class="p">}}</span>
+</span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="p">}))</span>
 </span></code></pre></div>
 <p>The transformer is called only when there are errors.</p>
 

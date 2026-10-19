@@ -50,7 +50,13 @@ Output:
 [Login "Admin" is reserved (Login: Admin) Should be even (Age: 3)]
 ```
 
-`h.ErrorT(ctx, value, localeKey, args...)` translates the message: `localeKey` is looked up in the [translations](https://insei.github.io/valigo/latest/features/translations/index.md), a key without a translation is used as is, as a format for `args`.
+`h.ErrorT(ctx, value, localeKey, args...)` translates the message: `localeKey` is looked up in the [translations](https://insei.github.io/valigo/latest/features/translations/index.md), a key without a translation is used as is, as a format for `args`. The [code](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients) of the error is the key. For a stable code and named parameters build the message by `shared.M` and return `h.ErrorMsg(ctx, value, msg)`:
+
+```go
+return []shared.Error{h.ErrorMsg(ctx, login, shared.M("login.reserved", "Login %q is reserved", shared.P("login", login)))}
+```
+
+The values of `shared.P` are the format arguments of the message in their order. A message without the checked value can be created once on the configuration, its parameters are shared by the errors.
 
 The function isn't called for an [absent value](https://insei.github.io/valigo/latest/features/absent/index.md).
 
