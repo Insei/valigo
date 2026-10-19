@@ -23,8 +23,10 @@ b.Field(&u.Age).As(str.Of)
 | `str.Of` | `string`, `*string`, named strings | [strings](strings.md) |
 | `num.Of` | numbers and named numbers | [numbers](numbers.md) |
 | `num.Ptr` | pointers to numbers | [numbers](numbers.md), `Required` checks only that the pointer isn't nil |
+| `timex.Of` | `time.Time`, `*time.Time` | [time](time.md) |
 | `vuuid.Of` | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid` | [uuid](uuid.md), the separate module `github.com/insei/valigo/uuid` |
 | `str.Slice` | `Slice` of strings, `*string` or named strings | [slices](slices.md) with the string rules of elements |
+| `timex.Slice` | `Slice` of `time.Time`, `*time.Time` | [slices](slices.md) with the time rules of elements |
 | `vuuid.Slice` | `Slice` of `uuid.UUID`, `*uuid.UUID` | [slices](slices.md) with the uuid rules of elements |
 | `shared.SlicePtr` | `Field` of `*[]E` | the slice configurator, a nil pointer is absent |
 
@@ -55,7 +57,7 @@ A conversion of your type is a function that takes the base configurator and ret
 - `shared.RetypeSlice` does the same for a slice configurator, also for the elements stored by pointer;
 - `shared.SliceRules` gives `Required`, `MinLen`, `MaxLen`, `Custom` and `When` of the slice to your slice configurator, see the source of `str.Slice`.
 
-A configurator of `time.Time`:
+A configurator of `time.Time` (the built-in one is [`timex`](time.md), this one shows how it's made):
 
 ```go
 package main
