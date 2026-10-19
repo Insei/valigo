@@ -60,6 +60,13 @@ func newValigo() *valigo.Validator {
 	return v
 }
 
+// newValigoTags configures valigo by the tags of go-playground/validator.
+func newValigoTags() *valigo.Validator {
+	v := valigo.New()
+	valigo.Configure[User](v, func(b valigo.Configurator[User], _ *User) { b.Tags("validate") })
+	return v
+}
+
 func TestTheSameRules(t *testing.T) {
 	ctx := context.Background()
 	v, pg := newValigo(), playground.New()
@@ -76,6 +83,13 @@ func TestTheSameRules(t *testing.T) {
 	if errs := v.Validate(ctx, invalid); len(errs) != 6 {
 		t.Errorf("valigo: %d errors: %v", len(errs), errs)
 	}
+	tags := newValigoTags()
+	if errs := tags.Validate(ctx, valid); errs != nil {
+		t.Errorf("valigo tags: %v", errs)
+	}
+	if errs := tags.Validate(ctx, invalid); len(errs) != 6 {
+		t.Errorf("valigo tags: %d errors: %v", len(errs), errs)
+	}
 	if errs, _ := pg.Struct(invalid).(playground.ValidationErrors); len(errs) != 6 {
 		t.Errorf("go-playground/validator: %d errors: %v", len(errs), errs)
 	}
@@ -88,6 +102,13 @@ func BenchmarkValid(b *testing.B) {
 	ctx := context.Background()
 	b.Run("valigo", func(b *testing.B) {
 		v := newValigo()
+		b.ReportAllocs()
+		for b.Loop() {
+			_ = v.Validate(ctx, valid)
+		}
+	})
+	b.Run("valigo-tags", func(b *testing.B) {
+		v := newValigoTags()
 		b.ReportAllocs()
 		for b.Loop() {
 			_ = v.Validate(ctx, valid)
@@ -112,6 +133,13 @@ func BenchmarkInvalid(b *testing.B) {
 	ctx := context.Background()
 	b.Run("valigo", func(b *testing.B) {
 		v := newValigo()
+		b.ReportAllocs()
+		for b.Loop() {
+			_ = v.Validate(ctx, invalid)
+		}
+	})
+	b.Run("valigo-tags", func(b *testing.B) {
+		v := newValigoTags()
 		b.ReportAllocs()
 		for b.Loop() {
 			_ = v.Validate(ctx, invalid)
