@@ -85,7 +85,7 @@ func (r *rules) validateFull(obj any) []Error {
 	return errs
 }
 
-func sampleField(t *testing.T, path string) fmap.Field {
+func sampleField(t testing.TB, path string) fmap.Field {
 	t.Helper()
 	fields, err := fmap.Get[sample]()
 	require.NoError(t, err)
