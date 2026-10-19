@@ -98,11 +98,11 @@ func New(opts ...Option) *Validator {
 func Configure[T any](v *Validator, fn func(builder Configurator[T], m *T)) {
 	delete(v.validators, reflect.TypeFor[*T]())
 	model := new(T)
-	// allocate all pointer fields values recursively
-	mustZero(model)
 	fields, err := fmap.GetFrom(model)
 	if err != nil {
 		panic(err)
 	}
+	// allocate all pointer fields values recursively
+	mustZero(model)
 	fn(Configurator[T]{b: &builder[T]{v: v, obj: model, fields: fields}}, model)
 }
