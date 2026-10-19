@@ -23,7 +23,7 @@ The configurator knows nothing about strings, numbers or uuids: they are convers
 
 ### Validation of valid objects doesn't allocate
 
-The rules are built once by `Configure`. `Validate` reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it. On the same rules a valid object is validated about 4 times faster than by go-playground/validator and 1.6 times slower than by the same rules written by hand, an invalid one with translated messages — about 2 times faster than go-playground/validator builds its messages, see [Performance](performance.md).
+The rules are built once by `Configure`. `Validate` reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it. On the same rules a valid object is validated about 4 times faster than by go-playground/validator and 1.4 times slower than by the same rules written by hand, an invalid one with translated messages — about 2 times faster than go-playground/validator builds its messages, see [Performance](performance.md).
 
 ### Absent values are handled, not panicked on
 
