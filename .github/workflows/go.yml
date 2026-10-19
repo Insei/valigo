@@ -26,6 +26,9 @@ jobs:
 
     - name: Test
       run: go test -v -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./...
+    - name: Build and run the programs of the documentation and the skill
+      run: scripts/check-examples.sh
+
     - name: Test examples
       run: |
         for dir in examples/*/; do
