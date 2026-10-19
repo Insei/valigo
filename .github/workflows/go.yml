@@ -79,6 +79,19 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ${{ steps.modules.outputs.coverage }}
 
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Go
+      uses: actions/setup-go@v7
+      with:
+        go-version: '1.27'
+
+    - name: Fuzz the formats, the reading of the fields and the tags
+      run: scripts/fuzz.sh
+
   examples:
     runs-on: ubuntu-latest
     steps:

@@ -54,4 +54,5 @@ The rules append their errors to one pooled buffer of the validation, and `Valid
 
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/), the changelog is generated from them by git-cliff.
 - `go test -race ./...` and the examples modules run in CI. Programs in the documentation and in the skill for AI agents are built and run by `scripts/check-examples.sh`.
+- Fuzz tests check the formats of strings against the parsers of the standard library and the patterns of their JSON Schema, the reading of the fields by the offsets against the fields themselves, and that any tag either configures the rules or panics with its error. `scripts/fuzz.sh` runs every target for `FUZZTIME`, 30s in CI; a failing input is saved in `testdata/fuzz` of the package and stays a regression test.
 - A new rule of an existing type is a method of its configurator over `Check` or `Required`, with a locale key in `translator/locales/*/data.yaml`.
