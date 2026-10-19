@@ -38,11 +38,11 @@ func (c Configurator[T]) field(fieldPtr any) fmap.Field {
 func (c Configurator[T]) add(fn shared.ValidationFn) {
 	if when := c.b.when; when != nil {
 		inner := fn
-		fn = func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
+		fn = func(ctx context.Context, h shared.Helper, obj any, errs []shared.Error) []shared.Error {
 			if !when(ctx, obj.(*T)) {
-				return nil
+				return errs
 			}
-			return inner(ctx, h, obj)
+			return inner(ctx, h, obj, errs)
 		}
 	}
 	t := reflect.TypeFor[*T]()
@@ -89,10 +89,10 @@ var structHelpers = sync.Pool{New: func() any { return new(structHelper) }}
 // The helper passed to fn is valid only during the fn call.
 func (c Configurator[T]) Custom(fn func(ctx context.Context, h shared.StructCustomHelper, obj *T) []shared.Error) {
 	fields := c.b.fields
-	c.add(func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
+	c.add(func(ctx context.Context, h shared.Helper, obj any, errs []shared.Error) []shared.Error {
 		sh := structHelpers.Get().(*structHelper)
 		sh.h, sh.fields, sh.obj = h, fields, obj
-		errs := fn(ctx, sh, obj.(*T))
+		errs = append(errs, fn(ctx, sh, obj.(*T))...)
 		*sh = structHelper{}
 		structHelpers.Put(sh)
 		return errs

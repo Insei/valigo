@@ -26,12 +26,12 @@ func (s *SliceFieldConfigurator[E]) As[R any](conv func(s *SliceFieldConfigurato
 func Deref[T any](f *Field[*T]) *Field[T] {
 	add := f.add
 	return &Field[T]{field: f.field, h: f.h, fields: f.fields, add: func(fn checkFn[T]) {
-		add(func(ctx context.Context, h Helper, obj any, v **T) []Error {
+		add(func(ctx context.Context, h Helper, obj any, v **T, errs []Error) []Error {
 			var p *T
 			if v != nil {
 				p = *v
 			}
-			return fn(ctx, h, obj, p)
+			return fn(ctx, h, obj, p, errs)
 		})
 	}}
 }
@@ -45,8 +45,8 @@ func Retype[T, U any](f *Field[T]) *Field[U] {
 	mustLayout[U](f.field, reflect.TypeFor[T]())
 	add := f.add
 	return &Field[U]{field: f.field, h: f.h, fields: f.fields, add: func(fn checkFn[U]) {
-		add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
-			return fn(ctx, h, obj, (*U)(unsafe.Pointer(v)))
+		add(func(ctx context.Context, h Helper, obj any, v *T, errs []Error) []Error {
+			return fn(ctx, h, obj, (*U)(unsafe.Pointer(v)), errs)
 		})
 	}}
 }

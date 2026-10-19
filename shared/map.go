@@ -38,12 +38,12 @@ func (m *MapFieldConfigurator[K, V]) As[R any](conv func(m *MapFieldConfigurator
 
 func (m *MapFieldConfigurator[K, V]) check(ok func(n int) bool, msg Msg) {
 	field, get := m.field, m.get
-	m.add(func(ctx context.Context, h Helper, obj any) []Error {
+	m.add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 		v := get(obj)
 		if v == nil || ok(len(*v)) {
-			return nil
+			return errs
 		}
-		return []Error{msg.Error(ctx, h, field, len(*v))}
+		return append(errs, msg.Error(ctx, h, field, len(*v)))
 	})
 }
 
@@ -62,11 +62,11 @@ func (m *MapFieldConfigurator[K, V]) MinLen(minLen int) *MapFieldConfigurator[K,
 // Required checks that the map is present and not empty.
 func (m *MapFieldConfigurator[K, V]) Required() *MapFieldConfigurator[K, V] {
 	field, get, msg := m.field, m.get, M("map.required", mapRequiredLocaleKey)
-	m.add(func(ctx context.Context, h Helper, obj any) []Error {
+	m.add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 		if v := get(obj); v != nil && len(*v) > 0 {
-			return nil
+			return errs
 		}
-		return []Error{msg.Error(ctx, h, field, nil)}
+		return append(errs, msg.Error(ctx, h, field, nil))
 	})
 	return m
 }
@@ -75,12 +75,12 @@ func (m *MapFieldConfigurator[K, V]) Required() *MapFieldConfigurator[K, V] {
 func (m *MapFieldConfigurator[K, V]) Custom(f func(ctx context.Context, h *FieldCustomHelper, value map[K]V) []Error) *MapFieldConfigurator[K, V] {
 	customHelper := NewFieldCustomHelper(m.field, m.h)
 	get := m.get
-	m.add(func(ctx context.Context, _ Helper, obj any) []Error {
+	m.add(func(ctx context.Context, _ Helper, obj any, errs []Error) []Error {
 		v := get(obj)
 		if v == nil {
-			return nil
+			return errs
 		}
-		return f(ctx, customHelper, *v)
+		return append(errs, f(ctx, customHelper, *v)...)
 	})
 	return m
 }
@@ -93,15 +93,15 @@ func (m *MapFieldConfigurator[K, V]) When(whenFn func(ctx context.Context, value
 	}
 	add, get := m.add, m.get
 	return &MapFieldConfigurator[K, V]{field: m.field, h: m.h, fields: m.fields, get: get, add: func(fn ValidationFn) {
-		add(func(ctx context.Context, h Helper, obj any) []Error {
+		add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 			var v map[K]V
 			if p := get(obj); p != nil {
 				v = *p
 			}
 			if !whenFn(ctx, v) {
-				return nil
+				return errs
 			}
-			return fn(ctx, h, obj)
+			return fn(ctx, h, obj, errs)
 		})
 	}}
 }
@@ -131,18 +131,17 @@ func mapSource[K comparable, V, T any](add func(fn ValidationFn), get func(obj a
 		if len(checks) > 1 {
 			return
 		}
-		add(func(ctx context.Context, h Helper, obj any) []Error {
+		add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 			m := get(obj)
 			if m == nil {
-				return nil
+				return errs
 			}
-			slot := slots.Get().(*T)
-			var errs []Error
+			slot, start := slots.Get().(*T), len(errs)
 			for k, v := range *m {
 				*slot = pick(k, v)
 				n := len(errs)
 				for _, check := range checks {
-					errs = append(errs, check(ctx, h, obj, slot)...)
+					errs = check(ctx, h, obj, slot, errs)
 				}
 				for j := n; j < len(errs); j++ {
 					errs[j].Location += "[" + fmt.Sprint(k) + "]"
@@ -151,7 +150,7 @@ func mapSource[K comparable, V, T any](add func(fn ValidationFn), get func(obj a
 			var zero T
 			*slot = zero
 			slots.Put(slot)
-			slices.SortStableFunc(errs, func(a, b Error) int { return cmp.Compare(a.Location, b.Location) })
+			slices.SortStableFunc(errs[start:], func(a, b Error) int { return cmp.Compare(a.Location, b.Location) })
 			return errs
 		})
 	}
