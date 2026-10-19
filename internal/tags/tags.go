@@ -1,4 +1,5 @@
-package valigo
+// Package tags configures the rules of the tags of go-playground/validator by the rules of valigo.
+package tags
 
 import (
 	"context"
@@ -18,22 +19,29 @@ import (
 	"github.com/insei/valigo/timex"
 )
 
-// Tags configures the rules of the tag name of the fields of T and of its nested structs in the syntax of
-// go-playground/validator, validate:"required,max=64", for a migration from it: the tags and the rules in code
-// can be mixed in one Configure. The rules are the rules of valigo with their messages, codes and constraints:
-// required is Required, min and max are the lengths in characters of strings, the values of numbers and the lengths
-// of slices and maps, dive applies the next rules to the elements of a slice or the values of a map[string]V.
-// The rules of the fields of a nil nested struct are skipped, like by go-playground/validator, unlike the rules in code.
-// See the documentation for the list of the rules. Tags panics on an unknown rule, like Configure on invalid rules.
-func (c Configurator[T]) Tags(name string) {
-	for _, path := range c.b.fields.GetAllPaths() {
-		field := c.b.fields.MustFind(path)
+// Struct is the configuration of the rules of a struct by its model, see valigo.Configure.
+type Struct struct {
+	// Storage is the fields of the model, Model is the pointer to the model.
+	Storage fmap.Storage
+	Model   any
+	Helper  shared.Helper
+	Fields  shared.Fields
+	// Add registers the rules, Describe their constraints, it can be nil.
+	Add      func(fn shared.ValidationFn)
+	Describe shared.Describe
+}
+
+// Apply configures the rules of the tag name of the fields of the struct and of its nested structs,
+// see valigo.Configurator.Tags. It panics on an unknown rule.
+func Apply(s Struct, name string) {
+	for _, path := range s.Storage.GetAllPaths() {
+		field := s.Storage.MustFind(path)
 		tag := field.GetTag().Get(name)
 		if tag == "" || tag == "-" {
 			continue
 		}
-		t := tagContext{field: field, h: c.b.v.helper, fields: c.field, add: inStruct(field, c.add), describe: c.describe(),
-			storage: c.b.fields, model: c.b.obj}
+		t := tagContext{field: field, h: s.Helper, fields: s.Fields, add: inStruct(field, s.Add), describe: s.Describe,
+			storage: s.Storage, model: s.Model}
 		if err := t.apply(parseTag(tag)); err != nil {
 			panic(fmt.Sprintf("valigo: tag %s:%q of field %s: %v", name, tag, path, err))
 		}

@@ -11,6 +11,8 @@ import (
 
 	"github.com/insei/fmap/v3"
 
+	"github.com/insei/valigo/internal/helper"
+	"github.com/insei/valigo/internal/zero"
 	"github.com/insei/valigo/shared"
 )
 
@@ -18,7 +20,7 @@ import (
 type Validator struct {
 	validators     map[reflect.Type][]shared.ValidationFn
 	constraints    map[reflect.Type][]shared.Constraint
-	helper         *helper
+	helper         *helper.Helper
 	transformError func(errs []shared.Error) []error
 }
 
@@ -105,7 +107,7 @@ func New(opts ...Option) *Validator {
 	v := &Validator{
 		validators:  make(map[reflect.Type][]shared.ValidationFn),
 		constraints: make(map[reflect.Type][]shared.Constraint),
-		helper:      newHelper(),
+		helper:      helper.New(),
 		transformError: func(errs []shared.Error) []error {
 			errsNew := make([]error, len(errs))
 			for i, err := range errs {
@@ -133,6 +135,6 @@ func Configure[T any](v *Validator, fn func(builder Configurator[T], m *T)) {
 		panic(err)
 	}
 	// allocate all pointer fields values recursively
-	mustZero(model)
+	zero.Must(model)
 	fn(Configurator[T]{b: &builder[T]{v: v, obj: model, fields: fields}}, model)
 }

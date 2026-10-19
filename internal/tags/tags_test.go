@@ -1,4 +1,4 @@
-package valigo
+package tags_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/insei/valigo"
 	"github.com/insei/valigo/internal/testenv"
 	"github.com/insei/valigo/str"
 )
@@ -76,9 +77,9 @@ func validTagsModel() *tagsModel {
 	}
 }
 
-func newTagsValidator() *Validator {
-	v := New()
-	Configure[tagsModel](v, func(b Configurator[tagsModel], m *tagsModel) {
+func newTagsValidator() *valigo.Validator {
+	v := valigo.New()
+	valigo.Configure[tagsModel](v, func(b valigo.Configurator[tagsModel], m *tagsModel) {
 		b.Tags("validate")
 		b.Field(&m.Untagged).As(str.Of).MaxLen(1) // the rules in code with the tags
 	})
@@ -211,7 +212,7 @@ func TestTagsErrors(t *testing.T) {
 		}], `valigo: tag validate:"unique" of field A: unique of the slices of pointers isn't supported`},
 		{"dive into structs", tagsOf[struct {
 			A []tagsAddress `validate:"dive"`
-		}], `valigo: tag validate:"dive" of field A: the elements of type valigo.tagsAddress aren't supported, configure the rules of their type`},
+		}], `valigo: tag validate:"dive" of field A: the elements of type tags_test.tagsAddress aren't supported, configure the rules of their type`},
 		{"dive into a map of ints", tagsOf[struct {
 			A map[int]string `validate:"dive,required"`
 		}], `valigo: tag validate:"dive,required" of field A: dive is supported for the maps of strings to values, map[string]V`},
@@ -271,5 +272,5 @@ func TestTagsErrors(t *testing.T) {
 
 // tagsOf configures the tags of T.
 func tagsOf[T any]() {
-	Configure[T](New(), func(b Configurator[T], _ *T) { b.Tags("validate") })
+	valigo.Configure[T](valigo.New(), func(b valigo.Configurator[T], _ *T) { b.Tags("validate") })
 }

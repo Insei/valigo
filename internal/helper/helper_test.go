@@ -1,4 +1,4 @@
-package valigo
+package helper
 
 import (
 	"context"
@@ -13,7 +13,7 @@ type admin struct {
 }
 
 func TestHelperErrorT(t *testing.T) {
-	h := newHelper()
+	h := New()
 	testAdmin := admin{
 		Name: "John",
 		Age:  33,
@@ -32,7 +32,7 @@ func TestHelperErrorT(t *testing.T) {
 
 func TestHelperFieldLocation(t *testing.T) {
 	strg, _ := fmap.GetFrom(admin{})
-	if got := newHelper().FieldLocation(strg.MustFind("Name")); got != "Name" {
+	if got := New().FieldLocation(strg.MustFind("Name")); got != "Name" {
 		t.Errorf("FieldLocation() = %q, want Name", got)
 	}
 }

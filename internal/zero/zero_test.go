@@ -1,4 +1,4 @@
-package valigo
+package zero
 
 import (
 	"testing"
@@ -217,9 +217,9 @@ func TestZero(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := zero(tc.input)
+			err := Allocate(tc.input)
 			if (err != nil) != tc.wantErr {
-				t.Errorf("zero() error = %v, wantErr %v", err, tc.wantErr)
+				t.Errorf("Allocate() error = %v, wantErr %v", err, tc.wantErr)
 			}
 		})
 	}
@@ -229,11 +229,11 @@ func TestMustZero(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
 		} else {
-			t.Errorf("mustZero() did not panic")
+			t.Errorf("Must() did not panic")
 		}
 	}()
 
-	mustZero("hello")
+	Must("hello")
 }
 
 func TestZeroRecursiveTypes(t *testing.T) {
@@ -243,17 +243,17 @@ func TestZeroRecursiveTypes(t *testing.T) {
 		Meta *struct{ Parent *node }
 	}
 	obj := &node{}
-	if err := zero(obj); err != nil {
-		t.Fatalf("zero() error = %v", err)
+	if err := Allocate(obj); err != nil {
+		t.Fatalf("Allocate() error = %v", err)
 	}
 	if obj.Next != nil || obj.Meta == nil || obj.Meta.Parent != nil {
-		t.Errorf("zero() must allocate non recursive pointers only, got %+v", obj)
+		t.Errorf("Allocate() must allocate non recursive pointers only, got %+v", obj)
 	}
 }
 
 func TestZeroErrors(t *testing.T) {
-	if err := zero(new(int)); err == nil {
-		t.Errorf("zero() of a non-struct must fail")
+	if err := Allocate(new(int)); err == nil {
+		t.Errorf("Allocate() of a non-struct must fail")
 	}
 }
 
@@ -263,10 +263,10 @@ func TestZeroSkipsUnexportedFields(t *testing.T) {
 		Shown  *struct{ X int }
 	}
 	obj := &withHidden{}
-	if err := zero(obj); err != nil {
-		t.Fatalf("zero() error = %v", err)
+	if err := Allocate(obj); err != nil {
+		t.Fatalf("Allocate() error = %v", err)
 	}
 	if obj.hidden != nil || obj.Shown == nil {
-		t.Errorf("zero() must allocate exported fields only, got %+v", obj)
+		t.Errorf("Allocate() must allocate exported fields only, got %+v", obj)
 	}
 }
