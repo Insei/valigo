@@ -324,6 +324,7 @@ Reference of valigo capabilities grouped by area.
 | [Errors](https://insei.github.io/valigo/latest/features/errors/index.md)                | `Validate` and `ValidateTyped`, `shared.Error`, locations of fields and elements, errors transformer                           |
 | [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) | `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers and codes                                   |
 | [gin](https://insei.github.io/valigo/latest/features/gin/index.md)                      | the module `github.com/insei/valigo/gin`: the `binding.StructValidator` of gin and validation with the language of the request |
+| [echo](https://insei.github.io/valigo/latest/features/echo/index.md)                    | the module `github.com/insei/valigo/echo`: the `echo.Validator` and validation with the language of the request                |
 | [huma](https://insei.github.io/valigo/latest/features/huma/index.md)                    | the module `github.com/insei/valigo/huma`: valigo rules in the `Resolve` of huma inputs                                        |
 | [Translations](https://insei.github.io/valigo/latest/features/translations/index.md)    | Built-in locales, own messages, languages from the context, `Accept-Language` middleware                                       |
 
@@ -962,6 +963,80 @@ Output:
 The message of the error is translated by the plural forms of the built-in key, and the client gets the code `string.max_runes` with the `max` of the tenant.
 
 The module [`examples/limits`](https://github.com/Insei/valigo/tree/main/examples/limits) is a fuller example: the limits of a title and of the number of tags by the plan of the tenant from a store that changes at runtime, and the rules of a field enabled by a feature flag.
+
+# echo
+
+The module `github.com/insei/valigo/echo` validates the requests of [echo](https://echo.labstack.com) by valigo.
+
+```bash
+go get github.com/insei/valigo/echo@latest
+```
+
+- `vecho.New(v)` is the `echo.Validator`: set `e.Validator = vecho.New(v)`, and `c.Validate(&req)` validates by the rules of valigo.
+- echo doesn't pass the request to its validator, so these messages are in the default language. `vecho.Validate(c, v, &req)` validates with the languages of the `Accept-Language` header of the request.
+- The error is [`shared.Errors`](https://insei.github.io/valigo/latest/features/errors/#errors-transformer), get the errors by `errors.As` and write them, e.g. as [problem details](https://insei.github.io/valigo/latest/features/problem/index.md).
+
+## Example
+
+```go
+package main
+
+import (
+    "errors"
+    "fmt"
+    "net/http"
+    "net/http/httptest"
+    "strings"
+
+    "github.com/insei/valigo"
+    vecho "github.com/insei/valigo/echo"
+    "github.com/insei/valigo/shared"
+    "github.com/insei/valigo/str"
+    "github.com/labstack/echo/v4"
+)
+
+type SignUp struct {
+    Email string `json:"email"`
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[SignUp](v, func(b valigo.Configurator[SignUp], s *SignUp) {
+        b.Field(&s.Email).As(str.Of).Required().Email()
+    })
+
+    e := echo.New()
+    e.Validator = vecho.New(v)
+    e.POST("/sign-up", func(c echo.Context) error {
+        var req SignUp
+        if err := c.Bind(&req); err != nil {
+            return err
+        }
+        if err := c.Validate(&req); err != nil {
+            var errs shared.Errors
+            if errors.As(err, &errs) {
+                return c.JSON(http.StatusUnprocessableEntity, errs)
+            }
+            return err
+        }
+        return c.NoContent(http.StatusCreated)
+    })
+
+    req := httptest.NewRequest(http.MethodPost, "/sign-up", strings.NewReader(`{"email": "ann"}`))
+    req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+    w := httptest.NewRecorder()
+    e.ServeHTTP(w, req)
+    fmt.Println(w.Code)
+    fmt.Print(w.Body.String())
+}
+```
+
+Output:
+
+```text
+422
+[{"Message":"Should be email address","Location":"Email","Value":"ann","Code":"string.email"}]
+```
 
 # Errors
 

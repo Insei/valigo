@@ -20,6 +20,7 @@ valigo validates Go structs by rules configured once with pointers to the fields
 - [Validator and Configure](https://insei.github.io/valigo/latest/features/configure/index.md)
 - [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md)
 - [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)
+- [echo](https://insei.github.io/valigo/latest/features/echo/index.md)
 - [Errors](https://insei.github.io/valigo/latest/features/errors/index.md)
 - [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md)
 - [gin](https://insei.github.io/valigo/latest/features/gin/index.md)
