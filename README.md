@@ -10,6 +10,9 @@ Valigo is a powerfull, zero allocations validation engine with localizations, co
 * Localizations
 * Zero allocations
 * Configured using pointers to structure fields
+* Type-safe rules arguments: `Number(&m.Age).Max(5)` is checked by the compiler
+
+Requires Go 1.27+ (generic methods).
 ## Roadmap
 * [x] Zero allocations on valid structs
 * [x] On Field Conditional validation
