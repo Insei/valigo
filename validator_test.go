@@ -7,8 +7,6 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/google/uuid"
-
 	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
@@ -25,14 +23,14 @@ type Sender struct {
 }
 
 func createSender() *Sender {
-	ptr := uuid.New().String()
+	ptr := "c6b7f3a2-0d4e-4f6a-9b8c-1d2e3f4a5b6c"
 	return &Sender{
 		Type:          "SMTP",
-		SMTPHost:      uuid.New().String() + "   ",
-		SMTPPort:      uuid.New().String() + " ",
+		SMTPHost:      "c6b7f3a2-0d4e-4f6a-9b8c-1d2e3f4a5b6c" + "   ",
+		SMTPPort:      "c6b7f3a2-0d4e-4f6a-9b8c-1d2e3f4a5b6c" + " ",
 		SMTPInt:       10,
-		HTTPAddress:   uuid.New().String() + " ",
-		HTTPDestParam: uuid.New().String() + "  ",
+		HTTPAddress:   "c6b7f3a2-0d4e-4f6a-9b8c-1d2e3f4a5b6c" + " ",
+		HTTPDestParam: "c6b7f3a2-0d4e-4f6a-9b8c-1d2e3f4a5b6c" + "  ",
 		PtrString:     &ptr,
 	}
 }
@@ -272,7 +270,7 @@ func TestConfigure(t *testing.T) {
 				SMTPHost:      "example.com",
 				SMTPPort:      "25",
 				PtrString:     ptrString,
-				HTTPDestParam: uuid.New().String(),
+				HTTPDestParam: "c6b7f3a2-0d4e-4f6a-9b8c-1d2e3f4a5b6c",
 			},
 			expectedError: false,
 		},

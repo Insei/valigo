@@ -26,6 +26,10 @@ jobs:
 
     - name: Test
       run: go test -v -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./...
+    - name: Test uuid module
+      working-directory: uuid
+      run: go test -v -race -coverprofile=../coverage-uuid.txt -covermode=atomic ./...
+
     - name: Build and run the programs of the documentation and the skill
       run: scripts/check-examples.sh
 
@@ -37,3 +41,4 @@ jobs:
     - uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.txt,./coverage-uuid.txt

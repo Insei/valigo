@@ -147,3 +147,16 @@ func TestRules(t *testing.T) {
 		})
 	}
 }
+
+func TestZeroAllocationsOnValid(t *testing.T) {
+	v := valigo.New()
+	valigo.Configure[ids](v, func(c valigo.Configurator[ids], m *ids) {
+		c.Field(&m.ID).As(vuuid.Of).Required().AnyOf(id1, id2)
+		c.Field(&m.IDPtr).As(vuuid.Of).Required()
+		c.Slice(&m.IDPtrs).As(vuuid.Slice).Required().AnyOf(id1)
+	})
+	obj := &ids{ID: id1, IDPtr: &id2, IDPtrs: []*uuid.UUID{&id1}}
+	ctx := context.Background()
+	assert.Nil(t, v.Validate(ctx, obj))
+	assert.Zero(t, testing.AllocsPerRun(100, func() { v.Validate(ctx, obj) }))
+}
