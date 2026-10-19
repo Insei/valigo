@@ -38,6 +38,10 @@ validation:
     "Should be lowercase": Должно быть в нижнем регистре
     "Should be uppercase": Должно быть в верхнем регистре
     "Should be date and time in %s format": Должно быть датой и временем в формате %s
+    "Should be ISO 3166-1 alpha-2 country code": Должно быть кодом страны ISO 3166-1 alpha-2
+    "Should be ISO 4217 currency code": Должно быть кодом валюты ISO 4217
+    "Should have valid Luhn checksum": Должно иметь верную контрольную сумму по алгоритму Луна
+    "Should be credit card number": Должно быть номером банковской карты
   num:
     "Cannot be less than %v": Не может быть меньше %v
     "Cannot be greater than %v": Не может быть больше %v

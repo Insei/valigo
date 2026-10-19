@@ -95,6 +95,11 @@ func TestRules(t *testing.T) {
 		{"lowercase", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Lowercase() }, &texts{Name: "Ab"}, []string{"Name: Should be lowercase"}},
 		{"uppercase", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Uppercase() }, &texts{Name: "Ab"}, []string{"Name: Should be uppercase"}},
 		{"datetime", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Datetime("2006-01-02") }, &texts{Name: "01.05.2026"}, []string{"Name: Should be date and time in 2006-01-02 format"}},
+		{"country code", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).CountryCode() }, &texts{Name: "XX"}, []string{"Name: Should be ISO 3166-1 alpha-2 country code"}},
+		{"currency code", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).CurrencyCode() }, &texts{Name: "ABC"}, []string{"Name: Should be ISO 4217 currency code"}},
+		{"luhn", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Luhn() }, &texts{Name: "123"}, []string{"Name: Should have valid Luhn checksum"}},
+		{"credit card", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).CreditCard() }, &texts{Name: "4111"}, []string{"Name: Should be credit card number"}},
+		{"credit card ok", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).CreditCard().Luhn() }, &texts{Name: "4111111111111111"}, nil},
 		{"nil pointer skipped", func(c valigo.Configurator[texts], m *texts) {
 			c.Field(&m.NamePtr).As(str.Of).MinLen(1).MaxLen(0).AnyOf("x").Regexp(digits).Email()
 		}, &texts{}, nil},
@@ -184,7 +189,8 @@ func TestCodes(t *testing.T) {
 	valigo.Configure[texts](v, func(c valigo.Configurator[texts], m *texts) {
 		c.Field(&m.Name).As(str.Of).Required().MinLen(5).MaxLen(1).MinRunes(5).MaxRunes(1).AnyOf("x").Regexp(re).Email().URL().
 			IP().IPv4().IPv6().Hostname().UUID().Alphanumeric().Prefix("x").Suffix("x").Contains("x").EqualField(&m.Repeat).
-			Base64().Base64URL().JSON().Semver().CIDR().MAC().E164().HexColor().ASCII().Lowercase().Uppercase().Datetime("2006")
+			Base64().Base64URL().JSON().Semver().CIDR().MAC().E164().HexColor().ASCII().Lowercase().Uppercase().Datetime("2006").
+			CountryCode().CurrencyCode().Luhn().CreditCard()
 	})
 	var codes []string
 	params := map[string]map[string]any{}
@@ -198,6 +204,7 @@ func TestCodes(t *testing.T) {
 		"string.alphanumeric", "string.prefix", "string.suffix", "string.contains", "string.equal_field",
 		"string.base64", "string.base64url", "string.json", "string.semver", "string.cidr", "string.mac", "string.e164",
 		"string.hex_color", "string.uppercase", "string.datetime",
+		"string.country_code", "string.currency_code", "string.luhn", "string.credit_card",
 	}, codes)
 	assert.Equal(t, map[string]any{"layout": "2006"}, params["string.datetime"])
 	assert.Equal(t, map[string]any{"min": 5}, params["string.min_len"])
