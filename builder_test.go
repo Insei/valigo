@@ -265,6 +265,9 @@ func TestConfigurePanics(t *testing.T) {
 }
 
 func TestZeroAllocationsOnValid(t *testing.T) {
+	if raceEnabled {
+		t.Skip("allocations are not stable under the race detector")
+	}
 	v := New()
 	Configure[model](v, func(c Configurator[model], m *model) {
 		c.String(&m.Name).Trim().Required().MaxLen(10).Email()
@@ -276,6 +279,12 @@ func TestZeroAllocationsOnValid(t *testing.T) {
 		c.StringSlice(&m.Tags).Required().MaxLen(5).Each(func(e *str.BaseConfigurator) { e.Trim().MaxLen(3) })
 		c.UUIDSlice(&m.UIDs).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
 		c.When(func(_ context.Context, m *model) bool { return m.Age > 0 }).Number(&m.ID).Min(1)
+		c.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *model) []shared.Error {
+			if obj.Age < 0 {
+				return []shared.Error{h.ErrorT(ctx, &obj.Age, obj.Age, "negative")}
+			}
+			return nil
+		})
 	})
 	id := uuid.New()
 	obj := &model{

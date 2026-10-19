@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"sync"
 
 	guuid "github.com/google/uuid"
 	"github.com/insei/fmap/v3"
@@ -69,25 +70,36 @@ func (c Configurator[T]) When(fn func(ctx context.Context, obj *T) bool) Configu
 	return Configurator[T]{b: &b}
 }
 
-// errorTFn implements shared.StructCustomHelper.
-type errorTFn func(ctx context.Context, ptrToField, fieldValue any, localeKey string, args ...any) shared.Error
-
-// ErrorT calls the errorTFn function and returns a shared.Error.
-func (e errorTFn) ErrorT(ctx context.Context, ptrToFieldValue, fieldValue any, localeKey string, args ...any) shared.Error {
-	return e(ctx, ptrToFieldValue, fieldValue, localeKey, args...)
+// structHelper implements shared.StructCustomHelper for a single struct Custom call.
+type structHelper struct {
+	h      shared.Helper
+	fields fmap.Storage
+	obj    any
 }
 
+// ErrorT returns a shared.Error for the field of the validated object by the pointer to it.
+func (s *structHelper) ErrorT(ctx context.Context, ptrToField, fieldValue any, localeKey string, args ...any) shared.Error {
+	field, err := s.fields.GetFieldByPtr(s.obj, ptrToField)
+	if err != nil {
+		panic(fmt.Sprintf("valigo: %T is not a pointer to a field of %T: %v", ptrToField, s.obj, err))
+	}
+	return s.h.ErrorT(ctx, field, fieldValue, localeKey, args...)
+}
+
+// structHelpers reuses helpers, so struct Custom rules don't allocate on valid objects.
+var structHelpers = sync.Pool{New: func() any { return new(structHelper) }}
+
 // Custom adds a custom validation function on the whole struct.
+// The helper passed to fn is valid only during the fn call.
 func (c Configurator[T]) Custom(fn func(ctx context.Context, h shared.StructCustomHelper, obj *T) []shared.Error) {
 	fields := c.b.fields
 	c.add(func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
-		return fn(ctx, errorTFn(func(ctx context.Context, ptrToField, fieldValue any, localeKey string, args ...any) shared.Error {
-			field, err := fields.GetFieldByPtr(obj, ptrToField)
-			if err != nil {
-				panic(fmt.Sprintf("valigo: %T is not a pointer to a field of %T: %v", ptrToField, obj, err))
-			}
-			return h.ErrorT(ctx, field, fieldValue, localeKey, args...)
-		}), obj.(*T))
+		sh := structHelpers.Get().(*structHelper)
+		sh.h, sh.fields, sh.obj = h, fields, obj
+		errs := fn(ctx, sh, obj.(*T))
+		*sh = structHelper{}
+		structHelpers.Put(sh)
+		return errs
 	})
 }
 
