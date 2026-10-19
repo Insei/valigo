@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/insei/valigo/internal/testenv"
 )
 
 func TestTranslatorGetLanguages(t *testing.T) {
@@ -59,4 +61,23 @@ func TestTranslatorErrorTKeepsPercent(t *testing.T) {
 	tr := New(WithStorage(storage))
 	err := tr.ErrorT(context.Background(), "discount", 50)
 	assert.EqualError(t, err, "Discount 50% is too big")
+}
+
+func TestTranslatorGetLanguagesWithoutPreferred(t *testing.T) {
+	tr := New(WithPreferredLanguagesFn(func(context.Context) []string { return nil })).(*translator)
+	assert.Equal(t, []string{"en"}, tr.getLanguages(context.Background()))
+	if !testenv.RaceEnabled {
+		assert.Zero(t, testing.AllocsPerRun(10, func() { tr.getLanguages(context.Background()) }))
+	}
+
+	bare := &translator{getPreferredLanguages: func(context.Context) []string { return nil }, defaultLang: "fr"}
+	assert.Equal(t, []string{"fr"}, bare.getLanguages(context.Background()))
+}
+
+func TestTranslatorGetLanguagesDoesntChangeTheContextSlice(t *testing.T) {
+	langs := make([]string, 1, 4)
+	langs[0] = "ru"
+	tr := New(WithPreferredLanguagesFn(func(context.Context) []string { return langs })).(*translator)
+	assert.Equal(t, []string{"ru", "en"}, tr.getLanguages(context.Background()))
+	assert.Equal(t, []string{"ru", ""}, langs[:2], "append must not write to the slice of the context")
 }

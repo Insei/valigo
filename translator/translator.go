@@ -11,14 +11,20 @@ type translator struct {
 	storage               StorageRO
 	getPreferredLanguages func(ctx context.Context) []string
 	defaultLang           string
+	// defaultLangs is the default language alone, for the contexts without languages
+	defaultLangs []string
 }
 
 // getLanguages returns the list of languages to use for translation,
 // including the default language if necessary.
 func (t *translator) getLanguages(ctx context.Context) []string {
 	preferred := t.getPreferredLanguages(ctx)
+	if len(preferred) == 0 && t.defaultLangs != nil {
+		return t.defaultLangs
+	}
 	if !slices.Contains(preferred, t.defaultLang) {
-		preferred = append(preferred, t.defaultLang)
+		// a full slice expression: the languages of the context are never changed by append
+		preferred = append(preferred[:len(preferred):len(preferred)], t.defaultLang)
 	}
 	return preferred
 }
@@ -43,5 +49,6 @@ func New(opts ...Option) Translator {
 	for _, opt := range opts {
 		opt.apply(t)
 	}
+	t.defaultLangs = []string{t.defaultLang}
 	return t
 }

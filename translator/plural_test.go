@@ -6,6 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/insei/valigo/internal/testenv"
 )
 
 func TestPluralCategory(t *testing.T) {
@@ -80,4 +82,24 @@ func TestEmbeddedPluralForms(t *testing.T) {
 	assert.Equal(t, "Cannot be longer than 1 character", storage.Get([]string{"en"}, key, 1))
 	assert.Equal(t, "Cannot be longer than 5 characters", storage.Get([]string{"en"}, key, 5))
 	assert.Equal(t, "Не может содержать больше 2 элементов", storage.Get([]string{"ru"}, "validation:map:Cannot contain more than %d elements", 2))
+}
+
+func TestPluralIndex(t *testing.T) {
+	storage := NewInMemStorage(WithInMemData(map[string]map[string]string{"en": {"%d files#one": "%d file", "%d files#other": "%d files"}}))
+	assert.Equal(t, "1 file", storage.Get([]string{"en"}, "%d files", 1), "the forms of WithInMemData are indexed")
+	assert.Equal(t, "2 files", storage.Get([]string{"en"}, "%d files", 2))
+
+	bare := &inMemTranslatorStorage{translations: map[string]map[string]string{}}
+	bare.Add("de", map[string]string{"%d Dateien#one": "%d Datei"})
+	assert.Equal(t, "1 Datei", bare.Get([]string{"de"}, "%d Dateien", 1))
+}
+
+func TestGetWithoutArgs(t *testing.T) {
+	storage := NewInMemStorage(WithInMemData(map[string]map[string]string{"en": {"done": "Done", "100%% sure": "100%% sure"}}))
+	assert.Equal(t, "Done", storage.Get([]string{"en"}, "done"))
+	assert.Equal(t, "100% sure", storage.Get([]string{"en"}, "100%% sure"), "a format with %% is formatted")
+	en := []string{"en"}
+	if !testenv.RaceEnabled {
+		assert.Zero(t, testing.AllocsPerRun(10, func() { storage.Get(en, "done") }))
+	}
 }
