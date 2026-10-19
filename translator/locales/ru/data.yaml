@@ -42,6 +42,17 @@ validation:
     "Should be ISO 4217 currency code": Должно быть кодом валюты ISO 4217
     "Should have valid Luhn checksum": Должно иметь верную контрольную сумму по алгоритму Луна
     "Should be credit card number": Должно быть номером банковской карты
+    "Should contain only letters": "Должно содержать только латинские буквы"
+    "Should contain only digits": "Должно содержать только цифры"
+    "Should be a number": "Должно быть числом"
+    "Should be hexadecimal": "Должно быть шестнадцатеричным числом"
+    "Cannot contain %s": "Не может содержать %s"
+    "Should contain any of the characters %s": "Должно содержать один из символов %s"
+    "Cannot contain the characters %s": "Не может содержать символы %s"
+    "Should be equal to %s ignoring case": "Должно совпадать с %s без учёта регистра"
+    "Cannot start with %s": "Не может начинаться с %s"
+    "Cannot end with %s": "Не может заканчиваться на %s"
+    "Cannot be equal to %s": "Не может совпадать с %s"
   num:
     "Cannot be less than %v": Не может быть меньше %v
     "Cannot be greater than %v": Не может быть больше %v
@@ -51,6 +62,8 @@ validation:
     "Invalid value": Невалидное значение
     "Should be latitude": Должно быть широтой
     "Should be longitude": Должно быть долготой
+    "Should be greater than %v": "Должно быть больше %v"
+    "Should be less than %v": "Должно быть меньше %v"
   time:
     "Should be fulfilled": Должно быть заполнено
     "Should be before %s": Должно быть раньше %s
@@ -66,6 +79,7 @@ validation:
     "Should be %v": Должно быть %v
     "Cannot be %v": Не может быть %v
     "Should contain unique values": Должно содержать уникальные значения
+    "Cannot be equal to %s": "Не может совпадать с %s"
   uuid:
     "Should be fulfilled": Должно быть заполнено
     "Only %s values is allowed": Только %s значения разрешены

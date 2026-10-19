@@ -72,6 +72,25 @@ func TestRules(t *testing.T) {
 		{"hostname", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Hostname() }, &texts{Name: "a_b"}, []string{"Name: Should be hostname"}},
 		{"uuid", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).UUID() }, &texts{Name: "nope"}, []string{"Name: Should be UUID"}},
 		{"alphanumeric", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Alphanumeric() }, &texts{Name: "a-b"}, []string{"Name: Should contain only letters and digits"}},
+		{"excludes", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Excludes("b") }, &texts{Name: "ab"}, []string{"Name: Cannot contain b"}},
+		{"contains any", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).ContainsAny("xy") }, &texts{Name: "ab"}, []string{"Name: Should contain any of the characters xy"}},
+		{"excludes any", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).ExcludesAny("xb") }, &texts{Name: "ab"}, []string{"Name: Cannot contain the characters xb"}},
+		{"not prefix", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).NotPrefix("a") }, &texts{Name: "ab"}, []string{"Name: Cannot start with a"}},
+		{"not suffix", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).NotSuffix("b") }, &texts{Name: "ab"}, []string{"Name: Cannot end with b"}},
+		{"equal fold", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).EqualFold("abc") }, &texts{Name: "ab"}, []string{"Name: Should be equal to abc ignoring case"}},
+		{"alpha", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Alpha() }, &texts{Name: "a1"}, []string{"Name: Should contain only letters"}},
+		{"digits", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Digits() }, &texts{Name: "1a"}, []string{"Name: Should contain only digits"}},
+		{"numeric", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Numeric() }, &texts{Name: "1."}, []string{"Name: Should be a number"}},
+		{"hexadecimal", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Hexadecimal() }, &texts{Name: "0xg"}, []string{"Name: Should be hexadecimal"}},
+		{"negative rules ok", func(c valigo.Configurator[texts], m *texts) {
+			c.Field(&m.Name).As(str.Of).Excludes("x").ContainsAny("b").ExcludesAny("xy").NotPrefix("b").NotSuffix("a").EqualFold("AB").Alpha()
+		}, &texts{Name: "ab"}, nil},
+		{"number rules ok", func(c valigo.Configurator[texts], m *texts) {
+			c.Field(&m.Name).As(str.Of).Digits().Numeric().Hexadecimal()
+		}, &texts{Name: "0042"}, nil},
+		{"signed numeric ok", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Numeric() }, &texts{Name: "-3.25"}, nil},
+		{"hex prefix ok", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Hexadecimal() }, &texts{Name: "0xFF"}, nil},
+		{"not equal field", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).NotEqualField(&m.Repeat) }, &texts{Name: "a", Repeat: "a"}, []string{"Name: Cannot be equal to Repeat"}},
 		{"prefix", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Prefix("ab") }, &texts{Name: "ba"}, []string{"Name: Should start with ab"}},
 		{"suffix", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Suffix("ab") }, &texts{Name: "ba"}, []string{"Name: Should end with ab"}},
 		{"contains", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Contains("x") }, &texts{Name: "ba"}, []string{"Name: Should contain x"}},
@@ -190,7 +209,9 @@ func TestCodes(t *testing.T) {
 		c.Field(&m.Name).As(str.Of).Required().MinLen(5).MaxLen(1).MinRunes(5).MaxRunes(1).AnyOf("x").Regexp(re).Email().URL().
 			IP().IPv4().IPv6().Hostname().UUID().Alphanumeric().Prefix("x").Suffix("x").Contains("x").EqualField(&m.Repeat).
 			Base64().Base64URL().JSON().Semver().CIDR().MAC().E164().HexColor().ASCII().Lowercase().Uppercase().Datetime("2006").
-			CountryCode().CurrencyCode().Luhn().CreditCard()
+			CountryCode().CurrencyCode().Luhn().CreditCard().
+			Excludes(" ").ContainsAny("xyz").ExcludesAny("ab").NotPrefix("a").NotSuffix("b").EqualFold("X").NotEqualField(&m.Name).
+			Alpha().Digits().Numeric().Hexadecimal()
 	})
 	var codes []string
 	params := map[string]map[string]any{}
@@ -205,7 +226,11 @@ func TestCodes(t *testing.T) {
 		"string.base64", "string.base64url", "string.json", "string.semver", "string.cidr", "string.mac", "string.e164",
 		"string.hex_color", "string.uppercase", "string.datetime",
 		"string.country_code", "string.currency_code", "string.luhn", "string.credit_card",
+		"string.excludes", "string.contains_any", "string.excludes_any", "string.not_prefix", "string.not_suffix",
+		"string.equal_fold", "string.not_equal_field", "string.alpha", "string.digits", "string.numeric", "string.hexadecimal",
 	}, codes)
+	assert.Equal(t, map[string]any{"chars": "xyz"}, params["string.contains_any"])
+	assert.Equal(t, map[string]any{"value": "X"}, params["string.equal_fold"])
 	assert.Equal(t, map[string]any{"layout": "2006"}, params["string.datetime"])
 	assert.Equal(t, map[string]any{"min": 5}, params["string.min_len"])
 	assert.Equal(t, map[string]any{"values": []string{"x"}}, params["string.any_of"])

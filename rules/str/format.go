@@ -314,3 +314,52 @@ func isDatetime(layout string) func(s string) bool {
 		return err == nil
 	}
 }
+
+func isAlpha(s string) bool {
+	if s == "" {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		if !isASCIILetter(s[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func isDigits(s string) bool {
+	if s == "" {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		if !isASCIIDigit(s[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// isNumeric reports whether s is [-+]digits[.digits].
+func isNumeric(s string) bool {
+	if s != "" && (s[0] == '-' || s[0] == '+') {
+		s = s[1:]
+	}
+	whole, fraction, dot := strings.Cut(s, ".")
+	return isDigits(whole) && (!dot || isDigits(fraction))
+}
+
+// isHexadecimal reports whether s is [0x]hexdigits.
+func isHexadecimal(s string) bool {
+	if len(s) > 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X') {
+		s = s[2:]
+	}
+	if s == "" {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		if !isHex(s[i]) {
+			return false
+		}
+	}
+	return true
+}
