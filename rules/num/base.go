@@ -15,6 +15,8 @@ const (
 	anyOfIntervalLocalKey = "validation:num:Only interval[%v - %v] is allowed"
 	latitudeLocaleKey     = "validation:num:Should be latitude"
 	longitudeLocaleKey    = "validation:num:Should be longitude"
+	greaterLocaleKey      = "validation:num:Should be greater than %v"
+	lessLocaleKey         = "validation:num:Should be less than %v"
 )
 
 // Number is a constraint for numeric types supported by BaseConfigurator.
@@ -66,6 +68,34 @@ func (i *BaseConfigurator[N]) Max(maxNum N) *BaseConfigurator[N] {
 func (i *BaseConfigurator[N]) Min(minNum N) *BaseConfigurator[N] {
 	i.f.Schema("minimum", minNum)
 	i.f.CheckMsg(func(v N) bool { return v >= minNum }, shared.M("number.min", minLocaleKey, shared.P("min", minNum)))
+	return i
+}
+
+// GreaterThan checks if the number is greater than n.
+func (i *BaseConfigurator[N]) GreaterThan(n N) *BaseConfigurator[N] {
+	i.f.Schema("exclusiveMinimum", n)
+	i.f.CheckMsg(func(v N) bool { return v > n }, shared.M("number.greater_than", greaterLocaleKey, shared.P("min", n)))
+	return i
+}
+
+// LessThan checks if the number is less than n.
+func (i *BaseConfigurator[N]) LessThan(n N) *BaseConfigurator[N] {
+	i.f.Schema("exclusiveMaximum", n)
+	i.f.CheckMsg(func(v N) bool { return v < n }, shared.M("number.less_than", lessLocaleKey, shared.P("max", n)))
+	return i
+}
+
+// GreaterField checks if the number is greater than the value of another numeric field of the object:
+// b.Field(&m.Max).As(num.Of).GreaterField(&m.Min).
+func (i *BaseConfigurator[N]) GreaterField(other *N) *BaseConfigurator[N] {
+	i.f.CheckWithMsg(other, func(v, o N) bool { return v > o }, shared.M("number.greater_field", greaterLocaleKey))
+	return i
+}
+
+// LessField checks if the number is less than the value of another numeric field of the object:
+// b.Field(&m.Min).As(num.Of).LessField(&m.Max).
+func (i *BaseConfigurator[N]) LessField(other *N) *BaseConfigurator[N] {
+	i.f.CheckWithMsg(other, func(v, o N) bool { return v < o }, shared.M("number.less_field", lessLocaleKey))
 	return i
 }
 

@@ -16,6 +16,7 @@ const (
 	equalLocaleKey    = "validation:value:Should be %v"
 	notEqualLocaleKey = "validation:value:Cannot be %v"
 	equalFieldKey     = "validation:value:Should be equal to %s"
+	notEqualFieldKey  = "validation:value:Cannot be equal to %s"
 )
 
 // BaseConfigurator configures rules for a comparable value.
@@ -75,6 +76,13 @@ func (i *BaseConfigurator[T]) Equal(expected T) *BaseConfigurator[T] {
 // b.Field(&m.Confirmation).As(eq.Of).EqualField(&m.Password).
 func (i *BaseConfigurator[T]) EqualField(other *T) *BaseConfigurator[T] {
 	i.f.CheckWithMsg(other, func(v, o T) bool { return v == o }, shared.M("value.equal_field", equalFieldKey))
+	return i
+}
+
+// NotEqualField checks if the value differs from the value of another field of the object:
+// b.Field(&m.Target).As(eq.Of).NotEqualField(&m.Source).
+func (i *BaseConfigurator[T]) NotEqualField(other *T) *BaseConfigurator[T] {
+	i.f.CheckWithMsg(other, func(v, o T) bool { return v != o }, shared.M("value.not_equal_field", notEqualFieldKey))
 	return i
 }
 

@@ -125,11 +125,12 @@ func TestCodes(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[numbers](v, func(c valigo.Configurator[numbers], m *numbers) {
 		c.Field(&m.Int).As(num.Of).Required().Min(5).Max(-1).MinField(&m.Min).MaxField(&m.Max).AnyOf(7).AnyOfInterval(1, 2)
-		c.Field(&m.Float64).As(num.Of).Latitude().Longitude()
+		c.Field(&m.Float64).As(num.Of).Latitude().Longitude().GreaterThan(300).LessThan(100).GreaterField(&m.Float64).LessField(&m.Float64)
 	})
 	var codes []string
 	for _, err := range v.ValidateTyped(context.Background(), &numbers{Min: 1, Max: -1, Float64: 200}) {
 		codes = append(codes, err.Code)
 	}
-	assert.Equal(t, []string{"number.required", "number.min", "number.max", "number.min_field", "number.max_field", "number.any_of", "number.interval", "number.latitude", "number.longitude"}, codes)
+	assert.Equal(t, []string{"number.required", "number.min", "number.max", "number.min_field", "number.max_field", "number.any_of", "number.interval", "number.latitude", "number.longitude",
+		"number.greater_than", "number.less_than", "number.greater_field", "number.less_field"}, codes)
 }
