@@ -3,8 +3,16 @@ validation:
   string:
     "Should be equal to %s": Должно совпадать с %s
     "Should be fulfilled": Должно быть заполнено
-    "Cannot be longer than %d characters": Не может быть длиннее %d символов
-    "Cannot be shorter than %d characters": Не может быть короче %d символов
+    "Cannot be longer than %d characters":
+      one: Не может быть длиннее %d символа
+      few: Не может быть длиннее %d символов
+      many: Не может быть длиннее %d символов
+      other: Не может быть длиннее %d символа
+    "Cannot be shorter than %d characters":
+      one: Не может быть короче %d символа
+      few: Не может быть короче %d символов
+      many: Не может быть короче %d символов
+      other: Не может быть короче %d символа
     "Doesn't match required regexp pattern": Не соответствует regexp шаблону
     "Only %s values is allowed": Только %s значения разрешены
     "Should be email address": Должно быть электронным адресом
@@ -45,9 +53,25 @@ validation:
     "Only %s values is allowed": Только %s значения разрешены
   map:
     "Should be fulfilled": Должно быть заполнено
-    "Cannot contain more than %d elements": Не может содержать больше %d элементов
-    "Cannot contain less than %d elements": Не может содержать меньше %d элементов
+    "Cannot contain more than %d elements":
+      one: Не может содержать больше %d элемента
+      few: Не может содержать больше %d элементов
+      many: Не может содержать больше %d элементов
+      other: Не может содержать больше %d элемента
+    "Cannot contain less than %d elements":
+      one: Не может содержать меньше %d элемента
+      few: Не может содержать меньше %d элементов
+      many: Не может содержать меньше %d элементов
+      other: Не может содержать меньше %d элемента
   slice:
     "Should be fulfilled": Должно быть заполнено
-    "Cannot contain more than %d elements": Не может содержать больше %d элементов
-    "Cannot contain less than %d elements": Не может содержать меньше %d элементов
+    "Cannot contain more than %d elements":
+      one: Не может содержать больше %d элемента
+      few: Не может содержать больше %d элементов
+      many: Не может содержать больше %d элементов
+      other: Не может содержать больше %d элемента
+    "Cannot contain less than %d elements":
+      one: Не может содержать меньше %d элемента
+      few: Не может содержать меньше %d элементов
+      many: Не может содержать меньше %d элементов
+      other: Не может содержать меньше %d элемента

@@ -3,8 +3,12 @@ validation:
   string:
     "Should be equal to %s": Should be equal to %s
     "Should be fulfilled": Should be fulfilled
-    "Cannot be longer than %d characters": Cannot be longer than %d characters
-    "Cannot be shorter than %d characters": Cannot be shorter than %d characters
+    "Cannot be longer than %d characters":
+      one: Cannot be longer than %d character
+      other: Cannot be longer than %d characters
+    "Cannot be shorter than %d characters":
+      one: Cannot be shorter than %d character
+      other: Cannot be shorter than %d characters
     "Doesn't match required regexp pattern": Doesn't match required regexp pattern
     "Only %s values is allowed": Only %s values is allowed
     "Should be email address": Should be email address
@@ -45,9 +49,17 @@ validation:
     "Only %s values is allowed": Only %s values is allowed
   map:
     "Should be fulfilled": Should be fulfilled
-    "Cannot contain more than %d elements": Cannot contain more than %d elements
-    "Cannot contain less than %d elements": Cannot contain less than %d elements
+    "Cannot contain more than %d elements":
+      one: Cannot contain more than %d element
+      other: Cannot contain more than %d elements
+    "Cannot contain less than %d elements":
+      one: Cannot contain less than %d element
+      other: Cannot contain less than %d elements
   slice:
     "Should be fulfilled": Should be fulfilled
-    "Cannot contain more than %d elements": Cannot contain more than %d elements
-    "Cannot contain less than %d elements": Cannot contain less than %d elements
+    "Cannot contain more than %d elements":
+      one: Cannot contain more than %d element
+      other: Cannot contain more than %d elements
+    "Cannot contain less than %d elements":
+      one: Cannot contain less than %d element
+      other: Cannot contain less than %d elements

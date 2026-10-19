@@ -92,7 +92,7 @@ func TestRules(t *testing.T) {
 			name: "slice length",
 			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Slice(&m.IDs).As(vuuid.Slice).MinLen(1).MaxLen(1) },
 			obj:  &ids{IDs: []uuid.UUID{id1, id2}},
-			want: []shared.Error{{Location: "IDs", Message: "Cannot contain more than 1 elements", Value: 2, Code: "slice.max_len", Params: map[string]any{"max": 1}}},
+			want: []shared.Error{{Location: "IDs", Message: "Cannot contain more than 1 element", Value: 2, Code: "slice.max_len", Params: map[string]any{"max": 1}}},
 		},
 		{
 			name: "slice required",

@@ -100,7 +100,7 @@ func TestRules(t *testing.T) {
 		}, &texts{Name: "admin"}, []string{"Name: Is reserved"}},
 
 		{"slice length", func(c valigo.Configurator[texts], m *texts) { c.Slice(&m.Tags).As(str.Slice).MinLen(3).MaxLen(1) }, &texts{Tags: []string{"a", "b"}}, []string{
-			"Tags: Cannot contain less than 3 elements", "Tags: Cannot contain more than 1 elements",
+			"Tags: Cannot contain less than 3 elements", "Tags: Cannot contain more than 1 element",
 		}},
 		{"slice required", func(c valigo.Configurator[texts], m *texts) {
 			c.Field(&m.TagsPtr).As(shared.SlicePtr).As(str.Slice).Required()
@@ -108,7 +108,7 @@ func TestRules(t *testing.T) {
 		{"slice each", func(c valigo.Configurator[texts], m *texts) {
 			c.Slice(&m.TagPtrs).As(str.Slice).Each(func(e *str.BaseConfigurator) { e.Required().MaxLen(1) })
 		}, &texts{TagPtrs: []*string{ptr("ab"), nil, ptr("c")}}, []string{
-			"TagPtrs[0]: Cannot be longer than 1 characters", "TagPtrs[1]: Should be fulfilled",
+			"TagPtrs[0]: Cannot be longer than 1 character", "TagPtrs[1]: Should be fulfilled",
 		}},
 		{"slice regexp", func(c valigo.Configurator[texts], m *texts) { c.Slice(&m.Tags).As(str.Slice).Regexp(digits) }, &texts{Tags: []string{"1", "a"}}, []string{
 			"Tags[1]: Doesn't match required regexp pattern",
