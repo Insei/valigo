@@ -453,6 +453,62 @@ The value is typed: `string` for `str.Of`, the number type for `num.Of` and `num
 
 For an [absent value](https://insei.github.io/valigo/latest/features/absent/index.md) the condition isn't called and the rules after it are skipped, including `Required`.
 
+## Conditional requiredness
+
+Tag based validators have families of tags like `required_if`, `required_with` and `required_without`. In valigo they are `When` with a condition on the fields:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/shared"
+    "github.com/insei/valigo/str"
+)
+
+type Customer struct {
+    Kind    string
+    TaxID   string
+    Phone   string
+    Email   string
+    Company string
+    Title   string
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Customer](v, func(b valigo.Configurator[Customer], c *Customer) {
+        // required_if=Kind company
+        b.When(func(_ context.Context, c *Customer) bool { return c.Kind == "company" }).Field(&c.TaxID).As(str.Of).Required()
+        // required_without=Email: a phone or an email
+        b.When(func(_ context.Context, c *Customer) bool { return c.Email == "" }).Field(&c.Phone).As(str.Of).Required()
+        // required_with=Company: the title of the person in the company
+        b.When(func(_ context.Context, c *Customer) bool { return c.Company != "" }).Field(&c.Title).As(str.Of).Required()
+        // excluded_unless=Kind company
+        b.When(func(_ context.Context, c *Customer) bool { return c.Kind != "company" }).Field(&c.Company).As(str.Of).
+            Custom(func(ctx context.Context, h *shared.FieldCustomHelper, company string) []shared.Error {
+                if company != "" {
+                    return []shared.Error{h.ErrorT(ctx, company, "Only companies have a company")}
+                }
+                return nil
+            })
+    })
+
+    fmt.Println(v.Validate(context.Background(), &Customer{Kind: "company"}))
+    fmt.Println(v.Validate(context.Background(), &Customer{Kind: "person", Email: "a@b.cc", Company: "ACME"}))
+}
+```
+
+Output:
+
+```text
+[Should be fulfilled (TaxID: ) Should be fulfilled (Phone: )]
+[Should be fulfilled (Title: ) Only companies have a company (Company: ACME)]
+```
+
 ## Conditions and custom rules
 
 A condition on several fields can also be written as a [struct custom rule](https://insei.github.io/valigo/latest/features/custom/#struct-rules), which reports errors itself. Prefer `When`: the rules after it are the regular ones, with their messages and translations.
@@ -965,32 +1021,35 @@ Output:
 {"code":"time.after_field","field":"EndsAt","params":{"field":"StartsAt"}}
 ```
 
-| Code                                                                                                                                                                 | Params                          |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `string.required`, `string.email`, `string.url`, `string.ip`, `string.ipv4`, `string.ipv6`, `string.hostname`, `string.uuid`, `string.alphanumeric`, `string.regexp` | —                               |
-| `string.min_len`, `string.min_runes`                                                                                                                                 | `min`                           |
-| `string.max_len`, `string.max_runes`                                                                                                                                 | `max`                           |
-| `string.any_of`                                                                                                                                                      | `values`                        |
-| `string.prefix`, `string.suffix`, `string.contains`                                                                                                                  | `prefix`, `suffix`, `substring` |
-| `string.equal_field`                                                                                                                                                 | `field`                         |
-| `number.required`                                                                                                                                                    | —                               |
-| `number.min`, `number.max`                                                                                                                                           | `min`, `max`                    |
-| `number.min_field`, `number.max_field`                                                                                                                               | `field`                         |
-| `number.any_of`                                                                                                                                                      | `values`                        |
-| `number.interval`                                                                                                                                                    | `min`, `max`                    |
-| `time.required`, `time.in_past`, `time.in_future`                                                                                                                    | —                               |
-| `time.before`, `time.after`                                                                                                                                          | `time` (RFC 3339)               |
-| `time.between`                                                                                                                                                       | `from`, `to` (RFC 3339)         |
-| `time.before_field`, `time.after_field`                                                                                                                              | `field`                         |
-| `value.required`, `value.unique`                                                                                                                                     | —                               |
-| `value.one_of`, `value.not_one_of`                                                                                                                                   | `values`                        |
-| `value.equal`, `value.not_equal`                                                                                                                                     | `value`                         |
-| `value.equal_field`                                                                                                                                                  | `field`                         |
-| `uuid.required`                                                                                                                                                      | —                               |
-| `uuid.any_of`                                                                                                                                                        | `values`                        |
-| `slice.required`, `map.required`                                                                                                                                     | —                               |
-| `slice.min_len`, `map.min_len`                                                                                                                                       | `min`                           |
-| `slice.max_len`, `map.max_len`                                                                                                                                       | `max`                           |
+| Code                                                                                                                                                                                                                                                                            | Params                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `string.required`, `string.email`, `string.url`, `string.ip`, `string.ipv4`, `string.ipv6`, `string.hostname`, `string.uuid`, `string.alphanumeric`, `string.regexp`                                                                                                            | —                               |
+| `string.min_len`, `string.min_runes`                                                                                                                                                                                                                                            | `min`                           |
+| `string.max_len`, `string.max_runes`                                                                                                                                                                                                                                            | `max`                           |
+| `string.any_of`                                                                                                                                                                                                                                                                 | `values`                        |
+| `string.prefix`, `string.suffix`, `string.contains`                                                                                                                                                                                                                             | `prefix`, `suffix`, `substring` |
+| `string.equal_field`                                                                                                                                                                                                                                                            | `field`                         |
+| `string.base64`, `string.base64url`, `string.json`, `string.semver`, `string.cidr`, `string.mac`, `string.e164`, `string.hex_color`, `string.ascii`, `string.lowercase`, `string.uppercase`, `string.country_code`, `string.currency_code`, `string.luhn`, `string.credit_card` | —                               |
+| `string.datetime`                                                                                                                                                                                                                                                               | `layout`                        |
+| `number.required`                                                                                                                                                                                                                                                               | —                               |
+| `number.min`, `number.max`                                                                                                                                                                                                                                                      | `min`, `max`                    |
+| `number.min_field`, `number.max_field`                                                                                                                                                                                                                                          | `field`                         |
+| `number.any_of`                                                                                                                                                                                                                                                                 | `values`                        |
+| `number.interval`                                                                                                                                                                                                                                                               | `min`, `max`                    |
+| `number.latitude`, `number.longitude`                                                                                                                                                                                                                                           | —                               |
+| `time.required`, `time.in_past`, `time.in_future`                                                                                                                                                                                                                               | —                               |
+| `time.before`, `time.after`                                                                                                                                                                                                                                                     | `time` (RFC 3339)               |
+| `time.between`                                                                                                                                                                                                                                                                  | `from`, `to` (RFC 3339)         |
+| `time.before_field`, `time.after_field`                                                                                                                                                                                                                                         | `field`                         |
+| `value.required`, `value.unique`                                                                                                                                                                                                                                                | —                               |
+| `value.one_of`, `value.not_one_of`                                                                                                                                                                                                                                              | `values`                        |
+| `value.equal`, `value.not_equal`                                                                                                                                                                                                                                                | `value`                         |
+| `value.equal_field`                                                                                                                                                                                                                                                             | `field`                         |
+| `uuid.required`                                                                                                                                                                                                                                                                 | —                               |
+| `uuid.any_of`                                                                                                                                                                                                                                                                   | `values`                        |
+| `slice.required`, `map.required`                                                                                                                                                                                                                                                | —                               |
+| `slice.min_len`, `map.min_len`                                                                                                                                                                                                                                                  | `min`                           |
+| `slice.max_len`, `map.max_len`                                                                                                                                                                                                                                                  | `max`                           |
 
 The `field` parameter is the location of the other field by the location function of the validator. The errors of [custom rules](https://insei.github.io/valigo/latest/features/custom/index.md) have the locale key as the code, or the code of `shared.M` with `ErrorMsg`.
 
@@ -1372,6 +1431,7 @@ Slices of numbers are converted by `num.Slice`: `b.Slice(&p.Sizes).As(num.Slice)
 | `MinField(&m.X)`, `MaxField(&m.X)` | the value is less or greater than the value of the field `X`, see [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md) | Cannot be less than %v, Cannot be greater than %v                                                                                          |
 | `AnyOf(values...)`                 | the value isn't one of `values`                                                                                                                           | Only %v values is allowed                                                                                                                  |
 | `AnyOfInterval(begin, end)`        | the value is outside `[begin, end]`, both ends are included                                                                                               | Only interval[%v - %v] is allowed                                                                                                          |
+| `Latitude()`, `Longitude()`        | the value is outside `[-90, 90]` / `[-180, 180]`                                                                                                          | Should be latitude, Should be longitude                                                                                                    |
 | `Custom(fn)`                       | `fn` returns errors                                                                                                                                       | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
 | `When(fn)`                         | —                                                                                                                                                         | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
 
@@ -1689,6 +1749,20 @@ b.Slice(&u.Emails).As(str.Slice).MaxLen(3).Email()
 | `Hostname()`                            | the value isn't a hostname by RFC 1123                                                                                                                  | Should be hostname                                                                                                                         |
 | `UUID()`                                | the value isn't a UUID in the canonical form, any case                                                                                                  | Should be UUID                                                                                                                             |
 | `Alphanumeric()`                        | the value is empty or has characters other than ASCII letters and digits                                                                                | Should contain only letters and digits                                                                                                     |
+| `ASCII()`                               | the value is empty or has non-ASCII characters                                                                                                          | Should contain only ASCII characters                                                                                                       |
+| `Lowercase()`, `Uppercase()`            | the value is empty or has upper / lower case letters                                                                                                    | Should be lowercase, Should be uppercase                                                                                                   |
+| `Base64()`, `Base64URL()`               | the value isn't base64 of RFC 4648 with the standard alphabet and padding / with the URL alphabet, padding optional                                     | Should be base64 encoded, Should be base64url encoded                                                                                      |
+| `JSON()`                                | the value isn't a valid JSON value                                                                                                                      | Should be JSON                                                                                                                             |
+| `Semver()`                              | the value isn't a semantic version of semver.org, `1.2.3-rc.1+build.5`, without `v`                                                                     | Should be semantic version                                                                                                                 |
+| `CIDR()`                                | the value isn't an IPv4 or IPv6 prefix, `10.0.0.0/8`                                                                                                    | Should be CIDR                                                                                                                             |
+| `MAC()`                                 | the value isn't a MAC address of 6 or 8 bytes, `00:1a:2b:3c:4d:5e`, `00-1a-...`, `001a.2b3c.4d5e`                                                       | Should be MAC address                                                                                                                      |
+| `E164()`                                | the value isn't a phone number of E.164, `+14155550123`                                                                                                 | Should be E.164 phone number                                                                                                               |
+| `HexColor()`                            | the value isn't `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa`                                                                                               | Should be hex color                                                                                                                        |
+| `Datetime(layout)`                      | the value isn't parsed by `time.Parse(layout, value)`                                                                                                   | Should be date and time in %s format                                                                                                       |
+| `CountryCode()`                         | the value isn't an upper case code of ISO 3166-1 alpha-2, `US`                                                                                          | Should be ISO 3166-1 alpha-2 country code                                                                                                  |
+| `CurrencyCode()`                        | the value isn't an upper case active code of ISO 4217, `EUR`                                                                                            | Should be ISO 4217 currency code                                                                                                           |
+| `Luhn()`                                | the value isn't 2 or more digits with a valid Luhn checksum                                                                                             | Should have valid Luhn checksum                                                                                                            |
+| `CreditCard()`                          | the value isn't 12-19 digits, grouped by spaces or hyphens, with a valid Luhn checksum                                                                  | Should be credit card number                                                                                                               |
 | `Custom(fn)`                            | `fn` returns errors                                                                                                                                     | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
 | `When(fn)`                              | —                                                                                                                                                       | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
 

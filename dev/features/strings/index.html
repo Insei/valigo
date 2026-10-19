@@ -1491,6 +1491,76 @@
 <td>Should contain only letters and digits</td>
 </tr>
 <tr>
+<td><code>ASCII()</code></td>
+<td>the value is empty or has non-ASCII characters</td>
+<td>Should contain only ASCII characters</td>
+</tr>
+<tr>
+<td><code>Lowercase()</code>, <code>Uppercase()</code></td>
+<td>the value is empty or has upper / lower case letters</td>
+<td>Should be lowercase, Should be uppercase</td>
+</tr>
+<tr>
+<td><code>Base64()</code>, <code>Base64URL()</code></td>
+<td>the value isn't base64 of RFC 4648 with the standard alphabet and padding / with the URL alphabet, padding optional</td>
+<td>Should be base64 encoded, Should be base64url encoded</td>
+</tr>
+<tr>
+<td><code>JSON()</code></td>
+<td>the value isn't a valid JSON value</td>
+<td>Should be JSON</td>
+</tr>
+<tr>
+<td><code>Semver()</code></td>
+<td>the value isn't a semantic version of semver.org, <code>1.2.3-rc.1+build.5</code>, without <code>v</code></td>
+<td>Should be semantic version</td>
+</tr>
+<tr>
+<td><code>CIDR()</code></td>
+<td>the value isn't an IPv4 or IPv6 prefix, <code>10.0.0.0/8</code></td>
+<td>Should be CIDR</td>
+</tr>
+<tr>
+<td><code>MAC()</code></td>
+<td>the value isn't a MAC address of 6 or 8 bytes, <code>00:1a:2b:3c:4d:5e</code>, <code>00-1a-...</code>, <code>001a.2b3c.4d5e</code></td>
+<td>Should be MAC address</td>
+</tr>
+<tr>
+<td><code>E164()</code></td>
+<td>the value isn't a phone number of E.164, <code>+14155550123</code></td>
+<td>Should be E.164 phone number</td>
+</tr>
+<tr>
+<td><code>HexColor()</code></td>
+<td>the value isn't <code>#rgb</code>, <code>#rgba</code>, <code>#rrggbb</code> or <code>#rrggbbaa</code></td>
+<td>Should be hex color</td>
+</tr>
+<tr>
+<td><code>Datetime(layout)</code></td>
+<td>the value isn't parsed by <code>time.Parse(layout, value)</code></td>
+<td>Should be date and time in %s format</td>
+</tr>
+<tr>
+<td><code>CountryCode()</code></td>
+<td>the value isn't an upper case code of ISO 3166-1 alpha-2, <code>US</code></td>
+<td>Should be ISO 3166-1 alpha-2 country code</td>
+</tr>
+<tr>
+<td><code>CurrencyCode()</code></td>
+<td>the value isn't an upper case active code of ISO 4217, <code>EUR</code></td>
+<td>Should be ISO 4217 currency code</td>
+</tr>
+<tr>
+<td><code>Luhn()</code></td>
+<td>the value isn't 2 or more digits with a valid Luhn checksum</td>
+<td>Should have valid Luhn checksum</td>
+</tr>
+<tr>
+<td><code>CreditCard()</code></td>
+<td>the value isn't 12-19 digits, grouped by spaces or hyphens, with a valid Luhn checksum</td>
+<td>Should be credit card number</td>
+</tr>
+<tr>
 <td><code>Custom(fn)</code></td>
 <td><code>fn</code> returns errors</td>
 <td>your messages, see <a href="../custom/">Custom rules</a></td>
