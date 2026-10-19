@@ -47,9 +47,20 @@ smtp.Field(&s.Port).As(num.Of).AnyOfInterval(1, 65535)
 
 See [Conditions](features/conditions.md) and [Custom rules](features/custom.md).
 
-### Translated messages
+### Messages in the language of the user, or codes for the client
 
-Messages of the built-in rules are translated to English, German, Spanish, French and Russian, your own messages are added to the same storage. The language is taken from the context, `NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there. See [Translations](features/translations.md).
+One validator serves all languages: the language of every request comes from the context, `NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there. The messages of the built-in rules are translated to English, German, Spanish, French and Russian with plural forms, your own messages are added to the same storage and work untranslated until you add translations. A client with its own locales gets a stable `Code` and named `Params` of every error instead. See [Translations](features/translations.md) and [Codes for clients](features/errors.md#codes-for-clients).
+
+How the libraries compare, by their documentation:
+
+| | valigo | go-playground/validator | ozzo-validation |
+|---|---|---|---|
+| Translations out of the box | en, de, es, fr, ru | many languages, the packages of `validator/translations` | English messages |
+| Language of a request | from the context, one validator for all languages | a translator of `universal-translator` is picked and passed to `Translate` for every request | the messages are global |
+| Setup | none, `valigo.New()` | a translator per language and the registration of the translations of every tag | replacing the message templates of the errors |
+| Plural forms | CLDR categories in the locale files | cardinal rules of `universal-translator` | — |
+| Codes for clients | `Code` and named `Params` of every error | the tag and one string parameter of a field error | the code and the parameters of an error |
+| Messages of own rules | the message is its locale key, translated when a translation is added | a translation is registered for every tag | the message of the error |
 
 ### Errors that point to the field
 
