@@ -1753,6 +1753,7 @@
 <ul>
 <li>Commits follow <a href="https://www.conventionalcommits.org/">Conventional Commits</a>, the changelog is generated from them by git-cliff.</li>
 <li><code>go test -race ./...</code> and the examples modules run in CI. Programs in the documentation and in the skill for AI agents are built and run by <code>scripts/check-examples.sh</code>.</li>
+<li>Fuzz tests check the formats of strings against the parsers of the standard library and the patterns of their JSON Schema, the reading of the fields by the offsets against the fields themselves, and that any tag either configures the rules or panics with its error. <code>scripts/fuzz.sh</code> runs every target for <code>FUZZTIME</code>, 30s in CI; a failing input is saved in <code>testdata/fuzz</code> of the package and stays a regression test.</li>
 <li>A new rule of an existing type is a method of its configurator over <code>Check</code> or <code>Required</code>, with a locale key in <code>translator/locales/*/data.yaml</code>.</li>
 </ul>
 
