@@ -78,7 +78,7 @@ and a conversion that doesn't fit the field doesn't compile:
 * Every error has the translated message, the location (`Tags[1]`, `address.city` with JSON paths), the value, a stable `Code` and named `Params`
 * Messages in English, German, Spanish, French and Russian with plural forms, the language of every request from the context, an `Accept-Language` middleware
 * `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers
-* `github.com/insei/valigo/huma`: the rules of valigo in the inputs of [huma](https://huma.rocks) operations
+* `github.com/insei/valigo/huma`, `github.com/insei/valigo/gin`, `github.com/insei/valigo/echo`: the rules of valigo in [huma](https://huma.rocks), [gin](https://gin-gonic.com) and [echo](https://echo.labstack.com)
 
 # Performance
 The same struct and rules, Intel Core i9-14900HX, Go 1.27.0, see [Performance](https://insei.github.io/valigo/latest/performance/):

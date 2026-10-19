@@ -95,6 +95,7 @@ nav:
       - HTTP problem details: features/problem.md
       - huma: features/huma.md
       - gin: features/gin.md
+      - echo: features/echo.md
   - Architecture:
       - How it works: architecture/index.md
 

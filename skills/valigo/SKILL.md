@@ -182,6 +182,10 @@ func main() {
 
 The module `github.com/insei/valigo/gin` (`vgin`): `binding.Validator = vgin.New(v)` makes `c.ShouldBindJSON` validate by valigo (messages in the default language, gin passes no request), `vgin.Validate(c, v, &req)` validates with the languages of `Accept-Language`; the error is `shared.Errors`, get it by `errors.As`.
 
+## echo
+
+The module `github.com/insei/valigo/echo` (`vecho`): `e.Validator = vecho.New(v)` makes `c.Validate(&req)` validate by valigo (messages in the default language), `vecho.Validate(c, v, &req)` validates with the languages of `Accept-Language`; the error is `shared.Errors`.
+
 ## huma
 
 The module `github.com/insei/valigo/huma` (`vhuma`): `valigo.New(valigo.WithFieldLocationNamingFn(vhuma.Location))` gives the locations of huma (`body.email`, `query.limit`, `path.id`), `func (i *Input) Resolve(ctx huma.Context) []error { return vhuma.Resolve(ctx, validator, i) }` validates the input with the languages of `Accept-Language`.
