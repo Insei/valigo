@@ -62,7 +62,7 @@ jobs:
           git worktree add pages origin/gh-pages
           # llms.txt of the latest version is also at the root of the site, where the agents look for it first
           cp -L pages/latest/llms.txt pages/latest/llms-full.txt pages/ 2>/dev/null || true
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: pages
 
