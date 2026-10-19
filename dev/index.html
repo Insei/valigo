@@ -1311,7 +1311,7 @@
 </span></code></pre></div>
 <p>What happens here:</p>
 <ol>
-<li><code>valigo.New()</code> creates a validator with the English and Russian messages.</li>
+<li><code>valigo.New()</code> creates a validator with the messages in English, German, Spanish, French and Russian.</li>
 <li><code>valigo.Configure[User]</code> calls the function once with a <em>model</em>: a <code>*User</code> whose nested pointer structs are allocated. Rules are bound to the fields of the model by their pointers, <code>&amp;u.Name</code>.</li>
 <li>Every configurator method returns the configurator of the field, so rules are chained. They run in the order of the chain: <code>Trim</code> changes the value before <code>Required</code> checks it.</li>
 <li><code>v.Validate</code> runs the rules of the <code>*User</code> type and returns <code>nil</code> for a valid object. Every error has the message, the location of the field (<code>Tags[1]</code> for the element of a slice) and the value.</li>

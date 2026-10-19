@@ -1283,7 +1283,7 @@
 
 
 <h1 id="translations">Translations<a class="headerlink" href="#translations" title="Permanent link">&para;</a></h1>
-<p>Messages are translated by a <code>translator.Translator</code>. The default one of <code>valigo.New</code> has the English and Russian messages of the built-in rules, English is the default language.</p>
+<p>Messages are translated by a <code>translator.Translator</code>. The default one of <code>valigo.New</code> has the English, German, Spanish, French and Russian messages of the built-in rules, English is the default language.</p>
 <h2 id="locale-keys">Locale keys<a class="headerlink" href="#locale-keys" title="Permanent link">&para;</a></h2>
 <p>The rules build messages by <em>locale keys</em>: <code>validation:string:Cannot be longer than %d characters</code>. The translator looks the key up in the languages of the context, then in the default language, and formats the found message with the arguments of the rule. A key without a translation is used as is: so the messages of <a href="../custom/">custom rules</a> work without translations.</p>
 <p>The keys of the built-in rules are in <a href="https://github.com/Insei/valigo/tree/main/translator/locales"><code>translator/locales</code></a>:</p>

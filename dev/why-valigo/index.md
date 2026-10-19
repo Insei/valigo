@@ -49,7 +49,7 @@ See [Conditions](https://insei.github.io/valigo/latest/features/conditions/index
 
 ### Translated messages
 
-Messages of the built-in rules are translated to English and Russian, your own messages are added to the same storage. The language is taken from the context, `NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there. See [Translations](https://insei.github.io/valigo/latest/features/translations/index.md).
+Messages of the built-in rules are translated to English, German, Spanish, French and Russian, your own messages are added to the same storage. The language is taken from the context, `NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there. See [Translations](https://insei.github.io/valigo/latest/features/translations/index.md).
 
 ### Errors that point to the field
 

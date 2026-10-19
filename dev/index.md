@@ -68,7 +68,7 @@ Should be fulfilled (Tags[1]: )
 
 What happens here:
 
-1. `valigo.New()` creates a validator with the English and Russian messages.
+1. `valigo.New()` creates a validator with the messages in English, German, Spanish, French and Russian.
 1. `valigo.Configure[User]` calls the function once with a *model*: a `*User` whose nested pointer structs are allocated. Rules are bound to the fields of the model by their pointers, `&u.Name`.
 1. Every configurator method returns the configurator of the field, so rules are chained. They run in the order of the chain: `Trim` changes the value before `Required` checks it.
 1. `v.Validate` runs the rules of the `*User` type and returns `nil` for a valid object. Every error has the message, the location of the field (`Tags[1]` for the element of a slice) and the value.
