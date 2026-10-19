@@ -14,12 +14,12 @@ Reference of valigo capabilities grouped by area.
 
 ## Rules
 
-| Page                                                                       | What's inside                                                                |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [Strings](https://insei.github.io/valigo/latest/features/strings/index.md) | `str.Of`: `Required`, `MinLen`, `MaxLen`, `AnyOf`, `Regexp`, `Email`, `Trim` |
-| [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md) | `num.Of` and `num.Ptr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval`   |
-| [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)       | `uuid.Of` of the separate module: `Required`, `AnyOf`                        |
-| [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)   | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements        |
+| Page                                                                       | What's inside                                                                                                                                      |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Strings](https://insei.github.io/valigo/latest/features/strings/index.md) | `str.Of`: `Required`, lengths, `AnyOf`, `Prefix`, `Suffix`, `Contains`, `Regexp`, `Email`, `URL`, `IP`, `Hostname`, `UUID`, `Alphanumeric`, `Trim` |
+| [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md) | `num.Of` and `num.Ptr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval`                                                                         |
+| [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)       | `uuid.Of` of the separate module: `Required`, `AnyOf`                                                                                              |
+| [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)   | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements                                                                              |
 
 ## Results
 

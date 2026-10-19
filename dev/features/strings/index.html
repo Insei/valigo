@@ -810,6 +810,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Formats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#trim" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1094,6 +1105,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Formats
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#trim" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1174,18 +1196,33 @@
 </tr>
 <tr>
 <td><code>MinLen(n)</code></td>
-<td>the length is less than <code>n</code></td>
+<td>the length in bytes is less than <code>n</code></td>
 <td>Cannot be shorter than %d characters</td>
 </tr>
 <tr>
 <td><code>MaxLen(n)</code></td>
-<td>the length is greater than <code>n</code></td>
+<td>the length in bytes is greater than <code>n</code></td>
+<td>Cannot be longer than %d characters</td>
+</tr>
+<tr>
+<td><code>MinRunes(n)</code></td>
+<td>the number of characters (runes) is less than <code>n</code></td>
+<td>Cannot be shorter than %d characters</td>
+</tr>
+<tr>
+<td><code>MaxRunes(n)</code></td>
+<td>the number of characters (runes) is greater than <code>n</code></td>
 <td>Cannot be longer than %d characters</td>
 </tr>
 <tr>
 <td><code>AnyOf(values...)</code></td>
 <td>the value isn't one of <code>values</code></td>
 <td>Only %s values is allowed</td>
+</tr>
+<tr>
+<td><code>Prefix(s)</code>, <code>Suffix(s)</code>, <code>Contains(s)</code></td>
+<td>the value doesn't start with, end with or contain <code>s</code></td>
+<td>Should start with %s, Should end with %s, Should contain %s</td>
 </tr>
 <tr>
 <td><code>Regexp(re, opts...)</code></td>
@@ -1196,6 +1233,31 @@
 <td><code>Email()</code></td>
 <td>the value isn't an email address</td>
 <td>Should be email address</td>
+</tr>
+<tr>
+<td><code>URL()</code></td>
+<td>the value isn't an absolute URL with a scheme and a host</td>
+<td>Should be URL</td>
+</tr>
+<tr>
+<td><code>IP()</code>, <code>IPv4()</code>, <code>IPv6()</code></td>
+<td>the value isn't an IP address of the version</td>
+<td>Should be IP address, Should be IPv4 address, Should be IPv6 address</td>
+</tr>
+<tr>
+<td><code>Hostname()</code></td>
+<td>the value isn't a hostname by RFC 1123</td>
+<td>Should be hostname</td>
+</tr>
+<tr>
+<td><code>UUID()</code></td>
+<td>the value isn't a UUID in the canonical form, any case</td>
+<td>Should be UUID</td>
+</tr>
+<tr>
+<td><code>Alphanumeric()</code></td>
+<td>the value is empty or has characters other than ASCII letters and digits</td>
+<td>Should contain only letters and digits</td>
 </tr>
 <tr>
 <td><code>Custom(fn)</code></td>
@@ -1209,39 +1271,109 @@
 </tr>
 </tbody>
 </table>
-<p>The lengths are in bytes, like <code>len</code>: <code>"яя"</code> has the length 4.</p>
+<p><code>MinLen</code> and <code>MaxLen</code> count bytes, like <code>len</code>: <code>"яя"</code> has the length 4. <code>MinRunes</code> and <code>MaxRunes</code> count characters: <code>"яя"</code> has 2.</p>
+<h2 id="formats">Formats<a class="headerlink" href="#formats" title="Permanent link">&para;</a></h2>
+<p>The format rules don't allocate on valid values, like the other rules, and fail on empty strings: use <a href="../conditions/#when-on-a-field"><code>When</code></a> for optional ones.</p>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Valid</th>
+<th>Invalid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>URL()</code></td>
+<td><code>https://example.com/path?q=1</code>, <code>http://localhost:8080</code>, <code>https://[::1]/x</code>, <code>ftp://user@files.example.com</code></td>
+<td><code>example.com</code>, <code>/relative</code>, <code>https://exa mple.com</code>, <code>https://example.com:99999</code></td>
+</tr>
+<tr>
+<td><code>Hostname()</code></td>
+<td><code>example.com</code>, <code>localhost</code>, <code>1.example</code></td>
+<td><code>-example.com</code>, <code>exa_mple.com</code>, <code>example.com.</code></td>
+</tr>
+<tr>
+<td><code>IP()</code></td>
+<td><code>192.168.0.1</code>, <code>2001:db8::1</code></td>
+<td><code>256.0.0.1</code>, <code>1.2.3</code></td>
+</tr>
+<tr>
+<td><code>UUID()</code></td>
+<td><code>6ba7b810-9dad-11d1-80b4-00c04fd430c8</code></td>
+<td><code>6ba7b8109dad11d180b400c04fd430c8</code>, <code>{6ba7b810-...}</code></td>
+</tr>
+</tbody>
+</table>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="s">"context"</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="s">"fmt"</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/str"</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">)</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Webhook</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="nx">URL</span><span class="w">      </span><span class="kt">string</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="nx">Host</span><span class="w">     </span><span class="kt">string</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="nx">ClientIP</span><span class="w"> </span><span class="kt">string</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="nx">Secret</span><span class="w">   </span><span class="kt">string</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="p">}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">    </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configure</span><span class="p">[</span><span class="nx">Webhook</span><span class="p">](</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configurator</span><span class="p">[</span><span class="nx">Webhook</span><span class="p">],</span><span class="w"> </span><span class="nx">w</span><span class="w"> </span><span class="o">*</span><span class="nx">Webhook</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">w</span><span class="p">.</span><span class="nx">URL</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">().</span><span class="nx">URL</span><span class="p">().</span><span class="nx">Prefix</span><span class="p">(</span><span class="s">"https://"</span><span class="p">)</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">w</span><span class="p">.</span><span class="nx">Host</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Hostname</span><span class="p">()</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">w</span><span class="p">.</span><span class="nx">ClientIP</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">When</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">_</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">ip</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">ip</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="p">}).</span><span class="nx">IP</span><span class="p">()</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">w</span><span class="p">.</span><span class="nx">Secret</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Alphanumeric</span><span class="p">().</span><span class="nx">MinRunes</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="p">})</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Webhook</span><span class="p">{</span><span class="nx">URL</span><span class="p">:</span><span class="w"> </span><span class="s">"http://example.com"</span><span class="p">,</span><span class="w"> </span><span class="nx">Host</span><span class="p">:</span><span class="w"> </span><span class="s">"my_host"</span><span class="p">,</span><span class="w"> </span><span class="nx">Secret</span><span class="p">:</span><span class="w"> </span><span class="s">"s3cr3t!"</span><span class="p">})</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">        </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Output:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Should start with https:// (URL: http://example.com)
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Should be hostname (Host: my_host)
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Should contain only letters and digits (Secret: s3cr3t!)
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Cannot be shorter than 16 characters (Secret: s3cr3t!)
+</span></code></pre></div>
 <h2 id="trim">Trim<a class="headerlink" href="#trim" title="Permanent link">&para;</a></h2>
 <p><code>Trim()</code> removes the leading and trailing whitespace of the value <strong>in the validated object</strong>. Rules run in the order of the chain, so the rules after <code>Trim</code> check the trimmed value:</p>
-<div class="language-go highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Name</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Trim</span><span class="p">().</span><span class="nx">Required</span><span class="p">()</span><span class="w"> </span><span class="c1">// "   " fails, "  Ann " becomes "Ann"</span>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Name</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Trim</span><span class="p">().</span><span class="nx">Required</span><span class="p">()</span><span class="w"> </span><span class="c1">// "   " fails, "  Ann " becomes "Ann"</span>
 </span></code></pre></div>
 <p>The struct is validated in place, <code>Validate(ctx, &amp;user)</code> trims <code>user.Name</code>. See the copy semantics of the values passed by value in <a href="../errors/#validate-and-validatetyped">Errors</a>.</p>
 <h2 id="regexp-message">Regexp message<a class="headerlink" href="#regexp-message" title="Permanent link">&para;</a></h2>
 <p><code>str.WithRegexpLocaleKey</code> replaces the message of a <code>Regexp</code> rule, the key can have its own <a href="../translations/">translations</a>:</p>
-<div class="language-go highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="s">"context"</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="s">"fmt"</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="s">"regexp"</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/str"</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="p">)</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Product</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">    </span><span class="nx">SKU</span><span class="w"> </span><span class="kt">string</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="p">}</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">    </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configure</span><span class="p">[</span><span class="nx">Product</span><span class="p">](</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configurator</span><span class="p">[</span><span class="nx">Product</span><span class="p">],</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="o">*</span><span class="nx">Product</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">SKU</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Regexp</span><span class="p">(</span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`^[A-Z]{3}-\d{4}$`</span><span class="p">),</span><span class="w"> </span><span class="nx">str</span><span class="p">.</span><span class="nx">WithRegexpLocaleKey</span><span class="p">(</span><span class="s">"Should look like ABC-1234"</span><span class="p">))</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">    </span><span class="p">})</span>
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Product</span><span class="p">{</span><span class="nx">SKU</span><span class="p">:</span><span class="w"> </span><span class="s">"abc-1"</span><span class="p">}))</span>
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="p">}</span>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="s">"context"</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="s">"fmt"</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="s">"regexp"</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/str"</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="p">)</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Product</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="nx">SKU</span><span class="w"> </span><span class="kt">string</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="p">}</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">    </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configure</span><span class="p">[</span><span class="nx">Product</span><span class="p">](</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configurator</span><span class="p">[</span><span class="nx">Product</span><span class="p">],</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="o">*</span><span class="nx">Product</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">SKU</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Regexp</span><span class="p">(</span><span class="nx">regexp</span><span class="p">.</span><span class="nx">MustCompile</span><span class="p">(</span><span class="s">`^[A-Z]{3}-\d{4}$`</span><span class="p">),</span><span class="w"> </span><span class="nx">str</span><span class="p">.</span><span class="nx">WithRegexpLocaleKey</span><span class="p">(</span><span class="s">"Should look like ABC-1234"</span><span class="p">))</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="w">    </span><span class="p">})</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Product</span><span class="p">{</span><span class="nx">SKU</span><span class="p">:</span><span class="w"> </span><span class="s">"abc-1"</span><span class="p">}))</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Output:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>[Should look like ABC-1234 (SKU: abc-1)]
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>[Should look like ABC-1234 (SKU: abc-1)]
 </span></code></pre></div>
 
 
