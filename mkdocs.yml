@@ -70,12 +70,13 @@ extra:
       link: https://pkg.go.dev/github.com/insei/valigo
 
 nav:
-  - Get started: index.md
-  - Why valigo?: why-valigo.md
-  - Upgrading from v0.0.x: upgrading.md
-  - Performance: performance.md
-  - For AI agents: ai-agents.md
-  - Features:
+  - Get started:
+      - index.md
+      - Why valigo?: why-valigo.md
+      - Performance: performance.md
+      - Upgrading from v0.0.x: upgrading.md
+      - For AI agents: ai-agents.md
+  - Configuration:
       - features/index.md
       - Validator and Configure: features/configure.md
       - Types and conversions: features/conversions.md
@@ -83,6 +84,7 @@ nav:
       - Conditions: features/conditions.md
       - Custom rules: features/custom.md
       - Rules on other fields: features/fields.md
+  - Rules:
       - Strings: features/strings.md
       - Numbers: features/numbers.md
       - Time: features/time.md
@@ -90,9 +92,11 @@ nav:
       - UUID: features/uuid.md
       - Slices: features/slices.md
       - Maps: features/maps.md
+  - Errors:
       - Errors: features/errors.md
       - Translations: features/translations.md
       - HTTP problem details: features/problem.md
+  - Integrations:
       - huma: features/huma.md
       - gin: features/gin.md
       - echo: features/echo.md
@@ -122,7 +126,29 @@ plugins:
           - performance.md: benchmarks with go-playground/validator, ozzo-validation, zog, gookit/validate and hand-written code
           - upgrading.md: upgrading from v0.0.x
           - ai-agents.md: the skill for AI agents
-        Features:
-          - features/*.md
+        Configuration:
+          - features/index.md: the map of the features
+          - features/configure.md: the validator, Configure, the model, field pointers
+          - features/conversions.md: Field, Slice, Map and As, the built-in conversions, conversions of your types
+          - features/absent.md: nil pointers and nil nested structs
+          - features/conditions.md: When on the struct and on fields, conditional requiredness
+          - features/custom.md: Custom rules, rules from data
+          - features/fields.md: rules on other fields
+        Rules:
+          - features/strings.md: the rules and formats of strings
+          - features/numbers.md: the rules of numbers
+          - features/time.md: the rules of time.Time
+          - features/values.md: the rules of comparable values, enums, bools
+          - features/uuid.md: the rules of uuids, the separate module
+          - features/slices.md: the rules of slices and their elements
+          - features/maps.md: the rules of maps, their keys and values
+        Errors:
+          - features/errors.md: Validate, shared.Error, locations, codes for clients
+          - features/translations.md: locales, plural forms, languages from the context
+          - features/problem.md: problem details of RFC 9457
+        Integrations:
+          - features/huma.md: huma inputs
+          - features/gin.md: gin binding
+          - features/echo.md: echo validator
         Architecture:
           - architecture/*.md
