@@ -73,6 +73,7 @@ and a conversion that doesn't fit the field doesn't compile:
 - **Conditions and custom rules**: `When` and `Custom` on fields and on the struct, closures with the context of the request — the limits can come from a database or the settings of a tenant.
 - **Absent values**: nil pointers and the fields of nil nested structs are skipped by every rule except `Required`.
 - **Your types**: a conversion function of a few lines, the core has no dependencies on uuid or other packages of types.
+- **Tags of go-playground/validator**: `b.Tags("validate")` configures the rules of `validate:"required,max=64"` with the messages and the speed of valigo, a migration moves them to code one by one.
 
 # Errors and translations
 * Every error has the translated message, the location (`Tags[1]`, `address.city` with JSON paths), the value, a stable `Code` and named `Params`
@@ -91,5 +92,3 @@ The same struct and rules, Intel Core i9-14900HX, Go 1.27.0, see [Performance](h
 | go-playground/validator | 1 785 ns, 16 allocs | 4 150 ns, 69 allocs, with `Error()` |
 | ozzo-validation | 2 950 ns, 38 allocs | 12 665 ns, 140 allocs, with `Error()` |
 
-# Roadmap
-* [ ] Rules from tags

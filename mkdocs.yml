@@ -84,6 +84,7 @@ nav:
       - Conditions: features/conditions.md
       - Custom rules: features/custom.md
       - Rules on other fields: features/fields.md
+      - Rules from tags: features/tags.md
   - Rules:
       - Strings: features/strings.md
       - Numbers: features/numbers.md
@@ -135,6 +136,7 @@ plugins:
           - features/conditions.md: When on the struct and on fields, conditional requiredness
           - features/custom.md: Custom rules, rules from data
           - features/fields.md: rules on other fields
+          - features/tags.md: the rules of the tags of go-playground/validator, a migration from it
         Rules:
           - features/strings.md: the rules and formats of strings
           - features/numbers.md: the rules of numbers
