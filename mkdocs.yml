@@ -102,6 +102,7 @@ nav:
       - huma: features/huma.md
       - gin: features/gin.md
       - echo: features/echo.md
+      - go-i18n: features/goi18n.md
   - Architecture:
       - How it works: architecture/index.md
 
@@ -154,5 +155,6 @@ plugins:
           - features/huma.md: huma inputs, the rules in the OpenAPI document
           - features/gin.md: gin binding
           - features/echo.md: echo validator
+          - features/goi18n.md: the translations of go-i18n bundles
         Architecture:
           - architecture/*.md

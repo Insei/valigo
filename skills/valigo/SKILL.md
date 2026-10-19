@@ -186,6 +186,10 @@ func main() {
 
 `v.Constraints()` returns the unconditional rules as JSON Schema keywords (`shared.Constraint`: Struct, Field, Path `items`/`additionalProperties`/`propertyNames`, Keyword, Value); rules under `When` aren't described, after `Trim`/`Modify` only `required`. `vhuma.OpenAPI(api, v)` returns the huma document with them in the body schemas (huma's own schemas stay unchanged). Own conversions describe rules by `f.Schema("minimum", 0)`.
 
+## Translation sources
+
+`translator.New(translator.WithSources(goi18n.Source(bundle), translator.Embedded()))` with `goi18n "github.com/insei/valigo/integrations/goi18n"`: per language of the request, the first source with the key wins; message IDs are the locale keys of valigo, go-i18n messages may use `{{.max}}` (the named params) or `%d`; `goi18n.Messages(lang)` exports the built-in messages. Own source: implement `translator.Source` `Translate(lang, key, args, params) (string, bool)`.
+
 ## gin
 
 The module `github.com/insei/valigo/integrations/gin` (`vgin`): `binding.Validator = vgin.New(v)` makes `c.ShouldBindJSON` validate by valigo (messages in the default language, gin passes no request), `vgin.Validate(c, v, &req)` validates with the languages of `Accept-Language`; the error is `shared.Errors`, get it by `errors.As`.
