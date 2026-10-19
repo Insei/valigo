@@ -44,9 +44,9 @@ The rules append their errors to one pooled buffer of the validation, and `Valid
 | `valigo` | `Validator`, `Configure`, `Configurator` with `Field`, `Slice`, `Map`, `When`, `Custom` and `Tags`, options |
 | `internal/zero`, `internal/helper`, `internal/tags` | the allocation of the models of `Configure`, the helper of the errors with the translator and the locations, the rules of the tags |
 | `shared` | the rules core `Field[T]`, slice configurator and `Elems[E]`, `As` and the conversions `Deref`, `Retype`, `RetypeSlice`, `SlicePtr`, `SliceRules`, `Error`, helpers |
-| `str`, `num`, `timex`, `eq` | configurators of strings, numbers, times and comparable values built on `shared.Field[T]`, their conversions `str.Of`, `num.Of`, `num.Ptr`, `timex.Of`, `eq.Of`... and slice conversions |
+| `rules/str`, `rules/num`, `rules/timex`, `rules/eq` | configurators of strings, numbers, times and comparable values built on `shared.Field[T]`, their conversions `str.Of`, `num.Of`, `num.Ptr`, `timex.Of`, `eq.Of`... and slice conversions |
 | `problem` | the problem details of RFC 9457 |
-| `github.com/insei/valigo/uuid` | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package |
+| `github.com/insei/valigo/rules/uuid` | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package |
 | `github.com/insei/valigo/huma` | the separate module of the inputs of huma operations |
 | `translator` | translator, in-memory storage, built-in locales, `Accept-Language` middleware |
 

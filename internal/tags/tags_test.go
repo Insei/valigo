@@ -9,7 +9,7 @@ import (
 
 	"github.com/insei/valigo"
 	"github.com/insei/valigo/internal/testenv"
-	"github.com/insei/valigo/str"
+	"github.com/insei/valigo/rules/str"
 )
 
 type tagsAddress struct {

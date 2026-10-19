@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/insei/valigo"
+	vuuid "github.com/insei/valigo/rules/uuid"
 	"github.com/insei/valigo/shared"
-	vuuid "github.com/insei/valigo/uuid"
 )
 
 type ids struct {

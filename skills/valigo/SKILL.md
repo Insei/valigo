@@ -1,6 +1,6 @@
 ---
 name: valigo
-description: Write Go code that validates structs with github.com/insei/valigo — typed rules configured by pointers to the fields of a model and converted to the configurators of their types (b.Field(&m.Name).As(str.Of), num.Of, num.Ptr, b.Slice(&m.Tags).As(str.Slice), uuid.Of of github.com/insei/valigo/uuid), Each for slice elements, When conditions, Custom rules of fields and structs, errors with field locations, translated messages and the Accept-Language middleware. Use when the code imports github.com/insei/valigo, or when a Go service validates request or config structs.
+description: Write Go code that validates structs with github.com/insei/valigo — typed rules configured by pointers to the fields of a model and converted to the configurators of their types (b.Field(&m.Name).As(str.Of), num.Of, num.Ptr, b.Slice(&m.Tags).As(str.Slice), uuid.Of of github.com/insei/valigo/rules/uuid), Each for slice elements, When conditions, Custom rules of fields and structs, errors with field locations, translated messages and the Accept-Language middleware. Use when the code imports github.com/insei/valigo, or when a Go service validates request or config structs.
 ---
 
 # valigo
@@ -12,7 +12,7 @@ Rules are configured once by `valigo.Configure[T]` with pointers to the fields o
 - Go 1.27 or newer: the configurator methods are generic.
 - Create one validator with `valigo.New(...)` on start and call `valigo.Configure[T]` once per type, before `Validate`. `Configure` panics on invalid configuration, it isn't safe concurrently with `Validate`, a repeated `Configure` of the same type replaces its rules.
 - Field pointers must point to the fields of the model passed to the function: `func(b valigo.Configurator[T], m *T) { b.Field(&m.Name).As(str.Of) }`. A pointer to anything else panics. Nested structs stored by pointer are allocated in the model, `&m.Address.City` is valid.
-- The configurator has only `Field`, `Slice`, `Map`, `When` and `Custom`. Convert a field to the configurator of its type by `As`: `b.Field(&m.Name).As(str.Of)` for `string`, `*string` and named strings; `.As(num.Of)` for numbers; `.As(num.Ptr)` for pointers to numbers; `.As(vuuid.Of)` for `uuid.UUID` and `*uuid.UUID` with `vuuid "github.com/insei/valigo/uuid"`, a separate module. Slices: `b.Slice(&m.Tags).As(str.Slice)`, `.As(vuuid.Slice)`; a pointer to a slice: `b.Field(&m.Tags).As(shared.SlicePtr).As(str.Slice)`. There are no `b.String`, `b.Number`, `b.UUID`, `b.StringSlice` methods.
+- The configurator has only `Field`, `Slice`, `Map`, `When` and `Custom`. Convert a field to the configurator of its type by `As`: `b.Field(&m.Name).As(str.Of)` for `string`, `*string` and named strings; `.As(num.Of)` for numbers; `.As(num.Ptr)` for pointers to numbers; `.As(vuuid.Of)` for `uuid.UUID` and `*uuid.UUID` with `vuuid "github.com/insei/valigo/rules/uuid"`, a separate module. Slices: `b.Slice(&m.Tags).As(str.Slice)`, `.As(vuuid.Slice)`; a pointer to a slice: `b.Field(&m.Tags).As(shared.SlicePtr).As(str.Slice)`. There are no `b.String`, `b.Number`, `b.UUID`, `b.StringSlice` methods.
 - Conditional requiredness (`required_if`, `required_with`, `required_without` of tags) is `b.When(func(ctx, m *T) bool { return m.Kind == "company" }).Field(&m.TaxID).As(str.Of).Required()`.
 - Rules on other fields take a pointer to the other field of the same model and type: `b.Field(&m.EndsAt).As(timex.Of).AfterField(&m.StartsAt)`, `num` `MinField`/`MaxField`, `str`/`eq` `EqualField`; the message has the location of the other field.
 - A conversion that doesn't fit the field type doesn't compile: `b.Field(&m.Age).As(str.Of)` for an `int`, `.As(num.Of)` for a `*int` (use `num.Ptr`).
@@ -52,10 +52,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
+	vuuid "github.com/insei/valigo/rules/uuid"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
-	vuuid "github.com/insei/valigo/uuid"
 )
 
 type Address struct {
@@ -121,9 +121,9 @@ import (
 
 	"github.com/insei/fmap/v3"
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
 )
 
 type Notification struct {

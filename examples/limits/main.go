@@ -11,9 +11,9 @@ import (
 	"unicode/utf8"
 
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
 )
 
 // Store is the source of the limits, a database or a cache in a real service.

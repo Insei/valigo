@@ -5,7 +5,7 @@ go 1.27
 require (
 	github.com/google/uuid v1.6.0
 	github.com/insei/valigo v0.1.0
-	github.com/insei/valigo/uuid v0.1.0
+	github.com/insei/valigo/rules/uuid v0.1.0
 )
 
 require (
@@ -15,5 +15,5 @@ require (
 
 replace (
 	github.com/insei/valigo => ../../
-	github.com/insei/valigo/uuid => ../../uuid
+	github.com/insei/valigo/rules/uuid => ../../rules/uuid
 )

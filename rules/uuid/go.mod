@@ -1,8 +1,8 @@
-module github.com/insei/valigo/uuid
+module github.com/insei/valigo/rules/uuid
 
 go 1.27
 
-replace github.com/insei/valigo => ../
+replace github.com/insei/valigo => ../../
 
 require (
 	github.com/google/uuid v1.6.0

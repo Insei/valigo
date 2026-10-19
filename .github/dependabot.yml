@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: gomod
     directories:
       - "/"
-      - "/uuid"
+      - "/rules/uuid"
       - "/huma"
       - "/gin"
       - "/echo"

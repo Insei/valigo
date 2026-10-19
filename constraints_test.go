@@ -9,10 +9,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/insei/valigo/eq"
-	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/rules/eq"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
 )
 
 type constraintsAddress struct {

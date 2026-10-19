@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/eq"
 	vhuma "github.com/insei/valigo/huma"
-	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/rules/eq"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
 )
 
 type Item struct {

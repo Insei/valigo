@@ -9,8 +9,8 @@ import (
 
 	"github.com/insei/valigo"
 	"github.com/insei/valigo/internal/testenv"
+	"github.com/insei/valigo/rules/str"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
 )
 
 type status string

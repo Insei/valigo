@@ -49,7 +49,7 @@ import (
 	"fmt"
 
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/eq"
+	"github.com/insei/valigo/rules/eq"
 )
 
 type Plan string

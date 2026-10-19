@@ -27,7 +27,7 @@ b.Field(&u.Age).As(str.Of)
 | `num.Ptr` | pointers to numbers | [numbers](numbers.md), `Required` checks only that the pointer isn't nil |
 | `timex.Of` | `time.Time`, `*time.Time` | [time](time.md) |
 | `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](values.md) |
-| `vuuid.Of` | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid` | [uuid](uuid.md), the separate module `github.com/insei/valigo/uuid` |
+| `vuuid.Of` | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid` | [uuid](uuid.md), the separate module `github.com/insei/valigo/rules/uuid` |
 | `str.Slice` | `Slice` of strings, `*string` or named strings | [slices](slices.md) with the string rules of elements |
 | `timex.Slice` | `Slice` of `time.Time`, `*time.Time` | [slices](slices.md) with the time rules of elements |
 | `eq.Slice` | `Slice` of a `comparable` type | [slices](slices.md) with `Unique` and the equality rules of elements |
@@ -126,4 +126,4 @@ Output:
 [Should be after 2026-01-01 (EndsAt: 2025-12-31 00:00:00 +0000 UTC)]
 ```
 
-The type constraint of `TimeOf` makes `b.Field(&e.Title).As(TimeOf)` a compile error for a `string` field. The rules of another uuid package are added the same way, see the source of [`github.com/insei/valigo/uuid`](https://github.com/Insei/valigo/tree/main/uuid).
+The type constraint of `TimeOf` makes `b.Field(&e.Title).As(TimeOf)` a compile error for a `string` field. The rules of another uuid package are added the same way, see the source of [`github.com/insei/valigo/rules/uuid`](https://github.com/Insei/valigo/tree/main/rules/uuid).

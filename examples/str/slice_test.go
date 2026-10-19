@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/str"
+	"github.com/insei/valigo/rules/str"
 )
 
 type year struct {

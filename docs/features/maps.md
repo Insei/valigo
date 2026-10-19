@@ -37,9 +37,9 @@ import (
 	"fmt"
 
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
 )
 
 type Service struct {
