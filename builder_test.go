@@ -6,14 +6,12 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
-	vuuid "github.com/insei/valigo/uuid"
 )
 
 type status string
@@ -30,14 +28,11 @@ type model struct {
 	AgePtr  *int
 	ID      int64
 	Score   float32
-	UID     uuid.UUID
-	UIDPtr  *uuid.UUID
 	Tags    []string
 	TagsPtr *[]string
 	TagPtrs []*string
 	Ints    []int
 	IntPtrs []*int
-	UIDs    []*uuid.UUID
 	Addr    *address
 	Inner   address
 }
@@ -54,7 +49,6 @@ func validateModel(t *testing.T, cfg func(c Configurator[model], m *model), obj 
 }
 
 func TestConfiguratorRules(t *testing.T) {
-	id1, id2 := uuid.New(), uuid.New()
 	tests := []struct {
 		name     string
 		cfg      func(c Configurator[model], m *model)
@@ -93,11 +87,6 @@ func TestConfiguratorRules(t *testing.T) {
 		{"number ptr nil required", func(c Configurator[model], m *model) { c.Field(&m.AgePtr).As(num.Ptr).Required() }, &model{}, 1},
 		{"number ptr zero required", func(c Configurator[model], m *model) { c.Field(&m.AgePtr).As(num.Ptr).Required() }, &model{AgePtr: ptr(0)}, 0},
 		{"number ptr checked", func(c Configurator[model], m *model) { c.Field(&m.AgePtr).As(num.Ptr).Max(10) }, &model{AgePtr: ptr(11)}, 1},
-
-		{"uuid required", func(c Configurator[model], m *model) { c.Field(&m.UID).As(vuuid.Of).Required() }, &model{}, 1},
-		{"uuid any of", func(c Configurator[model], m *model) { c.Field(&m.UID).As(vuuid.Of).AnyOf(id1) }, &model{UID: id2}, 1},
-		{"uuid ptr nil skipped", func(c Configurator[model], m *model) { c.Field(&m.UIDPtr).As(vuuid.Of).AnyOf(id1) }, &model{}, 0},
-		{"uuid ptr nil required", func(c Configurator[model], m *model) { c.Field(&m.UIDPtr).As(vuuid.Of).Required() }, &model{}, 1},
 
 		{"slice of ptrs", func(c Configurator[model], m *model) {
 			c.Slice(&m.IntPtrs).MaxLen(1).Each(func(e *shared.Field[*int]) { e.Check(func(v *int) bool { return v != nil }, "not nil") })
@@ -138,10 +127,6 @@ func TestConfiguratorRules(t *testing.T) {
 		{"string slice when", func(c Configurator[model], m *model) {
 			c.Slice(&m.Tags).As(str.Slice).When(func(_ context.Context, v shared.Elems[string]) bool { return v.Len() > 1 }).MaxLen(1)
 		}, &model{Tags: []string{"a", "b"}}, 1},
-		{"uuid slice any of", func(c Configurator[model], m *model) { c.Slice(&m.UIDs).As(vuuid.Slice).AnyOf(id1) }, &model{UIDs: []*uuid.UUID{&id1, &id2, nil}}, 1},
-		{"uuid slice each", func(c Configurator[model], m *model) {
-			c.Slice(&m.UIDs).As(vuuid.Slice).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
-		}, &model{UIDs: []*uuid.UUID{&id1, nil}}, 1},
 
 		{"field when false", func(c Configurator[model], m *model) {
 			c.Field(&m.Name).As(str.Of).When(func(_ context.Context, v string) bool { return v != "skip" }).MaxLen(1)
@@ -337,9 +322,7 @@ func TestZeroAllocationsOnValid(t *testing.T) {
 		c.Field(&m.Addr.City).As(str.Of).Required()
 		c.Field(&m.Age).As(num.Of).Min(0).Max(100).AnyOfInterval(0, 100)
 		c.Field(&m.AgePtr).As(num.Ptr).Required().Max(10)
-		c.Field(&m.UID).As(vuuid.Of).Required()
 		c.Slice(&m.Tags).As(str.Slice).Required().MaxLen(5).Each(func(e *str.BaseConfigurator) { e.Trim().MaxLen(3) })
-		c.Slice(&m.UIDs).As(vuuid.Slice).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
 		c.When(func(_ context.Context, m *model) bool { return m.Age > 0 }).Field(&m.ID).As(num.Of).Min(1)
 		c.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *model) []shared.Error {
 			if obj.Age < 0 {
@@ -348,10 +331,9 @@ func TestZeroAllocationsOnValid(t *testing.T) {
 			return nil
 		})
 	})
-	id := uuid.New()
 	obj := &model{
-		Name: "a@b.cc", AgePtr: ptr(1), Age: 5, ID: 1, UID: id,
-		Addr: &address{City: "x"}, Tags: []string{"a", "b"}, UIDs: []*uuid.UUID{&id},
+		Name: "a@b.cc", AgePtr: ptr(1), Age: 5, ID: 1,
+		Addr: &address{City: "x"}, Tags: []string{"a", "b"},
 	}
 	ctx := context.Background()
 	require.Nil(t, v.Validate(ctx, obj))

@@ -48,11 +48,17 @@ module examplescheck
 
 go 1.27
 
-require github.com/insei/valigo v0.0.0
+require (
+	github.com/insei/valigo v0.1.0
+	github.com/insei/valigo/uuid v0.1.0
+)
 
-replace github.com/insei/valigo => $root
+replace (
+	github.com/insei/valigo => $root
+	github.com/insei/valigo/uuid => $root/uuid
+)
 MOD
-cp "$root/go.sum" "$work/go.sum"
+cat "$root/go.sum" "$root/uuid/go.sum" | sort -u > "$work/go.sum"
 cd "$work"
 go mod tidy >/dev/null
 go vet ./...
