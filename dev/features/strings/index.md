@@ -1,0 +1,77 @@
+# Strings
+
+`String` configures the rules of a `string` field, a `*string` field or a field of a named string type:
+
+```go
+type Status string
+
+type User struct {
+    Name     string
+    Nickname *string
+    Status   Status
+}
+
+b.String(&u.Name).Trim().Required().MaxLen(64)
+b.String(&u.Nickname).MinLen(3) // a nil Nickname is skipped
+b.String(&u.Status).AnyOf("active", "blocked")
+```
+
+## Rules
+
+| Rule                  | Fails when                       | Message                                                                                                                                    |
+| --------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Required()`          | the value is absent or empty     | Should be fulfilled                                                                                                                        |
+| `MinLen(n)`           | the length is less than `n`      | Cannot be shorter than %d characters                                                                                                       |
+| `MaxLen(n)`           | the length is greater than `n`   | Cannot be longer than %d characters                                                                                                        |
+| `AnyOf(values...)`    | the value isn't one of `values`  | Only %s values is allowed                                                                                                                  |
+| `Regexp(re, opts...)` | the value doesn't match `re`     | Doesn't match required regexp pattern                                                                                                      |
+| `Email()`             | the value isn't an email address | Should be email address                                                                                                                    |
+| `Custom(fn)`          | `fn` returns errors              | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
+| `When(fn)`            | —                                | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+
+The lengths are in bytes, like `len`: `"яя"` has the length 4.
+
+## Trim
+
+`Trim()` removes the leading and trailing whitespace of the value **in the validated object**. Rules run in the order of the chain, so the rules after `Trim` check the trimmed value:
+
+```go
+b.String(&u.Name).Trim().Required() // "   " fails, "  Ann " becomes "Ann"
+```
+
+The struct is validated in place, `Validate(ctx, &user)` trims `user.Name`. See the copy semantics of the values passed by value in [Errors](https://insei.github.io/valigo/latest/features/errors/#validate-and-validatetyped).
+
+## Regexp message
+
+`str.WithRegexpLocaleKey` replaces the message of a `Regexp` rule, the key can have its own [translations](https://insei.github.io/valigo/latest/features/translations/index.md):
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "regexp"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/str"
+)
+
+type Product struct {
+    SKU string
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Product](v, func(b valigo.Configurator[Product], p *Product) {
+        b.String(&p.SKU).Regexp(regexp.MustCompile(`^[A-Z]{3}-\d{4}$`), str.WithRegexpLocaleKey("Should look like ABC-1234"))
+    })
+    fmt.Println(v.Validate(context.Background(), &Product{SKU: "abc-1"}))
+}
+```
+
+Output:
+
+```text
+[Should look like ABC-1234 (SKU: abc-1)]
+```

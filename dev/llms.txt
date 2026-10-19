@@ -1,0 +1,31 @@
+# valigo
+
+> Typed, zero allocation validation of Go structs, rules are configured by pointers to the fields
+
+valigo validates Go structs by rules configured once with pointers to the fields of a model: b.String(&u.Name).Required().MaxLen(64). The configurator methods are generic (Go 1.27), so the compiler checks the field types and the rule arguments. Validation of valid objects doesn't allocate, absent values are skipped by all rules except Required, errors have field locations and translated messages. The module path is github.com/insei/valigo.
+
+## Start
+
+- [Get started](https://insei.github.io/valigo/latest/index.md): installation and the first validator
+- [Why valigo?](https://insei.github.io/valigo/latest/why-valigo/index.md): what it gives compared to tag based validators
+- [Upgrading from v0.0.x](https://insei.github.io/valigo/latest/upgrading/index.md): upgrading from v0.0.x
+- [For AI agents](https://insei.github.io/valigo/latest/ai-agents/index.md): the skill for AI agents
+
+## Features
+
+- [Features](https://insei.github.io/valigo/latest/features/index.md)
+- [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md)
+- [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md)
+- [Validator and Configure](https://insei.github.io/valigo/latest/features/configure/index.md)
+- [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)
+- [Errors](https://insei.github.io/valigo/latest/features/errors/index.md)
+- [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)
+- [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)
+- [Strings](https://insei.github.io/valigo/latest/features/strings/index.md)
+- [Translations](https://insei.github.io/valigo/latest/features/translations/index.md)
+- [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)
+
+## Architecture
+
+- [How it works](https://insei.github.io/valigo/latest/architecture/index.md)
+

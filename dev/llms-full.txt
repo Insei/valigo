@@ -1,0 +1,1185 @@
+# valigo
+
+> Typed, zero allocation validation of Go structs, rules are configured by pointers to the fields
+
+valigo validates Go structs by rules configured once with pointers to the fields of a model: b.String(&u.Name).Required().MaxLen(64). The configurator methods are generic (Go 1.27), so the compiler checks the field types and the rule arguments. Validation of valid objects doesn't allocate, absent values are skipped by all rules except Required, errors have field locations and translated messages. The module path is github.com/insei/valigo.
+
+# Start
+
+# valigo
+
+**valigo** is a validation library for Go structs. Rules are configured once, in code, by pointers to the fields of a model: `b.String(&u.Name).Required().MaxLen(64)`. The compiler checks that a rule fits the field type and that its arguments have the field type, the validation itself doesn't allocate on valid objects, and error messages are translated.
+
+One-line ideology
+
+*Rules are Go code next to the struct, not strings in tags: a typo or a wrong type doesn't compile.*
+
+## Install
+
+```bash
+go get github.com/insei/valigo@latest
+```
+
+Minimum Go version is **1.27**: the configurator uses generic methods.
+
+## Quick start
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "regexp"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/str"
+)
+
+type User struct {
+    Name  string
+    Email string
+    Age   int
+    Phone *string
+    Tags  []string
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
+        b.String(&u.Name).Trim().Required().MaxLen(64)
+        b.String(&u.Email).Required().Email()
+        b.Number(&u.Age).AnyOfInterval(18, 120)
+        b.String(&u.Phone).Regexp(regexp.MustCompile(`^\+\d{10,15}$`)) // a nil phone is skipped
+        b.StringSlice(&u.Tags).MaxLen(5).Each(func(tag *str.BaseConfigurator) {
+            tag.Trim().Required().MaxLen(16)
+        })
+    })
+
+    user := &User{Name: "  Ann  ", Email: "ann.example.com", Age: 16, Tags: []string{"go", " "}}
+    for _, err := range v.Validate(context.Background(), user) {
+        fmt.Println(err)
+    }
+    fmt.Printf("%q\n", user.Name)
+}
+```
+
+Output:
+
+```text
+Should be email address (Email: ann.example.com)
+Only interval[18 - 120] is allowed (Age: 16)
+Should be fulfilled (Tags[1]: )
+"Ann"
+```
+
+What happens here:
+
+1. `valigo.New()` creates a validator with the English and Russian messages.
+1. `valigo.Configure[User]` calls the function once with a *model*: a `*User` whose nested pointer structs are allocated. Rules are bound to the fields of the model by their pointers, `&u.Name`.
+1. Every configurator method returns the configurator of the field, so rules are chained. They run in the order of the chain: `Trim` changes the value before `Required` checks it.
+1. `v.Validate` runs the rules of the `*User` type and returns `nil` for a valid object. Every error has the message, the location of the field (`Tags[1]` for the element of a slice) and the value.
+
+## Where to go next
+
+- [Why valigo?](https://insei.github.io/valigo/latest/why-valigo/index.md) — what it gives compared to tag based validators.
+- [Features](https://insei.github.io/valigo/latest/features/index.md) — the rules of every type, conditions, custom rules, errors, translations.
+- [How it works](https://insei.github.io/valigo/latest/architecture/index.md) — the model, the field pointers and why valid objects don't allocate.
+- [Upgrading from v0.0.x](https://insei.github.io/valigo/latest/upgrading/index.md) — the configurator API has changed.
+- [For AI agents](https://insei.github.io/valigo/latest/ai-agents/index.md) — the skill and the documentation in one file.
+
+# Why valigo?
+
+**valigo is for Go services that validate their input structs and want the rules checked by the compiler, the validation free on valid input, and the messages in the language of the user.**
+
+## What you get
+
+### Rules are code, checked by the compiler
+
+Rules are configured by pointers to the fields of the model, so the field and its type are known at compile time:
+
+```go
+b.String(&u.Name).Required().MaxLen(64)   // String accepts only string and *string fields
+b.Number(&u.ID).Min(1)                    // Min takes an int64 for an int64 field
+b.Number(&u.ID).Min("1")                  // doesn't compile
+b.String(&u.Age)                          // doesn't compile: Age is an int
+```
+
+A renamed field is renamed in the rules by the IDE, a removed field breaks the build instead of a silently skipped rule. Tag based validators keep the rules in strings, `validate:"required,max=64"`, and report a typo or a rule of a wrong type only at runtime.
+
+### Validation of valid objects doesn't allocate
+
+The rules are built once by `Configure`. `Validate` reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it.
+
+### Absent values are handled, not panicked on
+
+A nil pointer field, a nil pointer to a slice and the fields of a nil nested struct are *absent*: every rule skips them, only `Required` fails. Optional fields need no special code:
+
+```go
+b.String(&u.Phone).Regexp(phoneRe)  // nil Phone is valid, a set one must match
+b.NumberPtr(&u.Discount).Max(50)    // nil Discount is valid
+b.String(&u.Address.City).Required() // fails for a nil Address too
+```
+
+### Conditions and custom rules at every level
+
+`When` on the struct enables rules by the state of the object, `When` on a field — by the value of the field. `Custom` on a field gets its typed value, `Custom` on the struct gets the whole object and reports errors on any of its fields:
+
+```go
+smtp := b.When(func(_ context.Context, s *Sender) bool { return s.Type == "smtp" })
+smtp.String(&s.Host).Required()
+smtp.Number(&s.Port).AnyOfInterval(1, 65535)
+```
+
+See [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) and [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md).
+
+### Translated messages
+
+Messages of the built-in rules are translated to English and Russian, your own messages are added to the same storage. The language is taken from the context, `NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there. See [Translations](https://insei.github.io/valigo/latest/features/translations/index.md).
+
+### Errors that point to the field
+
+Every error has the message, the location and the value: `Tags[1]` for an element of a slice, `Address.City` for a nested field, or the JSON path of the field with a custom location function. See [Errors](https://insei.github.io/valigo/latest/features/errors/index.md).
+
+## When valigo is not the right tool
+
+- **Rules come from the data**, e.g. a form builder or rules stored in a database: valigo rules are Go code compiled into the service.
+- **The input is not a struct**: valigo validates structs, decode maps and JSON into a struct first.
+- **Go older than 1.27**: the configurator uses generic methods.
+
+# Upgrading from v0.0.x
+
+The configuration style is the same, `b.String(&u.Name).Required()`, but the configurator is typed now. Go 1.27 is required.
+
+| v0.0.x                                                                             | Now                                                                                                       |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `Configurator[T]` is an interface                                                  | a struct with generic methods, the signature of the `Configure` function is the same                      |
+| field configurators are interfaces: `str.BaseConfigurator`, `num.BaseConfigurator` | pointers to concrete types: `*str.BaseConfigurator`, `*num.BaseConfigurator[N]`, `*uuid.BaseConfigurator` |
+| `b.Number(&u.Score)` for `*int`                                                    | `b.NumberPtr(&u.Score)`                                                                                   |
+| `Max(any)`, `Min(any)`, `AnyOf(...any)`, `AnyOfInterval(any, any)`                 | the arguments have the type of the field, `Max(5)` works for `int64`                                      |
+| `Custom(func(ctx, h, value any) ...)`, `When(func(ctx, value any) bool)` of fields | the value is typed: `string`, the number type, `uuid.UUID`                                                |
+| `Slice(any)` with `Custom(func(ctx, h, value []*any) ...)`                         | `Slice[E](*[]E)` with `Custom(func(ctx, h, value shared.Elems[E]) ...)`                                   |
+| `StringSlice(...).MaxLen(n)`                                                       | the same: the number of elements; rules on elements are set by `Each`                                     |
+| `shared.NewSliceFieldConfigurator(params)`, `shared.FieldConfigurator`             | `shared.NewSliceFieldConfigurator(field, helper, add)`, `shared.Field[T]`                                 |
+
+## Behavior changes
+
+- `Validate` returns `nil` for a valid object, it returned an empty slice. Check `len(errs) > 0` or `errs != nil`, both work now.
+- A struct value is validated by a copy, it was silently skipped.
+- Nil pointers and the fields of nil nested structs are skipped by rules, they panicked; `Required` fails on them.
+- `Number(...).Required()` fails on zero, it did nothing. `NumberPtr(...).Required()` fails on nil.
+- `AnyOfInterval(begin, end)` includes both ends.
+- The errors of slice elements have the index in the location: `Tags[1]`.
+- A field `When` isn't called for an absent value, it got the zero value.
+- A repeated `Configure` of the same type replaces its rules, it appended them.
+
+# For AI agents
+
+AI agents often write the code that uses a library, and a model trained before the typed configurator doesn't know its API: it writes `Number(&u.Score)` for a `*int` field or `Max(int64(5))` with an `any` argument. Give the agent the current documentation.
+
+## The skill
+
+[`skills/valigo/SKILL.md`](https://github.com/Insei/valigo/blob/main/skills/valigo/SKILL.md) is a short guide for agents in the [Agent Skills](https://agentskills.io) format: the rules, complete programs, the configurators with their rules and the common mistakes. It is versioned with the code, and CI builds and runs its programs against the code of the repository, so it doesn't describe the API that doesn't exist.
+
+Claude Code finds the skill in the `.claude/skills` directory of the project or of the user:
+
+```sh
+mkdir -p .claude/skills/valigo
+curl -fsSL https://raw.githubusercontent.com/Insei/valigo/main/skills/valigo/SKILL.md \
+  -o .claude/skills/valigo/SKILL.md
+```
+
+Replace `main` with the release tag to get the skill of the version in your `go.mod`. Other agents read it from any path: mention it in `AGENTS.md` or in the instructions of the agent.
+
+The skill describes the library, not your project. Keep the rules of your project — where the validators are configured, how the errors are returned to the clients — in your own instructions next to it.
+
+## llms.txt
+
+The documentation is published in the [llms.txt](https://llmstxt.org) format for every version:
+
+- [`llms.txt`](https://insei.github.io/valigo/latest/llms.txt) — the index of the pages with descriptions;
+- [`llms-full.txt`](https://insei.github.io/valigo/latest/llms-full.txt) — the whole documentation as one Markdown file, to put into the context of the agent.
+
+Replace `latest` with the version, or with `dev` for the documentation of the `main` branch.
+# Features
+
+# Features
+
+Reference of valigo capabilities grouped by area.
+
+## Configuration
+
+| Page                                                                                         | What's inside                                                                               |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [Validator and Configure](https://insei.github.io/valigo/latest/features/configure/index.md) | `New` and its options, `Configure`, the model, field pointers, nested and recursive structs |
+| [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md)              | nil pointers, nil slices and nil nested structs: which rules skip them                      |
+| [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md)             | `When` on the struct and on a field                                                         |
+| [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)               | `Custom` on a field, on a slice and on the struct                                           |
+
+## Rules
+
+| Page                                                                       | What's inside                                                                |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [Strings](https://insei.github.io/valigo/latest/features/strings/index.md) | `String`: `Required`, `MinLen`, `MaxLen`, `AnyOf`, `Regexp`, `Email`, `Trim` |
+| [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md) | `Number` and `NumberPtr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval` |
+| [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)       | `UUID`: `Required`, `AnyOf`                                                  |
+| [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)   | `Slice`, `StringSlice`, `UUIDSlice`: length rules, `Each` for elements       |
+
+## Results
+
+| Page                                                                                 | What's inside                                                                                        |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| [Errors](https://insei.github.io/valigo/latest/features/errors/index.md)             | `Validate` and `ValidateTyped`, `shared.Error`, locations of fields and elements, errors transformer |
+| [Translations](https://insei.github.io/valigo/latest/features/translations/index.md) | Built-in locales, own messages, languages from the context, `Accept-Language` middleware             |
+
+# Absent values
+
+A value is *absent* when there is nothing to check:
+
+- a nil pointer field: `*string`, `*int`, `*uuid.UUID`;
+- a nil pointer to a slice: `*[]string`;
+- a field of a nested struct stored by a nil pointer: `City` of a nil `*Address`;
+- a nil element of a slice of pointers: `[]*string{nil}`.
+
+Every rule skips absent values, only `Required` fails on them. So an optional field needs no special code: the rules check it only when it is set.
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/valigo"
+)
+
+type Address struct {
+    City string
+}
+
+type Order struct {
+    Comment  *string
+    Discount *int
+    Coupons  *[]string
+    Delivery *Address
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Order](v, func(b valigo.Configurator[Order], o *Order) {
+        b.String(&o.Comment).MaxLen(200)
+        b.NumberPtr(&o.Discount).AnyOfInterval(1, 50)
+        b.StringSlice(&o.Coupons).MaxLen(3)
+        b.String(&o.Delivery.City).Required()
+    })
+
+    // nothing is set: only the Required rule fails
+    fmt.Println(v.Validate(context.Background(), &Order{}))
+
+    discount := 70
+    fmt.Println(v.Validate(context.Background(), &Order{Discount: &discount, Delivery: &Address{City: "Paris"}}))
+}
+```
+
+Output:
+
+```text
+[Should be fulfilled (Delivery.City: <nil>)]
+[Only interval[1 - 50] is allowed (Discount: 70)]
+```
+
+## Required
+
+What `Required` checks depends on the type:
+
+| Configurator                        | Fails on                                         |
+| ----------------------------------- | ------------------------------------------------ |
+| `String`                            | absent value, empty string                       |
+| `Number`                            | zero                                             |
+| `NumberPtr`                         | absent value; zero is a valid value of a pointer |
+| `UUID`                              | absent value, `uuid.Nil`                         |
+| `Slice`, `StringSlice`, `UUIDSlice` | absent slice, empty slice                        |
+
+Nil slices of value fields (`[]string(nil)`) are present and empty: length rules check them, `Each` has nothing to check.
+
+## Conditions
+
+A field `When` doesn't call its condition for an absent value and skips its rules, including `Required`: the condition is about the value, and there is no value. Put `Required` before `When`, or use `When` of the struct, if the field is required under a condition. See [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md).
+
+# Conditions
+
+## When on the struct
+
+`When` of the configurator returns a configurator whose rules are applied only if the function returns true for the validated object:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/valigo"
+)
+
+type Sender struct {
+    Type     string
+    SMTPHost string
+    SMTPPort int
+    HTTPURL  string
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Sender](v, func(b valigo.Configurator[Sender], s *Sender) {
+        b.String(&s.Type).AnyOf("smtp", "http")
+
+        smtp := b.When(func(_ context.Context, s *Sender) bool { return s.Type == "smtp" })
+        smtp.String(&s.SMTPHost).Required()
+        smtp.Number(&s.SMTPPort).AnyOfInterval(1, 65535)
+
+        http := b.When(func(_ context.Context, s *Sender) bool { return s.Type == "http" })
+        http.String(&s.HTTPURL).Required()
+    })
+
+    fmt.Println(v.Validate(context.Background(), &Sender{Type: "smtp"}))
+    fmt.Println(v.Validate(context.Background(), &Sender{Type: "http"}))
+}
+```
+
+Output:
+
+```text
+[Should be fulfilled (SMTPHost: ) Only interval[1 - 65535] is allowed (SMTPPort: 0)]
+[Should be fulfilled (HTTPURL: )]
+```
+
+- The returned configurator has all methods of the original one, the conditions of chained `When` calls are combined with AND: `b.When(a).When(b)`.
+- `When` doesn't change the configurator it is called on: `b` keeps adding unconditional rules.
+- The context passed to `Validate` is passed to the condition, e.g. to enable rules by the role of the user.
+
+## When on a field
+
+`When` of a field configurator returns a configurator of the same field whose rules are applied only if the function returns true for the value of the field. The rules before `When` stay unconditional:
+
+```go
+b.String(&u.Website).
+    Trim().                                                                  // always
+    When(func(_ context.Context, v string) bool { return v != "" }).
+    Regexp(urlRe)                                                            // only for a non-empty value
+```
+
+The value is typed: `string` for `String`, the number type for `Number` and `NumberPtr`, `uuid.UUID` for `UUID`, and `shared.Elems[E]` for slices, see [Slices](https://insei.github.io/valigo/latest/features/slices/#custom-and-when).
+
+For an [absent value](https://insei.github.io/valigo/latest/features/absent/index.md) the condition isn't called and the rules after it are skipped, including `Required`.
+
+## Conditions and custom rules
+
+A condition on several fields can also be written as a [struct custom rule](https://insei.github.io/valigo/latest/features/custom/#struct-rules), which reports errors itself. Prefer `When`: the rules after it are the regular ones, with their messages and translations.
+
+# Validator and Configure
+
+## Validator
+
+`valigo.New` creates a validator. It holds the rules of all configured types and the translator of the messages, create one per application and share it.
+
+```go
+v := valigo.New(
+    valigo.WithTranslator(t),                     // translator of the messages, see Translations
+    valigo.WithFieldLocationNamingFn(jsonPath),   // location of the field in errors, see Errors
+    valigo.WithErrorsTransformer(toProblemFields), // []shared.Error to []error for Validate, see Errors
+)
+```
+
+All options are optional, a `nil` argument keeps the default.
+
+## Configure
+
+`valigo.Configure[T]` configures the rules of the struct type `T`:
+
+```go
+valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
+    b.String(&u.Name).Required()
+})
+```
+
+The function is called once, with:
+
+- `b` — the configurator of `T`, its methods return the configurators of fields: [`String`](https://insei.github.io/valigo/latest/features/strings/index.md), [`Number` and `NumberPtr`](https://insei.github.io/valigo/latest/features/numbers/index.md), [`UUID`](https://insei.github.io/valigo/latest/features/uuid/index.md), [`Slice`, `StringSlice` and `UUIDSlice`](https://insei.github.io/valigo/latest/features/slices/index.md), and [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md) and [`Custom`](https://insei.github.io/valigo/latest/features/custom/index.md) of the struct;
+- `u` — the *model*, a `*User` created by `Configure`. Rules are bound to the fields of the model by their pointers.
+
+The rules are applied to objects of type `*T`: `v.Validate(ctx, &user)`. A struct value is validated too, by a copy, see [Errors](https://insei.github.io/valigo/latest/features/errors/#validate-and-validatetyped).
+
+`Configure` is called on the application start. It isn't safe to call concurrently with `Validate`, and it **panics** on invalid configuration: a configuration error is a bug of the code, not a state of the running service. A repeated `Configure` of the same type replaces its rules.
+
+## Field pointers
+
+A field pointer must point to a field of the model passed to the function:
+
+```go
+valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
+    b.String(&u.Name)       // a field of the model
+    b.String(&u.Address.City) // a field of a nested struct of the model
+
+    var name string
+    b.String(&name)         // panic: *string is not a pointer to a field of *main.User: field not found
+})
+```
+
+Types of the fields are checked by the compiler: `String` accepts `*string`, `**string` and pointers to named string types, `Number` accepts pointers to numbers, and so on. Rules can't be configured on a field of a wrong type.
+
+## Nested structs
+
+Fields of nested structs are configured by the same pointers. The model allocates all nested structs stored by pointer, so `&u.Address.City` is valid even if `Address` is `*Address`:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/valigo"
+)
+
+type Address struct {
+    City string
+}
+
+type User struct {
+    Name    string
+    Home    Address
+    Work    *Address
+    Manager *User // recursive types are supported, the model doesn't allocate Manager
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
+        b.String(&u.Home.City).Required()
+        b.String(&u.Work.City).Required()
+    })
+
+    fmt.Println(v.Validate(context.Background(), &User{Work: &Address{}}))
+    fmt.Println(v.Validate(context.Background(), &User{Home: Address{City: "Berlin"}}))
+}
+```
+
+Output:
+
+```text
+[Should be fulfilled (Home.City: ) Should be fulfilled (Work.City: )]
+[Should be fulfilled (Work.City: <nil>)]
+```
+
+When the validated object has a nil `Work`, the field `Work.City` is absent: rules skip it and `Required` fails, see [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md).
+
+Embedded structs work the same way, `&u.ID` for a field of an embedded `Base`. Unexported fields are allowed in the model, and unexported fields of the model itself can be configured too.
+
+## Reusing rules
+
+Rules of nested types aren't inherited: configuring `Address` doesn't add its rules to `User`. Share the rules by a function:
+
+```go
+func addressRules[T any](b valigo.Configurator[T], a *Address) {
+    b.String(&a.City).Required()
+}
+
+valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
+    addressRules(b, &u.Home)
+    addressRules(b, u.Work)
+})
+```
+
+# Custom rules
+
+## Field rules
+
+`Custom` of a field configurator adds a rule with your logic. The function gets the typed value of the field and a helper that builds errors with the location of the field:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "strings"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/shared"
+)
+
+type Account struct {
+    Login string
+    Age   int
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Account](v, func(b valigo.Configurator[Account], a *Account) {
+        b.String(&a.Login).Required().Custom(func(ctx context.Context, h *shared.FieldCustomHelper, login string) []shared.Error {
+            if strings.EqualFold(login, "admin") {
+                return []shared.Error{h.ErrorT(ctx, login, "Login %q is reserved", login)}
+            }
+            return nil
+        })
+        b.Number(&a.Age).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, age int) []shared.Error {
+            if age%2 != 0 {
+                return []shared.Error{h.ErrorT(ctx, age, "Should be even")}
+            }
+            return nil
+        })
+    })
+
+    fmt.Println(v.Validate(context.Background(), &Account{Login: "Admin", Age: 3}))
+}
+```
+
+Output:
+
+```text
+[Login "Admin" is reserved (Login: Admin) Should be even (Age: 3)]
+```
+
+`h.ErrorT(ctx, value, localeKey, args...)` translates the message: `localeKey` is looked up in the [translations](https://insei.github.io/valigo/latest/features/translations/index.md), a key without a translation is used as is, as a format for `args`.
+
+The function isn't called for an [absent value](https://insei.github.io/valigo/latest/features/absent/index.md).
+
+## Rules on slice elements
+
+The `Each` of `Slice` gives a `*shared.Field[E]` of the elements. Besides `Custom` and `When` it has `Check`, the base of all built-in rules: a predicate and a message for the elements that don't match it.
+
+```go
+b.Slice(&o.Quantities).Each(func(q *shared.Field[int]) {
+    q.Check(func(v int) bool { return v > 0 }, "Should be positive")
+})
+```
+
+`Required(ok, localeKey)` fails for absent elements and the elements that don't match `ok`, `Modify(fn)` changes the elements in place. See [Slices](https://insei.github.io/valigo/latest/features/slices/index.md).
+
+## Struct rules
+
+`Custom` of the struct configurator gets the whole object, for the rules on several fields. `h.ErrorT` takes the pointer to the field of the *validated object* to build its location:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/shared"
+)
+
+type Booking struct {
+    From time.Time
+    To   time.Time
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Booking](v, func(b valigo.Configurator[Booking], _ *Booking) {
+        b.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *Booking) []shared.Error {
+            if !obj.To.After(obj.From) {
+                return []shared.Error{h.ErrorT(ctx, &obj.To, obj.To.Format(time.DateOnly), "Should be after %s", obj.From.Format(time.DateOnly))}
+            }
+            return nil
+        })
+    })
+
+    from := time.Date(2026, 5, 10, 0, 0, 0, 0, time.UTC)
+    fmt.Println(v.Validate(context.Background(), &Booking{From: from, To: from.AddDate(0, 0, -1)}))
+}
+```
+
+Output:
+
+```text
+[Should be after 2026-05-10 (To: 2026-05-09)]
+```
+
+- Struct `Custom` can be combined with [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md): `b.When(cond).Custom(fn)`.
+- The helper is valid only during the call of the function, don't keep it.
+- A pointer that doesn't point to a field of the validated object panics.
+
+# Errors
+
+## Validate and ValidateTyped
+
+```go
+func (v *Validator) Validate(ctx context.Context, obj any) []error
+func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error
+```
+
+- `ValidateTyped` returns the errors as `shared.Error` values, `Validate` passes them through the [errors transformer](#errors-transformer), by default every `shared.Error` becomes an `error`.
+- Both return `nil` when the object is valid, when the type of the object has no rules, and for a nil pointer.
+- `obj` is a pointer to the configured struct. A struct value is validated too, by a shallow copy: [`Trim`](https://insei.github.io/valigo/latest/features/strings/#trim) of its fields isn't visible to the caller, but the values behind its pointers and the elements of its slices are shared with the caller and can be changed.
+- The errors go in the order of the configuration: the rules of a field in the order of the chain, the fields in the order of their first rule.
+
+## shared.Error
+
+```go
+type Error struct {
+    Message  string // translated message
+    Location string // location of the field, Address.City or Tags[1] by default
+    Value    any    // the checked value, nil for absent values
+}
+```
+
+`Error()` returns `Message (Location: Value)`, or `Message` alone when both the location and the value are empty. `Error` has JSON field names of its own: `{"Message":"...","Location":"...","Value":...}`, convert it to your API format by the transformer.
+
+## Location of fields
+
+The location is the path of the field in the struct by default: `Address.City`. `WithFieldLocationNamingFn` replaces it, e.g. with the path of the JSON tags, so the client sees the names of its request:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/fmap/v3"
+    "github.com/insei/valigo"
+)
+
+type Address struct {
+    City string `json:"city"`
+}
+
+type SignUp struct {
+    Email   string   `json:"email"`
+    Address Address  `json:"address"`
+    Tags    []string `json:"tags"`
+}
+
+func main() {
+    v := valigo.New(valigo.WithFieldLocationNamingFn(func(field fmap.Field) string {
+        return field.GetTagPath("json", false)
+    }))
+    valigo.Configure[SignUp](v, func(b valigo.Configurator[SignUp], s *SignUp) {
+        b.String(&s.Email).Email()
+        b.String(&s.Address.City).Required()
+        b.StringSlice(&s.Tags).Email()
+    })
+
+    for _, err := range v.ValidateTyped(context.Background(), &SignUp{Email: "a", Tags: []string{"b"}}) {
+        fmt.Println(err.Location, err.Message)
+    }
+}
+```
+
+Output:
+
+```text
+email Should be email address
+address.city Should be fulfilled
+tags[0] Should be email address
+```
+
+The index of a slice element is appended to the location returned by the function.
+
+## Errors transformer
+
+`WithErrorsTransformer` sets how `Validate` converts the errors, e.g. to one error of the API:
+
+```go
+type FieldError struct {
+    Field   string `json:"field"`
+    Message string `json:"message"`
+}
+
+type ValidationError struct {
+    Fields []FieldError `json:"fields"`
+}
+
+func (e *ValidationError) Error() string { return "validation failed" }
+
+v := valigo.New(valigo.WithErrorsTransformer(func(errs []shared.Error) []error {
+    fields := make([]FieldError, len(errs))
+    for i, err := range errs {
+        fields[i] = FieldError{Field: err.Location, Message: err.Message}
+    }
+    return []error{&ValidationError{Fields: fields}}
+}))
+```
+
+The transformer is called only when there are errors.
+
+# Numbers
+
+`Number` configures the rules of a numeric field, `NumberPtr` — of a pointer to a numeric field. Supported types are `int`, `int8`, `int16`, `int32`, `int64`, `uint`, `uint8`, `uint16`, `uint32`, `uint64`, `float32`, `float64` and named types based on them.
+
+The arguments of the rules have the type of the field. Untyped constants fit any numeric type, a value of another type doesn't compile:
+
+```go
+type Price int64
+
+type Product struct {
+    Stock    int
+    Price    Price
+    Rating   float32
+    Discount *uint8
+}
+
+b.Number(&p.Stock).Min(0)
+b.Number(&p.Price).AnyOfInterval(1, 1_000_000) // the arguments are Price
+b.Number(&p.Rating).Max(5)
+b.NumberPtr(&p.Discount).Max(90)               // a nil Discount is skipped
+
+var limit int32 = 10
+b.Number(&p.Stock).Max(limit) // doesn't compile: int32 isn't int
+```
+
+## Rules
+
+| Rule                        | Fails when                                                    | Message                                                                                                                                    |
+| --------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Required()`                | `Number`: the value is zero; `NumberPtr`: the value is absent | Should be fulfilled                                                                                                                        |
+| `Min(n)`                    | the value is less than `n`                                    | Cannot be less than %v                                                                                                                     |
+| `Max(n)`                    | the value is greater than `n`                                 | Cannot be greater than %v                                                                                                                  |
+| `AnyOf(values...)`          | the value isn't one of `values`                               | Only %v values is allowed                                                                                                                  |
+| `AnyOfInterval(begin, end)` | the value is outside `[begin, end]`, both ends are included   | Only interval[%v - %v] is allowed                                                                                                          |
+| `Custom(fn)`                | `fn` returns errors                                           | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
+| `When(fn)`                  | —                                                             | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+
+## Zero and absent
+
+Zero is a valid value of a pointer: `NumberPtr(&p.Discount).Required()` passes for a pointer to `0` and fails for `nil`. Use a pointer field when zero must be distinguished from "not set", e.g. in PATCH requests:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/valigo"
+)
+
+type UpdateProduct struct {
+    Stock *int
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[UpdateProduct](v, func(b valigo.Configurator[UpdateProduct], p *UpdateProduct) {
+        b.NumberPtr(&p.Stock).Min(0)
+    })
+
+    zero, negative := 0, -1
+    fmt.Println(v.Validate(context.Background(), &UpdateProduct{}))
+    fmt.Println(v.Validate(context.Background(), &UpdateProduct{Stock: &zero}))
+    fmt.Println(v.Validate(context.Background(), &UpdateProduct{Stock: &negative}))
+}
+```
+
+Output:
+
+```text
+[]
+[]
+[Cannot be less than 0 (Stock: -1)]
+```
+
+# Slices
+
+| Configurator  | Fields                                                         | Rules on elements                                                                                                                 |
+| ------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `Slice`       | `[]E` of any `E`                                               | `Each` with `*shared.Field[E]`: `Check`, `Required`, `Modify`, `Custom`, `When`                                                   |
+| `StringSlice` | `[]string`, `*[]string`, `[]*string`, `*[]*string`             | `Each` with the [string configurator](https://insei.github.io/valigo/latest/features/strings/index.md), `Trim`, `Regexp`, `Email` |
+| `UUIDSlice`   | `[]uuid.UUID`, `*[]uuid.UUID`, `[]*uuid.UUID`, `*[]*uuid.UUID` | `Each` with the [uuid configurator](https://insei.github.io/valigo/latest/features/uuid/index.md), `AnyOf`                        |
+
+## The slice and its elements
+
+The rules of the configurator check **the slice itself**, the rules inside `Each` check **every element**:
+
+| Rule         | Fails when                           | Message                                   |
+| ------------ | ------------------------------------ | ----------------------------------------- |
+| `Required()` | the slice is absent or empty         | Should be fulfilled                       |
+| `MinLen(n)`  | the slice has less than `n` elements | Cannot contain less than %d elements      |
+| `MaxLen(n)`  | the slice has more than `n` elements | Cannot contain more than %d elements      |
+| `Each(fn)`   | —                                    | `fn` configures the rules of the elements |
+
+`Trim`, `Regexp` and `Email` of `StringSlice` and `AnyOf` of `UUIDSlice` are shortcuts for the same rules in `Each`.
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/google/uuid"
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/shared"
+    "github.com/insei/valigo/str"
+    vuuid "github.com/insei/valigo/uuid"
+)
+
+type Post struct {
+    Tags       []string
+    Editors    []*uuid.UUID
+    Quantities []int
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Post](v, func(b valigo.Configurator[Post], p *Post) {
+        b.StringSlice(&p.Tags).Required().MaxLen(3).Each(func(tag *str.BaseConfigurator) {
+            tag.Trim().Required().MaxLen(10)
+        })
+        b.UUIDSlice(&p.Editors).Each(func(id *vuuid.BaseConfigurator) {
+            id.Required()
+        })
+        b.Slice(&p.Quantities).Each(func(q *shared.Field[int]) {
+            q.Check(func(v int) bool { return v > 0 }, "Should be positive")
+        })
+    })
+
+    editor := uuid.MustParse("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+    post := &Post{
+        Tags:       []string{"go", "  ", "validation-library"},
+        Editors:    []*uuid.UUID{&editor, nil},
+        Quantities: []int{1, 0},
+    }
+    for _, err := range v.Validate(context.Background(), post) {
+        fmt.Println(err)
+    }
+}
+```
+
+Output:
+
+```text
+Should be fulfilled (Tags[1]: )
+Cannot be longer than 10 characters (Tags[2]: validation-library)
+Should be fulfilled (Editors[1]: <nil>)
+Should be positive (Quantities[1]: 0)
+```
+
+The location of an element error has the index of the element, the errors of the slice itself have the location of the field. Nil elements of slices of pointers are [absent](https://insei.github.io/valigo/latest/features/absent/index.md): only `Required` fails on them.
+
+## Custom and When
+
+`Custom` and `When` of the slice configurators get the elements as `shared.Elems[E]`, a view over `[]E` and `[]*E` without copying:
+
+```go
+b.StringSlice(&p.Tags).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, tags shared.Elems[string]) []shared.Error {
+    seen := make(map[string]bool, tags.Len())
+    for _, tag := range tags.All() { // tag is *string, nil for nil elements of []*string
+        if tag != nil && seen[*tag] {
+            return []shared.Error{h.ErrorT(ctx, *tag, "Tags should be unique")}
+        }
+        if tag != nil {
+            seen[*tag] = true
+        }
+    }
+    return nil
+})
+```
+
+`Len()` returns the number of elements, `At(i)` the pointer to the element `i`, `All()` iterates over the indexes and the pointers.
+
+## Slices of pointers in Slice
+
+`Slice` works with the declared element type: for `[]*int` the element is `*int`, and nil elements are regular values for its rules:
+
+```go
+b.Slice(&p.Limits).Each(func(limit *shared.Field[*int]) {
+    limit.Check(func(v *int) bool { return v != nil }, "Should be set")
+})
+```
+
+# Strings
+
+`String` configures the rules of a `string` field, a `*string` field or a field of a named string type:
+
+```go
+type Status string
+
+type User struct {
+    Name     string
+    Nickname *string
+    Status   Status
+}
+
+b.String(&u.Name).Trim().Required().MaxLen(64)
+b.String(&u.Nickname).MinLen(3) // a nil Nickname is skipped
+b.String(&u.Status).AnyOf("active", "blocked")
+```
+
+## Rules
+
+| Rule                  | Fails when                       | Message                                                                                                                                    |
+| --------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Required()`          | the value is absent or empty     | Should be fulfilled                                                                                                                        |
+| `MinLen(n)`           | the length is less than `n`      | Cannot be shorter than %d characters                                                                                                       |
+| `MaxLen(n)`           | the length is greater than `n`   | Cannot be longer than %d characters                                                                                                        |
+| `AnyOf(values...)`    | the value isn't one of `values`  | Only %s values is allowed                                                                                                                  |
+| `Regexp(re, opts...)` | the value doesn't match `re`     | Doesn't match required regexp pattern                                                                                                      |
+| `Email()`             | the value isn't an email address | Should be email address                                                                                                                    |
+| `Custom(fn)`          | `fn` returns errors              | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
+| `When(fn)`            | —                                | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+
+The lengths are in bytes, like `len`: `"яя"` has the length 4.
+
+## Trim
+
+`Trim()` removes the leading and trailing whitespace of the value **in the validated object**. Rules run in the order of the chain, so the rules after `Trim` check the trimmed value:
+
+```go
+b.String(&u.Name).Trim().Required() // "   " fails, "  Ann " becomes "Ann"
+```
+
+The struct is validated in place, `Validate(ctx, &user)` trims `user.Name`. See the copy semantics of the values passed by value in [Errors](https://insei.github.io/valigo/latest/features/errors/#validate-and-validatetyped).
+
+## Regexp message
+
+`str.WithRegexpLocaleKey` replaces the message of a `Regexp` rule, the key can have its own [translations](https://insei.github.io/valigo/latest/features/translations/index.md):
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "regexp"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/str"
+)
+
+type Product struct {
+    SKU string
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Product](v, func(b valigo.Configurator[Product], p *Product) {
+        b.String(&p.SKU).Regexp(regexp.MustCompile(`^[A-Z]{3}-\d{4}$`), str.WithRegexpLocaleKey("Should look like ABC-1234"))
+    })
+    fmt.Println(v.Validate(context.Background(), &Product{SKU: "abc-1"}))
+}
+```
+
+Output:
+
+```text
+[Should look like ABC-1234 (SKU: abc-1)]
+```
+
+# Translations
+
+Messages are translated by a `translator.Translator`. The default one of `valigo.New` has the English and Russian messages of the built-in rules, English is the default language.
+
+## Locale keys
+
+The rules build messages by *locale keys*: `validation:string:Cannot be longer than %d characters`. The translator looks the key up in the languages of the context, then in the default language, and formats the found message with the arguments of the rule. A key without a translation is used as is: so the messages of [custom rules](https://insei.github.io/valigo/latest/features/custom/index.md) work without translations.
+
+The keys of the built-in rules are in [`translator/locales`](https://github.com/Insei/valigo/tree/main/translator/locales):
+
+```yaml
+validation:
+  string:
+    "Cannot be longer than %d characters": Не может быть длиннее %d символов
+```
+
+## Languages from the context
+
+The languages of the request are taken from the context, `translator.NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there, ordered by their `q`:
+
+```go
+handler := translator.NewAcceptLanguageMiddleware()(mux)
+```
+
+Another source of the languages is set by `translator.WithPreferredLanguagesFn`, e.g. the language of the user profile.
+
+## Own messages
+
+Add the translations of your messages to a storage and pass the translator to the validator:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/shared"
+    "github.com/insei/valigo/translator"
+)
+
+type language struct{}
+
+type Account struct {
+    Login string
+}
+
+const reservedKey = "validation:login:Login %q is reserved"
+
+func main() {
+    storage := translator.NewInMemStorage() // the built-in locales are loaded
+    storage.Add("en", map[string]string{reservedKey: "Login %q is reserved"})
+    storage.Add("ru", map[string]string{reservedKey: "Логин %q зарезервирован"})
+
+    t := translator.New(
+        translator.WithStorage(storage),
+        translator.WithDefaultLang("en"),
+        translator.WithPreferredLanguagesFn(func(ctx context.Context) []string {
+            lang, _ := ctx.Value(language{}).(string)
+            return []string{lang}
+        }),
+    )
+
+    v := valigo.New(valigo.WithTranslator(t))
+    valigo.Configure[Account](v, func(b valigo.Configurator[Account], a *Account) {
+        b.String(&a.Login).MinLen(3).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, login string) []shared.Error {
+            if login == "root" {
+                return []shared.Error{h.ErrorT(ctx, login, reservedKey, login)}
+            }
+            return nil
+        })
+    })
+
+    ctx := context.WithValue(context.Background(), language{}, "ru")
+    fmt.Println(v.Validate(ctx, &Account{Login: "ro"}))
+    fmt.Println(v.Validate(ctx, &Account{Login: "root"}))
+    fmt.Println(v.Validate(context.Background(), &Account{Login: "root"}))
+}
+```
+
+Output:
+
+```text
+[Не может быть короче 3 символов (Login: ro)]
+[Логин "root" зарезервирован (Login: root)]
+[Login "root" is reserved (Login: root)]
+```
+
+- `storage.Merge(locales)` adds the translations of several languages at once, e.g. from your own YAML files read by `translator.LocalesFromFS(fsys)`: `locales/<lang>/data.yaml` with the same nested format as the built-in locales.
+- `translator.NewInMemStorage(translator.WithInMemData(data))` replaces the built-in locales with yours.
+- [`str.WithRegexpLocaleKey`](https://insei.github.io/valigo/latest/features/strings/#regexp-message) sets the key of a `Regexp` rule.
+
+# UUID
+
+`UUID` configures the rules of a [`uuid.UUID`](https://pkg.go.dev/github.com/google/uuid) field or a `*uuid.UUID` field:
+
+```go
+type Comment struct {
+    ID       uuid.UUID
+    ParentID *uuid.UUID
+}
+
+b.UUID(&c.ID).Required()
+b.UUID(&c.ParentID).Custom(notDeleted) // a nil ParentID is skipped
+```
+
+## Rules
+
+| Rule               | Fails when                        | Message                                                                                                                                    |
+| ------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Required()`       | the value is absent or `uuid.Nil` | Should be fulfilled                                                                                                                        |
+| `AnyOf(values...)` | the value isn't one of `values`   | Only %s values is allowed                                                                                                                  |
+| `Custom(fn)`       | `fn` returns errors               | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
+| `When(fn)`         | —                                 | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+
+Slices of uuids are configured by `UUIDSlice`, see [Slices](https://insei.github.io/valigo/latest/features/slices/index.md).
+
+## Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/google/uuid"
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/shared"
+)
+
+type Comment struct {
+    ID       uuid.UUID
+    ParentID *uuid.UUID
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Comment](v, func(b valigo.Configurator[Comment], c *Comment) {
+        b.UUID(&c.ID).Required().Custom(func(ctx context.Context, h *shared.FieldCustomHelper, id uuid.UUID) []shared.Error {
+            if id.Version() != 7 {
+                return []shared.Error{h.ErrorT(ctx, id, "Should be UUID v7")}
+            }
+            return nil
+        })
+    })
+
+    fmt.Println(v.Validate(context.Background(), &Comment{}))
+    fmt.Println(v.Validate(context.Background(), &Comment{ID: uuid.MustParse("6ba7b810-9dad-11d1-80b4-00c04fd430c8")}))
+}
+```
+
+Output:
+
+```text
+[Should be fulfilled (ID: 00000000-0000-0000-0000-000000000000) Should be UUID v7 (ID: 00000000-0000-0000-0000-000000000000)]
+[Should be UUID v7 (ID: 6ba7b810-9dad-11d1-80b4-00c04fd430c8)]
+```
+# Architecture
+
+# How it works
+
+This page is for the contributors and for those who want to know the cost of a rule.
+
+## Configure: from pointers to fields
+
+`Configure[T]` creates the *model*, a `*T` with all exported nested structs stored by pointer allocated (pointers to the types being allocated are left nil, so recursive types stop). The model gives every field a unique address, so a pointer `&u.Address.City` identifies the field: [fmap](https://github.com/Insei/fmap) finds the field descriptor by the address relative to the model.
+
+The descriptor knows the offset of the field and the chain of the nested pointer structs, so it reads the field of any object of the type: `Address.City` of a `*User` follows the `Address` pointer and returns a typed nil pointer when it is nil. That's how [absent values](https://insei.github.io/valigo/latest/features/absent/index.md) appear.
+
+## Typed rules
+
+Configurator methods are generic: `String[F ~string | *string](p *F)`, `Number[N num.Number](p *N)`. The type of the pointer selects the method and the types of the rule arguments, so a wrong field or argument type doesn't compile.
+
+Every field configurator is a thin wrapper over one core type, `shared.Field[T]`. It has four primitives, all built-in rules are made of them:
+
+| Primitive                 | Behavior                                                                   |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `Check(ok, key, args...)` | an error with the key when `ok(value)` is false, absent values are skipped |
+| `Required(ok, key)`       | an error when the value is absent or `ok(value)` is false                  |
+| `Modify(fn)`              | changes the value in place, e.g. `Trim`                                    |
+| `Custom(fn)`              | your function with the typed value and the field helper                    |
+
+`When(cond)` wraps the next rules of the field with the condition. `MaxLen` of a string is `Check(func(v string) bool { return len(v) <= n }, ...)`.
+
+`shared.Field[T]` doesn't know where the value comes from. For a struct field the source reads the field, for `Each` the source iterates over the elements of the slice and adds the index to the locations of the errors. That's why the same string configurator validates a `Name string` field and every element of `Tags []*string`.
+
+## Validate: the hot path
+
+`Configure` registers one validation function per field source in the validator, keyed by the type `*T`. `Validate`:
+
+1. finds the functions of the type of the object, a map lookup;
+1. calls every function: it reads the field once through the descriptor, a pointer into the object, and runs the rules of the field;
+1. a rule returns `nil` for a valid value, and builds a `shared.Error` with the translated message otherwise.
+
+Nothing in this path allocates for valid objects: the values are read by pointers, the rules are closures created by `Configure`, the regexps are compiled once, and the helper of struct `Custom` rules is pooled. A test checks it with `testing.AllocsPerRun`.
+
+## Packages
+
+| Package              | Contents                                                                       |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `valigo`             | `Validator`, `Configure`, `Configurator` with its generic methods, options     |
+| `shared`             | the rules core `Field[T]`, slice configurator and `Elems[E]`, `Error`, helpers |
+| `str`, `num`, `uuid` | configurators of strings, numbers and uuids built on `shared.Field[T]`         |
+| `translator`         | translator, in-memory storage, built-in locales, `Accept-Language` middleware  |
+
+## Contributing
+
+- Commits follow [Conventional Commits](https://www.conventionalcommits.org/), the changelog is generated from them by git-cliff.
+- `go test -race ./...` and the examples modules run in CI. Programs in the documentation and in the skill for AI agents are built and run by `scripts/check-examples.sh`.
+- A new rule of an existing type is a method of its configurator over `Check` or `Required`, with a locale key in `translator/locales/*/data.yaml`.
