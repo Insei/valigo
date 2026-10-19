@@ -149,3 +149,29 @@ func TestMoreFormatsDontAllocate(t *testing.T) {
 		}
 	}
 }
+
+func TestCodeSets(t *testing.T) {
+	if len(countryCodes) != 249 {
+		t.Errorf("%d country codes, ISO 3166-1 has 249", len(countryCodes))
+	}
+	check(t, "isCountryCode", isCountryCode, []string{"US", "DE", "RU", "ZW", "AX"}, []string{"", "us", "USA", "XX", "UK"})
+	check(t, "isCurrencyCode", isCurrencyCode, []string{"USD", "EUR", "RUB", "XAU", "ZWG"}, []string{"", "usd", "US", "ABC", "HRK"})
+}
+
+func TestLuhn(t *testing.T) {
+	check(t, "isLuhn", isLuhn, []string{"79927398713", "4111111111111111", "00"}, []string{"", "7", "79927398710", "4111-1111"})
+	check(t, "isCreditCard", isCreditCard, []string{"4111111111111111", "4111 1111 1111 1111", "5500-0000-0000-0004", "378282246310005"},
+		[]string{"", "4111111111111112", "41111111111", "4111  1111 1111 1111", " 4111111111111111", "4111111111111111-", "4111x111111111111"})
+}
+
+func TestCodesDontAllocate(t *testing.T) {
+	for name, fn := range map[string]func() bool{
+		"country":  func() bool { return isCountryCode("DE") },
+		"currency": func() bool { return isCurrencyCode("EUR") },
+		"card":     func() bool { return isCreditCard("4111 1111 1111 1111") },
+	} {
+		if allocs := testing.AllocsPerRun(100, func() { fn() }); allocs != 0 {
+			t.Errorf("%s allocates %v times", name, allocs)
+		}
+	}
+}

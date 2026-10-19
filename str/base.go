@@ -40,6 +40,10 @@ const (
 	lowercaseLocaleKey = "validation:string:Should be lowercase"
 	uppercaseLocaleKey = "validation:string:Should be uppercase"
 	datetimeLocaleKey  = "validation:string:Should be date and time in %s format"
+	countryLocaleKey   = "validation:string:Should be ISO 3166-1 alpha-2 country code"
+	currencyLocaleKey  = "validation:string:Should be ISO 4217 currency code"
+	luhnLocaleKey      = "validation:string:Should have valid Luhn checksum"
+	cardLocaleKey      = "validation:string:Should be credit card number"
 )
 
 var emailRegexp = regexp.MustCompile(`^[^\s,@#$%^&*!()]+@([a-zA-Z0-9]+[.])+[a-zA-Z]{2,8}$`)
@@ -268,6 +272,31 @@ func (i *BaseConfigurator) Uppercase() *BaseConfigurator {
 // Datetime checks if the string is a date or a time of the layout of time.Parse: Datetime(time.DateOnly).
 func (i *BaseConfigurator) Datetime(layout string) *BaseConfigurator {
 	i.f.CheckMsg(isDatetime(layout), shared.M("string.datetime", datetimeLocaleKey, shared.P("layout", layout)))
+	return i
+}
+
+// CountryCode checks if the string is an upper case code of ISO 3166-1 alpha-2: US, DE.
+func (i *BaseConfigurator) CountryCode() *BaseConfigurator {
+	i.f.CheckMsg(isCountryCode, shared.M("string.country_code", countryLocaleKey))
+	return i
+}
+
+// CurrencyCode checks if the string is an upper case active code of ISO 4217: USD, EUR.
+func (i *BaseConfigurator) CurrencyCode() *BaseConfigurator {
+	i.f.CheckMsg(isCurrencyCode, shared.M("string.currency_code", currencyLocaleKey))
+	return i
+}
+
+// Luhn checks if the string is at least 2 digits with a valid checksum of the Luhn algorithm.
+func (i *BaseConfigurator) Luhn() *BaseConfigurator {
+	i.f.CheckMsg(isLuhn, shared.M("string.luhn", luhnLocaleKey))
+	return i
+}
+
+// CreditCard checks if the string is a card number of 12-19 digits with a valid Luhn checksum,
+// the digits can be grouped by spaces or hyphens.
+func (i *BaseConfigurator) CreditCard() *BaseConfigurator {
+	i.f.CheckMsg(isCreditCard, shared.M("string.credit_card", cardLocaleKey))
 	return i
 }
 

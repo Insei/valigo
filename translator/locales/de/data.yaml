@@ -34,6 +34,10 @@ validation:
     "Should be lowercase": Muss in Kleinbuchstaben sein
     "Should be uppercase": Muss in Großbuchstaben sein
     "Should be date and time in %s format": Muss Datum und Uhrzeit im Format %s sein
+    "Should be ISO 3166-1 alpha-2 country code": Muss ein Ländercode nach ISO 3166-1 alpha-2 sein
+    "Should be ISO 4217 currency code": Muss ein Währungscode nach ISO 4217 sein
+    "Should have valid Luhn checksum": Muss eine gültige Luhn-Prüfsumme haben
+    "Should be credit card number": Muss eine Kreditkartennummer sein
   num:
     "Cannot be less than %v": Darf nicht kleiner als %v sein
     "Cannot be greater than %v": Darf nicht größer als %v sein
