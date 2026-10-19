@@ -1428,7 +1428,7 @@
 <p>The languages of the request are taken from the context, <code>translator.NewAcceptLanguageMiddleware</code> puts the languages of the <code>Accept-Language</code> header there, ordered by their <code>q</code>:</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">handler</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">translator</span><span class="p">.</span><span class="nx">NewAcceptLanguageMiddleware</span><span class="p">()(</span><span class="nx">mux</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Another source of the languages is set by <code>translator.WithPreferredLanguagesFn</code>, e.g. the language of the user profile.</p>
+<p>Without the middleware of <code>net/http</code>, e.g. in the <code>Resolve</code> of a huma input, put the languages of the header to the context by <code>translator.ContextWithAcceptLanguage(ctx, header)</code>, or any languages by <code>translator.ContextWithLanguages(ctx, "ru")</code>, e.g. the language of the user profile. Another source of the languages is set by <code>translator.WithPreferredLanguagesFn</code>.</p>
 <h2 id="own-messages">Own messages<a class="headerlink" href="#own-messages" title="Permanent link">&para;</a></h2>
 <p>Add the translations of your messages to a storage and pass the translator to the validator:</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
