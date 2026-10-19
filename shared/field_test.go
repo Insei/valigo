@@ -322,3 +322,33 @@ func TestInStruct(t *testing.T) {
 	assert.False(t, present(&sample{}))
 	assert.True(t, InStruct(sampleField(t, "Text"))(&sample{}))
 }
+
+func TestOr(t *testing.T) {
+	var r rules
+	notEmpty := func(v string) bool { return v != "" }
+	short := func(v string) bool { return len(v) < 3 }
+	f := NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add, nil)
+	f.Or(func(a *Field[string]) {
+		a.Check(func(v string) bool { return v == "a" }, "not a").Check(short, "long")
+	}, func(a *Field[string]) {
+		a.Check(func(v string) bool { return v == "b" }, "not b")
+	}, func(a *Field[string]) {
+		a.Check(func(v string) bool { return v == "c" }, "not c")
+	}).Check(notEmpty, "empty")
+	assert.Empty(t, r.validate(&sample{Text: "a"}))
+	assert.Empty(t, r.validate(&sample{Text: "b"}), "the second alternative")
+	assert.Empty(t, r.validate(&sample{Text: "c"}), "the third alternative after the failed second")
+	assert.Equal(t, []Error{{Location: "Text", Message: "not a", Value: "long"}, {Location: "Text", Message: "long", Value: "long"}},
+		r.validate(&sample{Text: "long"}), "the errors of the first alternative")
+
+	var req rules
+	NewValueField[*string](sampleField(t, "TextPtr"), pathHelper{}, sampleFields, req.add, nil).As(Deref).Or(func(a *Field[string]) {
+		a.Required(notEmpty, "required")
+	}, func(a *Field[string]) {
+		a.Check(notEmpty, "skipped for absent values")
+	})
+	assert.Empty(t, req.validate(&sample{}), "an alternative without Required passes an absent value")
+
+	assert.Equal(t, "x", *Getter[string](sampleField(t, "Inner.Text"))(&sample{Inner: &inner{Text: "x"}}))
+	assert.Nil(t, Getter[string](sampleField(t, "Inner.Text"))(&sample{}))
+}
