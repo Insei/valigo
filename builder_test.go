@@ -34,6 +34,7 @@ type model struct {
 	TagsPtr *[]string
 	TagPtrs []*string
 	Ints    []int
+	IntPtrs []*int
 	UIDs    []*uuid.UUID
 	Addr    *address
 	Inner   address
@@ -96,6 +97,9 @@ func TestConfiguratorRules(t *testing.T) {
 		{"uuid ptr nil skipped", func(c Configurator[model], m *model) { c.UUID(&m.UIDPtr).AnyOf(id1) }, &model{}, 0},
 		{"uuid ptr nil required", func(c Configurator[model], m *model) { c.UUID(&m.UIDPtr).Required() }, &model{}, 1},
 
+		{"slice of ptrs", func(c Configurator[model], m *model) {
+			c.Slice(&m.IntPtrs).MaxLen(1).Each(func(e *shared.Field[*int]) { e.Check(func(v *int) bool { return v != nil }, "not nil") })
+		}, &model{IntPtrs: []*int{ptr(1), nil}}, 2},
 		{"slice max len", func(c Configurator[model], m *model) { c.Slice(&m.Ints).MaxLen(2) }, &model{Ints: []int{1, 2, 3}}, 1},
 		{"slice min len", func(c Configurator[model], m *model) { c.Slice(&m.Ints).MinLen(2) }, &model{Ints: []int{1}}, 1},
 		{"slice required", func(c Configurator[model], m *model) { c.Slice(&m.Ints).Required() }, &model{Ints: []int{}}, 1},
