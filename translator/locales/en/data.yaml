@@ -14,3 +14,10 @@ validation:
     "Only %v values is allowed": Only %v values is allowed
     "Only interval[%v - %v] is allowed": Only interval[%v - %v] is allowed
     "Invalid value": Invalid value
+  uuid:
+    "Should be fulfilled": Should be fulfilled
+    "Only %s values is allowed": Only %s values is allowed
+  slice:
+    "Should be fulfilled": Should be fulfilled
+    "Cannot contain more than %d elements": Cannot contain more than %d elements
+    "Cannot contain less than %d elements": Cannot contain less than %d elements
