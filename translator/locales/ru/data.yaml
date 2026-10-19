@@ -31,6 +31,13 @@ validation:
     "Should be between %s and %s": Должно быть между %s и %s
     "Should be in the past": Должно быть в прошлом
     "Should be in the future": Должно быть в будущем
+  value:
+    "Should be fulfilled": Должно быть заполнено
+    "Only %v values is allowed": Только %v значения разрешены
+    "Values %v are not allowed": Значения %v запрещены
+    "Should be %v": Должно быть %v
+    "Cannot be %v": Не может быть %v
+    "Should contain unique values": Должно содержать уникальные значения
   uuid:
     "Should be fulfilled": Должно быть заполнено
     "Only %s values is allowed": Только %s значения разрешены
