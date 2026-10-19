@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/num"
-	"github.com/insei/valigo/str"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
+	vuuid "github.com/insei/valigo/rules/uuid"
 	"github.com/insei/valigo/translator"
-	vuuid "github.com/insei/valigo/uuid"
 )
 
 type Sender struct {

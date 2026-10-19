@@ -45,6 +45,7 @@ jobs:
         cache-dependency-path: |
           go.sum
           */go.sum
+          rules/*/go.sum
 
     - name: Build
       run: |
@@ -63,8 +64,9 @@ jobs:
         . scripts/modules.sh
         files=./coverage.txt
         for module in $MODULES; do
-          (cd "$module" && go test -v -race -coverprofile="../coverage-$module.txt" -covermode=atomic ./...)
-          files="$files,./coverage-$module.txt"
+          name="coverage-${module//\//-}.txt"
+          (cd "$module" && go test -v -race -coverprofile="$OLDPWD/$name" -covermode=atomic ./...)
+          files="$files,./$name"
         done
         echo "coverage=$files" >> "$GITHUB_OUTPUT"
 
@@ -87,7 +89,7 @@ jobs:
         go-version: '1.27'
         cache-dependency-path: |
           go.sum
-          uuid/go.sum
+          rules/uuid/go.sum
           huma/go.sum
           examples/*/go.sum
 

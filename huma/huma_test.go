@@ -15,8 +15,8 @@ import (
 
 	"github.com/insei/valigo"
 	vhuma "github.com/insei/valigo/huma"
-	"github.com/insei/valigo/num"
-	"github.com/insei/valigo/str"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
 )
 
 type Address struct {

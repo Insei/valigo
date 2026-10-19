@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/rules/num"
 	"github.com/insei/valigo/shared"
 )
 

@@ -43,7 +43,7 @@ import (
 	"time"
 
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/timex"
+	"github.com/insei/valigo/rules/timex"
 )
 
 type Report struct {

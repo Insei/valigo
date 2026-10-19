@@ -65,7 +65,7 @@ and a conversion that doesn't fit the field doesn't compile:
 | `num.Of`, `num.Ptr` | integers, floats, named numbers, pointers to them | `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval`, `Latitude`, `Longitude` |
 | `timex.Of` | `time.Time`, `*time.Time` | `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture` |
 | `eq.Of`, `eq.Ptr` | any `comparable`: enums, bools | `Required`, `OneOf`, `NotOneOf`, `Equal`, `NotEqual` |
-| `vuuid.Of` | `uuid.UUID`, `*uuid.UUID`, the separate module `github.com/insei/valigo/uuid` | `Required`, `AnyOf` |
+| `vuuid.Of` | `uuid.UUID`, `*uuid.UUID`, the separate module `github.com/insei/valigo/rules/uuid` | `Required`, `AnyOf` |
 | `str.Slice`, `num.Slice`, `timex.Slice`, `eq.Slice`, `vuuid.Slice` | slices, also of pointers | `Required`, `MinLen`, `MaxLen`, `Each` for the elements, `Unique` |
 | `b.Map(&m.X)` | maps | `Required`, `MinLen`, `MaxLen`, `EachKey`, `EachValue` |
 

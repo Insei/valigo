@@ -39,8 +39,8 @@ import (
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
 	"github.com/insei/valigo"
 	vhuma "github.com/insei/valigo/huma"
-	"github.com/insei/valigo/num"
-	"github.com/insei/valigo/str"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
 )
 
 type CreateUserInput struct {
@@ -135,7 +135,7 @@ import (
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
 	"github.com/insei/valigo"
 	vhuma "github.com/insei/valigo/huma"
-	"github.com/insei/valigo/str"
+	"github.com/insei/valigo/rules/str"
 )
 
 type CreateUserInput struct {

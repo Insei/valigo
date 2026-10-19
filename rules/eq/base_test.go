@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/eq"
 	"github.com/insei/valigo/internal/testenv"
+	"github.com/insei/valigo/rules/eq"
 	"github.com/insei/valigo/shared"
 )
 

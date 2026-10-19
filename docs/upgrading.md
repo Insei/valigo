@@ -4,10 +4,12 @@ Rules are still configured by pointers to the fields of the model, but the confi
 
 | v0.0.x | Now |
 |---|---|
+| `github.com/insei/valigo/str`, `github.com/insei/valigo/num` | `github.com/insei/valigo/rules/str`, `github.com/insei/valigo/rules/num`, also `rules/eq` and `rules/timex` |
+| `github.com/insei/valigo/uuid` of the core module | the separate module `github.com/insei/valigo/rules/uuid` |
 | `b.String(&u.Name)` | `b.Field(&u.Name).As(str.Of)` |
 | `b.Number(&u.Age)` | `b.Field(&u.Age).As(num.Of)` |
 | `b.Number(&u.Score)` for `*int` | `b.Field(&u.Score).As(num.Ptr)` |
-| `b.UUID(&u.ID)` | `b.Field(&u.ID).As(vuuid.Of)` of the separate module `github.com/insei/valigo/uuid` |
+| `b.UUID(&u.ID)` | `b.Field(&u.ID).As(vuuid.Of)` of the separate module `github.com/insei/valigo/rules/uuid` |
 | `b.StringSlice(&u.Tags)` | `b.Slice(&u.Tags).As(str.Slice)`, for `*[]string`: `b.Field(&u.Tags).As(shared.SlicePtr).As(str.Slice)` |
 | `b.UUIDSlice(&u.IDs)` | `b.Slice(&u.IDs).As(vuuid.Slice)` |
 | `b.Slice(any)` with `Custom(func(ctx, h, value []*any) ...)` | `b.Slice(&u.Items)` with `Custom(func(ctx, h, value shared.Elems[E]) ...)` and `Each` |
@@ -16,7 +18,7 @@ Rules are still configured by pointers to the fields of the model, but the confi
 | `Max(any)`, `Min(any)`, `AnyOf(...any)`, `AnyOfInterval(any, any)` | the arguments have the type of the field, `Max(5)` works for `int64` |
 | `Custom(func(ctx, h, value any) ...)`, `When(func(ctx, value any) bool)` of fields | the value is typed: `string`, the number type, `uuid.UUID` |
 | `StringSlice(...).MaxLen(n)` | the same: the number of elements; rules on elements are set by `Each` |
-| `shared.NewSliceFieldConfigurator(params)`, `shared.FieldConfigurator` | `shared.NewSliceFieldConfigurator(field, helper, add)`, `shared.Field[T]` |
+| `shared.NewSliceFieldConfigurator(params)`, `shared.FieldConfigurator` | `shared.NewSliceFieldConfigurator(field, helper, fields, add, describe)`, `shared.Field[T]` |
 
 ## Behavior changes
 

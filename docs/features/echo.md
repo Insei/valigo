@@ -24,8 +24,8 @@ import (
 
 	"github.com/insei/valigo"
 	vecho "github.com/insei/valigo/echo"
+	"github.com/insei/valigo/rules/str"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
 	"github.com/labstack/echo/v4"
 )
 

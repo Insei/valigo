@@ -11,9 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/insei/valigo/internal/testenv"
-	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/rules/num"
+	"github.com/insei/valigo/rules/str"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
 )
 
 type status string

@@ -61,7 +61,7 @@ import (
 	"fmt"
 
 	"github.com/insei/valigo"
-	"github.com/insei/valigo/str"
+	"github.com/insei/valigo/rules/str"
 )
 
 type Address struct {
