@@ -1806,9 +1806,29 @@
 <td>Should be equal to %s</td>
 </tr>
 <tr>
+<td><code>NotEqualField(&amp;m.X)</code></td>
+<td>the value is equal to the value of the string field <code>X</code></td>
+<td>Cannot be equal to %s</td>
+</tr>
+<tr>
+<td><code>EqualFold(s)</code></td>
+<td>the value isn't equal to <code>s</code> ignoring case, by Unicode case folding</td>
+<td>Should be equal to %s ignoring case</td>
+</tr>
+<tr>
 <td><code>Prefix(s)</code>, <code>Suffix(s)</code>, <code>Contains(s)</code></td>
 <td>the value doesn't start with, end with or contain <code>s</code></td>
 <td>Should start with %s, Should end with %s, Should contain %s</td>
+</tr>
+<tr>
+<td><code>NotPrefix(s)</code>, <code>NotSuffix(s)</code>, <code>Excludes(s)</code></td>
+<td>the value starts with, ends with or contains <code>s</code></td>
+<td>Cannot start with %s, Cannot end with %s, Cannot contain %s</td>
+</tr>
+<tr>
+<td><code>ContainsAny(chars)</code>, <code>ExcludesAny(chars)</code></td>
+<td>the value has none / one of the characters of <code>chars</code></td>
+<td>Should contain any of the characters %s, Cannot contain the characters %s</td>
 </tr>
 <tr>
 <td><code>Regexp(re, opts...)</code></td>
@@ -1844,6 +1864,26 @@
 <td><code>Alphanumeric()</code></td>
 <td>the value is empty or has characters other than ASCII letters and digits</td>
 <td>Should contain only letters and digits</td>
+</tr>
+<tr>
+<td><code>Alpha()</code></td>
+<td>the value is empty or has characters other than ASCII letters</td>
+<td>Should contain only letters</td>
+</tr>
+<tr>
+<td><code>Digits()</code></td>
+<td>the value is empty or has characters other than ASCII digits, <code>0042</code></td>
+<td>Should contain only digits</td>
+</tr>
+<tr>
+<td><code>Numeric()</code></td>
+<td>the value isn't a decimal number with an optional sign and fraction, <code>-12</code>, <code>+3.5</code></td>
+<td>Should be a number</td>
+</tr>
+<tr>
+<td><code>Hexadecimal()</code></td>
+<td>the value isn't a hexadecimal number with an optional <code>0x</code>, <code>ff</code>, <code>0x1A</code></td>
+<td>Should be hexadecimal</td>
 </tr>
 <tr>
 <td><code>ASCII()</code></td>

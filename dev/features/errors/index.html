@@ -1858,8 +1858,24 @@
 <td><code>prefix</code>, <code>suffix</code>, <code>substring</code></td>
 </tr>
 <tr>
-<td><code>string.equal_field</code></td>
+<td><code>string.equal_field</code>, <code>string.not_equal_field</code></td>
 <td><code>field</code></td>
+</tr>
+<tr>
+<td><code>string.excludes</code>, <code>string.not_prefix</code>, <code>string.not_suffix</code></td>
+<td><code>substring</code>, <code>prefix</code>, <code>suffix</code></td>
+</tr>
+<tr>
+<td><code>string.contains_any</code>, <code>string.excludes_any</code></td>
+<td><code>chars</code></td>
+</tr>
+<tr>
+<td><code>string.equal_fold</code></td>
+<td><code>value</code></td>
+</tr>
+<tr>
+<td><code>string.alpha</code>, <code>string.digits</code>, <code>string.numeric</code>, <code>string.hexadecimal</code></td>
+<td>—</td>
 </tr>
 <tr>
 <td><code>string.base64</code>, <code>string.base64url</code>, <code>string.json</code>, <code>string.semver</code>, <code>string.cidr</code>, <code>string.mac</code>, <code>string.e164</code>, <code>string.hex_color</code>, <code>string.ascii</code>, <code>string.lowercase</code>, <code>string.uppercase</code>, <code>string.country_code</code>, <code>string.currency_code</code>, <code>string.luhn</code>, <code>string.credit_card</code></td>
@@ -1878,8 +1894,12 @@
 <td><code>min</code>, <code>max</code></td>
 </tr>
 <tr>
-<td><code>number.min_field</code>, <code>number.max_field</code></td>
+<td><code>number.min_field</code>, <code>number.max_field</code>, <code>number.greater_field</code>, <code>number.less_field</code></td>
 <td><code>field</code></td>
+</tr>
+<tr>
+<td><code>number.greater_than</code>, <code>number.less_than</code></td>
+<td><code>min</code>, <code>max</code></td>
 </tr>
 <tr>
 <td><code>number.any_of</code></td>
@@ -1922,7 +1942,7 @@
 <td><code>value</code></td>
 </tr>
 <tr>
-<td><code>value.equal_field</code></td>
+<td><code>value.equal_field</code>, <code>value.not_equal_field</code></td>
 <td><code>field</code></td>
 </tr>
 <tr>

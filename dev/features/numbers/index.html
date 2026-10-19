@@ -1747,6 +1747,16 @@
 <td>Cannot be greater than %v</td>
 </tr>
 <tr>
+<td><code>GreaterThan(n)</code>, <code>LessThan(n)</code></td>
+<td>the value isn't greater / less than <code>n</code></td>
+<td>Should be greater than %v, Should be less than %v</td>
+</tr>
+<tr>
+<td><code>GreaterField(&amp;m.X)</code>, <code>LessField(&amp;m.X)</code></td>
+<td>the value isn't greater / less than the value of the field <code>X</code></td>
+<td>Should be greater than %v, Should be less than %v</td>
+</tr>
+<tr>
 <td><code>MinField(&amp;m.X)</code>, <code>MaxField(&amp;m.X)</code></td>
 <td>the value is less or greater than the value of the field <code>X</code>, see <a href="../fields/">Rules on other fields</a></td>
 <td>Cannot be less than %v, Cannot be greater than %v</td>
