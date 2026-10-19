@@ -78,6 +78,7 @@ and a conversion that doesn't fit the field doesn't compile:
 * Every error has the translated message, the location (`Tags[1]`, `address.city` with JSON paths), the value, a stable `Code` and named `Params`
 * Messages in English, German, Spanish, French and Russian with plural forms, the language of every request from the context, an `Accept-Language` middleware
 * `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers
+* The rules as the keywords of JSON Schema, `vhuma.OpenAPI` puts them into the OpenAPI document of huma: the clients see `maxLength`, `format`, `enum` of the rules
 * `github.com/insei/valigo/huma`, `github.com/insei/valigo/gin`, `github.com/insei/valigo/echo`: the rules of valigo in [huma](https://huma.rocks), [gin](https://gin-gonic.com) and [echo](https://echo.labstack.com)
 
 # Performance

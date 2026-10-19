@@ -178,6 +178,10 @@ func main() {
 
 `valigo.New(valigo.WithErrorsTransformer(problem.Transformer()))` makes `Validate` return one `*problem.Details` of RFC 9457, write it by `problem.From(errs).Write(w)`: 422, `application/problem+json`, `errors` with `detail`, `pointer` (`#/tags/1`), `location`, `code`, `params`. Options: `problem.WithType`, `WithTitle`, `WithStatus`, `WithDetail`.
 
+## JSON Schema
+
+`v.Constraints()` returns the unconditional rules as JSON Schema keywords (`shared.Constraint`: Struct, Field, Path `items`/`additionalProperties`/`propertyNames`, Keyword, Value); rules under `When` aren't described, after `Trim`/`Modify` only `required`. `vhuma.OpenAPI(api, v)` returns the huma document with them in the body schemas (huma's own schemas stay unchanged). Own conversions describe rules by `f.Schema("minimum", 0)`.
+
 ## gin
 
 The module `github.com/insei/valigo/gin` (`vgin`): `binding.Validator = vgin.New(v)` makes `c.ShouldBindJSON` validate by valigo (messages in the default language, gin passes no request), `vgin.Validate(c, v, &req)` validates with the languages of `Accept-Language`; the error is `shared.Errors`, get it by `errors.As`.
