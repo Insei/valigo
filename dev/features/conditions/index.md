@@ -12,6 +12,8 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
+    "github.com/insei/valigo/num"
+    "github.com/insei/valigo/str"
 )
 
 type Sender struct {
@@ -24,14 +26,14 @@ type Sender struct {
 func main() {
     v := valigo.New()
     valigo.Configure[Sender](v, func(b valigo.Configurator[Sender], s *Sender) {
-        b.String(&s.Type).AnyOf("smtp", "http")
+        b.Field(&s.Type).As(str.Of).AnyOf("smtp", "http")
 
         smtp := b.When(func(_ context.Context, s *Sender) bool { return s.Type == "smtp" })
-        smtp.String(&s.SMTPHost).Required()
-        smtp.Number(&s.SMTPPort).AnyOfInterval(1, 65535)
+        smtp.Field(&s.SMTPHost).As(str.Of).Required()
+        smtp.Field(&s.SMTPPort).As(num.Of).AnyOfInterval(1, 65535)
 
         http := b.When(func(_ context.Context, s *Sender) bool { return s.Type == "http" })
-        http.String(&s.HTTPURL).Required()
+        http.Field(&s.HTTPURL).As(str.Of).Required()
     })
 
     fmt.Println(v.Validate(context.Background(), &Sender{Type: "smtp"}))
@@ -55,13 +57,13 @@ Output:
 `When` of a field configurator returns a configurator of the same field whose rules are applied only if the function returns true for the value of the field. The rules before `When` stay unconditional:
 
 ```go
-b.String(&u.Website).
+b.Field(&u.Website).As(str.Of).
     Trim().                                                                  // always
     When(func(_ context.Context, v string) bool { return v != "" }).
     Regexp(urlRe)                                                            // only for a non-empty value
 ```
 
-The value is typed: `string` for `String`, the number type for `Number` and `NumberPtr`, `uuid.UUID` for `UUID`, and `shared.Elems[E]` for slices, see [Slices](https://insei.github.io/valigo/latest/features/slices/#custom-and-when).
+The value is typed: `string` for `str.Of`, the number type for `num.Of` and `num.Ptr`, `uuid.UUID` for `uuid.Of`, and `shared.Elems[E]` for slices, see [Slices](https://insei.github.io/valigo/latest/features/slices/#custom-and-when).
 
 For an [absent value](https://insei.github.io/valigo/latest/features/absent/index.md) the condition isn't called and the rules after it are skipped, including `Required`.
 

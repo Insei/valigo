@@ -533,6 +533,8 @@
       
         
       
+        
+      
     
     
     
@@ -605,6 +607,34 @@
     
   
     Validator and Configure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="conversions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types and conversions
   
 
     
@@ -1046,6 +1076,10 @@
 <td><code>New</code> and its options, <code>Configure</code>, the model, field pointers, nested and recursive structs</td>
 </tr>
 <tr>
+<td><a href="conversions/">Types and conversions</a></td>
+<td><code>Field</code>, <code>Slice</code> and <code>As</code>, the built-in conversions, conversions of your types</td>
+</tr>
+<tr>
 <td><a href="absent/">Absent values</a></td>
 <td>nil pointers, nil slices and nil nested structs: which rules skip them</td>
 </tr>
@@ -1070,19 +1104,19 @@
 <tbody>
 <tr>
 <td><a href="strings/">Strings</a></td>
-<td><code>String</code>: <code>Required</code>, <code>MinLen</code>, <code>MaxLen</code>, <code>AnyOf</code>, <code>Regexp</code>, <code>Email</code>, <code>Trim</code></td>
+<td><code>str.Of</code>: <code>Required</code>, <code>MinLen</code>, <code>MaxLen</code>, <code>AnyOf</code>, <code>Regexp</code>, <code>Email</code>, <code>Trim</code></td>
 </tr>
 <tr>
 <td><a href="numbers/">Numbers</a></td>
-<td><code>Number</code> and <code>NumberPtr</code>: <code>Required</code>, <code>Min</code>, <code>Max</code>, <code>AnyOf</code>, <code>AnyOfInterval</code></td>
+<td><code>num.Of</code> and <code>num.Ptr</code>: <code>Required</code>, <code>Min</code>, <code>Max</code>, <code>AnyOf</code>, <code>AnyOfInterval</code></td>
 </tr>
 <tr>
 <td><a href="uuid/">UUID</a></td>
-<td><code>UUID</code>: <code>Required</code>, <code>AnyOf</code></td>
+<td><code>uuid.Of</code> of the separate module: <code>Required</code>, <code>AnyOf</code></td>
 </tr>
 <tr>
 <td><a href="slices/">Slices</a></td>
-<td><code>Slice</code>, <code>StringSlice</code>, <code>UUIDSlice</code>: length rules, <code>Each</code> for elements</td>
+<td><code>Slice</code>, <code>str.Slice</code>, <code>uuid.Slice</code>: length rules, <code>Each</code> for elements</td>
 </tr>
 </tbody>
 </table>

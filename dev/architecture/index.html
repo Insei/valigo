@@ -529,6 +529,8 @@
       
         
       
+        
+      
     
     
     
@@ -598,6 +600,34 @@
     
   
     Validator and Configure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/conversions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types and conversions
   
 
     
@@ -1056,8 +1086,8 @@
 <p><code>Configure[T]</code> creates the <em>model</em>, a <code>*T</code> with all exported nested structs stored by pointer allocated (pointers to the types being allocated are left nil, so recursive types stop). The model gives every field a unique address, so a pointer <code>&amp;u.Address.City</code> identifies the field: <a href="https://github.com/Insei/fmap">fmap</a> finds the field descriptor by the address relative to the model.</p>
 <p>The descriptor knows the offset of the field and the chain of the nested pointer structs, so it reads the field of any object of the type: <code>Address.City</code> of a <code>*User</code> follows the <code>Address</code> pointer and returns a typed nil pointer when it is nil. That's how <a href="../features/absent/">absent values</a> appear.</p>
 <h2 id="typed-rules">Typed rules<a class="headerlink" href="#typed-rules" title="Permanent link">&para;</a></h2>
-<p>Configurator methods are generic: <code>String[F ~string | *string](p *F)</code>, <code>Number[N num.Number](p *N)</code>. The type of the pointer selects the method and the types of the rule arguments, so a wrong field or argument type doesn't compile.</p>
-<p>Every field configurator is a thin wrapper over one core type, <code>shared.Field[T]</code>. It has four primitives, all built-in rules are made of them:</p>
+<p>The configurator methods are generic: <code>Field[F any](p *F) *shared.Field[F]</code>, <code>Slice[E any](p *[]E)</code>. The type of the field becomes the type parameter of the base configurator. <code>As</code> is a generic method too, it takes a conversion with a type constraint, <code>str.Of[S ~string | *string](f *shared.Field[S])</code>: the compiler checks the constraint against the type of the field, and the conversion fixes the types of the rule arguments.</p>
+<p>Every typed configurator is a thin wrapper over one core type, <code>shared.Field[T]</code>. It has four primitives, all built-in rules are made of them:</p>
 <table>
 <thead>
 <tr>
@@ -1105,15 +1135,19 @@
 <tbody>
 <tr>
 <td><code>valigo</code></td>
-<td><code>Validator</code>, <code>Configure</code>, <code>Configurator</code> with its generic methods, options</td>
+<td><code>Validator</code>, <code>Configure</code>, <code>Configurator</code> with <code>Field</code>, <code>Slice</code>, <code>When</code> and <code>Custom</code>, options</td>
 </tr>
 <tr>
 <td><code>shared</code></td>
-<td>the rules core <code>Field[T]</code>, slice configurator and <code>Elems[E]</code>, <code>Error</code>, helpers</td>
+<td>the rules core <code>Field[T]</code>, slice configurator and <code>Elems[E]</code>, <code>As</code> and the conversions <code>Deref</code>, <code>Retype</code>, <code>RetypeSlice</code>, <code>SlicePtr</code>, <code>SliceRules</code>, <code>Error</code>, helpers</td>
 </tr>
 <tr>
-<td><code>str</code>, <code>num</code>, <code>uuid</code></td>
-<td>configurators of strings, numbers and uuids built on <code>shared.Field[T]</code></td>
+<td><code>str</code>, <code>num</code></td>
+<td>configurators of strings and numbers built on <code>shared.Field[T]</code>, the conversions <code>str.Of</code>, <code>str.Slice</code>, <code>num.Of</code>, <code>num.Ptr</code></td>
+</tr>
+<tr>
+<td><code>github.com/insei/valigo/uuid</code></td>
+<td>the separate module with the rules of <code>github.com/google/uuid</code>, the core doesn't depend on a uuid package</td>
 </tr>
 <tr>
 <td><code>translator</code></td>

@@ -1,10 +1,14 @@
 # Slices
 
-| Configurator  | Fields                                                         | Rules on elements                                                                                                                 |
-| ------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `Slice`       | `[]E` of any `E`                                               | `Each` with `*shared.Field[E]`: `Check`, `Required`, `Modify`, `Custom`, `When`                                                   |
-| `StringSlice` | `[]string`, `*[]string`, `[]*string`, `*[]*string`             | `Each` with the [string configurator](https://insei.github.io/valigo/latest/features/strings/index.md), `Trim`, `Regexp`, `Email` |
-| `UUIDSlice`   | `[]uuid.UUID`, `*[]uuid.UUID`, `[]*uuid.UUID`, `*[]*uuid.UUID` | `Each` with the [uuid configurator](https://insei.github.io/valigo/latest/features/uuid/index.md), `AnyOf`                        |
+`b.Slice(&m.X)` returns the configurator of a `[]E` field with the rules of the slice itself. `As` converts it to a typed slice configurator, the rules of the slice stay available after the conversion:
+
+| Configurator       | Elements                           | Rules on elements                                                                                                                 |
+| ------------------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `b.Slice(&m.X)`    | any `E`                            | `Each` with `*shared.Field[E]`: `Check`, `Required`, `Modify`, `Custom`, `When`, and `As` to convert the element                  |
+| `.As(str.Slice)`   | `string`, `*string`, named strings | `Each` with the [string configurator](https://insei.github.io/valigo/latest/features/strings/index.md), `Trim`, `Regexp`, `Email` |
+| `.As(vuuid.Slice)` | `uuid.UUID`, `*uuid.UUID`          | `Each` with the [uuid configurator](https://insei.github.io/valigo/latest/features/uuid/index.md), `AnyOf`                        |
+
+A pointer to a slice, `*[]E`, is converted from its field: `b.Field(&m.Tags).As(shared.SlicePtr).As(str.Slice)`, a nil pointer is [absent](https://insei.github.io/valigo/latest/features/absent/index.md).
 
 ## The slice and its elements
 
@@ -17,7 +21,7 @@ The rules of the configurator check **the slice itself**, the rules inside `Each
 | `MaxLen(n)`  | the slice has more than `n` elements | Cannot contain more than %d elements      |
 | `Each(fn)`   | —                                    | `fn` configures the rules of the elements |
 
-`Trim`, `Regexp` and `Email` of `StringSlice` and `AnyOf` of `UUIDSlice` are shortcuts for the same rules in `Each`.
+`Trim`, `Regexp` and `Email` of `str.Slice` and `AnyOf` of `uuid.Slice` are shortcuts for the same rules in `Each`. Any element is converted in `Each` too, e.g. the numbers: `e.As(num.Of).Min(1)`.
 
 ```go
 package main
@@ -42,10 +46,10 @@ type Post struct {
 func main() {
     v := valigo.New()
     valigo.Configure[Post](v, func(b valigo.Configurator[Post], p *Post) {
-        b.StringSlice(&p.Tags).Required().MaxLen(3).Each(func(tag *str.BaseConfigurator) {
+        b.Slice(&p.Tags).As(str.Slice).Required().MaxLen(3).Each(func(tag *str.BaseConfigurator) {
             tag.Trim().Required().MaxLen(10)
         })
-        b.UUIDSlice(&p.Editors).Each(func(id *vuuid.BaseConfigurator) {
+        b.Slice(&p.Editors).As(vuuid.Slice).Each(func(id *vuuid.BaseConfigurator) {
             id.Required()
         })
         b.Slice(&p.Quantities).Each(func(q *shared.Field[int]) {
@@ -81,7 +85,7 @@ The location of an element error has the index of the element, the errors of the
 `Custom` and `When` of the slice configurators get the elements as `shared.Elems[E]`, a view over `[]E` and `[]*E` without copying:
 
 ```go
-b.StringSlice(&p.Tags).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, tags shared.Elems[string]) []shared.Error {
+b.Slice(&p.Tags).As(str.Slice).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, tags shared.Elems[string]) []shared.Error {
     seen := make(map[string]bool, tags.Len())
     for _, tag := range tags.All() { // tag is *string, nil for nil elements of []*string
         if tag != nil && seen[*tag] {
@@ -97,12 +101,12 @@ b.StringSlice(&p.Tags).Custom(func(ctx context.Context, h *shared.FieldCustomHel
 
 `Len()` returns the number of elements, `At(i)` the pointer to the element `i`, `All()` iterates over the indexes and the pointers.
 
-## Slices of pointers in Slice
+## Slices of pointers
 
-`Slice` works with the declared element type: for `[]*int` the element is `*int`, and nil elements are regular values for its rules:
+`Slice` works with the declared element type: for `[]*int` the element is `*int`. Convert the element to check the pointed values, nil elements are absent then:
 
 ```go
 b.Slice(&p.Limits).Each(func(limit *shared.Field[*int]) {
-    limit.Check(func(v *int) bool { return v != nil }, "Should be set")
+    limit.As(num.Ptr).Required().Max(100)
 })
 ```

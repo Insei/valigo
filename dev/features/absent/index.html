@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://insei.github.io/valigo/dev/features/absent/">
       
       
-        <link rel="prev" href="../configure/">
+        <link rel="prev" href="../conversions/">
       
       
         <link rel="next" href="../conditions/">
@@ -533,6 +533,8 @@
       
         
       
+        
+      
     
     
     
@@ -605,6 +607,34 @@
     
   
     Validator and Configure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conversions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types and conversions
   
 
     
@@ -1104,34 +1134,37 @@
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="s">"fmt"</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="s">"github.com/insei/valigo"</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Address</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nx">City</span><span class="w"> </span><span class="kt">string</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">}</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Order</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nx">Comment</span><span class="w">  </span><span class="o">*</span><span class="kt">string</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="nx">Discount</span><span class="w"> </span><span class="o">*</span><span class="kt">int</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="nx">Coupons</span><span class="w">  </span><span class="o">*</span><span class="p">[]</span><span class="kt">string</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="nx">Delivery</span><span class="w"> </span><span class="o">*</span><span class="nx">Address</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">}</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configure</span><span class="p">[</span><span class="nx">Order</span><span class="p">](</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configurator</span><span class="p">[</span><span class="nx">Order</span><span class="p">],</span><span class="w"> </span><span class="nx">o</span><span class="w"> </span><span class="o">*</span><span class="nx">Order</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">String</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">o</span><span class="p">.</span><span class="nx">Comment</span><span class="p">).</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
-</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">NumberPtr</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">o</span><span class="p">.</span><span class="nx">Discount</span><span class="p">).</span><span class="nx">AnyOfInterval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">50</span><span class="p">)</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">StringSlice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">o</span><span class="p">.</span><span class="nx">Coupons</span><span class="p">).</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">String</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">o</span><span class="p">.</span><span class="nx">Delivery</span><span class="p">.</span><span class="nx">City</span><span class="p">).</span><span class="nx">Required</span><span class="p">()</span>
-</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span><span class="p">})</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>
-</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="c1">// nothing is set: only the Required rule fails</span>
-</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Order</span><span class="p">{}))</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/num"</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/shared"</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="s">"github.com/insei/valigo/str"</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">)</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Address</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="nx">City</span><span class="w"> </span><span class="kt">string</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Order</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="nx">Comment</span><span class="w">  </span><span class="o">*</span><span class="kt">string</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="nx">Discount</span><span class="w"> </span><span class="o">*</span><span class="kt">int</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="nx">Coupons</span><span class="w">  </span><span class="o">*</span><span class="p">[]</span><span class="kt">string</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="nx">Delivery</span><span class="w"> </span><span class="o">*</span><span class="nx">Address</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="p">}</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">    </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configure</span><span class="p">[</span><span class="nx">Order</span><span class="p">](</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configurator</span><span class="p">[</span><span class="nx">Order</span><span class="p">],</span><span class="w"> </span><span class="nx">o</span><span class="w"> </span><span class="o">*</span><span class="nx">Order</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">o</span><span class="p">.</span><span class="nx">Comment</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">o</span><span class="p">.</span><span class="nx">Discount</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Ptr</span><span class="p">).</span><span class="nx">AnyOfInterval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">50</span><span class="p">)</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">o</span><span class="p">.</span><span class="nx">Coupons</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">shared</span><span class="p">.</span><span class="nx">SlicePtr</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Slice</span><span class="p">).</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">o</span><span class="p">.</span><span class="nx">Delivery</span><span class="p">.</span><span class="nx">City</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">()</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="p">})</span>
 </span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>
-</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">    </span><span class="nx">discount</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">70</span>
-</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Order</span><span class="p">{</span><span class="nx">Discount</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">discount</span><span class="p">,</span><span class="w"> </span><span class="nx">Delivery</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Address</span><span class="p">{</span><span class="nx">City</span><span class="p">:</span><span class="w"> </span><span class="s">"Paris"</span><span class="p">}}))</span>
-</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="p">}</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">    </span><span class="c1">// nothing is set: only the Required rule fails</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Order</span><span class="p">{}))</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">    </span><span class="nx">discount</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">70</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Order</span><span class="p">{</span><span class="nx">Discount</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">discount</span><span class="p">,</span><span class="w"> </span><span class="nx">Delivery</span><span class="p">:</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Address</span><span class="p">{</span><span class="nx">City</span><span class="p">:</span><span class="w"> </span><span class="s">"Paris"</span><span class="p">}}))</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Output:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[Should be fulfilled (Delivery.City: &lt;nil&gt;)]
@@ -1142,29 +1175,29 @@
 <table>
 <thead>
 <tr>
-<th>Configurator</th>
+<th>Conversion</th>
 <th>Fails on</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>String</code></td>
+<td><code>str.Of</code></td>
 <td>absent value, empty string</td>
 </tr>
 <tr>
-<td><code>Number</code></td>
+<td><code>num.Of</code></td>
 <td>zero</td>
 </tr>
 <tr>
-<td><code>NumberPtr</code></td>
+<td><code>num.Ptr</code></td>
 <td>absent value; zero is a valid value of a pointer</td>
 </tr>
 <tr>
-<td><code>UUID</code></td>
+<td><code>uuid.Of</code></td>
 <td>absent value, <code>uuid.Nil</code></td>
 </tr>
 <tr>
-<td><code>Slice</code>, <code>StringSlice</code>, <code>UUIDSlice</code></td>
+<td><code>Slice</code>, <code>str.Slice</code>, <code>uuid.Slice</code></td>
 <td>absent slice, empty slice</td>
 </tr>
 </tbody>

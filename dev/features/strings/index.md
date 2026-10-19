@@ -1,6 +1,6 @@
 # Strings
 
-`String` configures the rules of a `string` field, a `*string` field or a field of a named string type:
+`str.Of` converts a `string` field, a `*string` field or a field of a named string type to the string configurator:
 
 ```go
 type Status string
@@ -11,9 +11,15 @@ type User struct {
     Status   Status
 }
 
-b.String(&u.Name).Trim().Required().MaxLen(64)
-b.String(&u.Nickname).MinLen(3) // a nil Nickname is skipped
-b.String(&u.Status).AnyOf("active", "blocked")
+b.Field(&u.Name).As(str.Of).Trim().Required().MaxLen(64)
+b.Field(&u.Nickname).As(str.Of).MinLen(3) // a nil Nickname is skipped
+b.Field(&u.Status).As(str.Of).AnyOf("active", "blocked")
+```
+
+Slices of strings are converted by `str.Slice`, see [Slices](https://insei.github.io/valigo/latest/features/slices/index.md).
+
+```go
+b.Slice(&u.Emails).As(str.Slice).MaxLen(3).Email()
 ```
 
 ## Rules
@@ -36,7 +42,7 @@ The lengths are in bytes, like `len`: `"яя"` has the length 4.
 `Trim()` removes the leading and trailing whitespace of the value **in the validated object**. Rules run in the order of the chain, so the rules after `Trim` check the trimmed value:
 
 ```go
-b.String(&u.Name).Trim().Required() // "   " fails, "  Ann " becomes "Ann"
+b.Field(&u.Name).As(str.Of).Trim().Required() // "   " fails, "  Ann " becomes "Ann"
 ```
 
 The struct is validated in place, `Validate(ctx, &user)` trims `user.Name`. See the copy semantics of the values passed by value in [Errors](https://insei.github.io/valigo/latest/features/errors/#validate-and-validatetyped).
@@ -64,7 +70,7 @@ type Product struct {
 func main() {
     v := valigo.New()
     valigo.Configure[Product](v, func(b valigo.Configurator[Product], p *Product) {
-        b.String(&p.SKU).Regexp(regexp.MustCompile(`^[A-Z]{3}-\d{4}$`), str.WithRegexpLocaleKey("Should look like ABC-1234"))
+        b.Field(&p.SKU).As(str.Of).Regexp(regexp.MustCompile(`^[A-Z]{3}-\d{4}$`), str.WithRegexpLocaleKey("Should look like ABC-1234"))
     })
     fmt.Println(v.Validate(context.Background(), &Product{SKU: "abc-1"}))
 }

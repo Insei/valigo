@@ -37,6 +37,7 @@ import (
 
     "github.com/insei/valigo"
     "github.com/insei/valigo/shared"
+    "github.com/insei/valigo/str"
     "github.com/insei/valigo/translator"
 )
 
@@ -64,7 +65,7 @@ func main() {
 
     v := valigo.New(valigo.WithTranslator(t))
     valigo.Configure[Account](v, func(b valigo.Configurator[Account], a *Account) {
-        b.String(&a.Login).MinLen(3).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, login string) []shared.Error {
+        b.Field(&a.Login).As(str.Of).MinLen(3).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, login string) []shared.Error {
             if login == "root" {
                 return []shared.Error{h.ErrorT(ctx, login, reservedKey, login)}
             }

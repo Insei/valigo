@@ -507,6 +507,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#any-type-without-changes-of-the-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Any type, without changes of the library
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#validation-of-valid-objects-doesnt-allocate" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -672,6 +683,8 @@
       
         
       
+        
+      
     
     
     
@@ -741,6 +754,34 @@
     
   
     Validator and Configure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/conversions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types and conversions
   
 
     
@@ -1132,6 +1173,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#any-type-without-changes-of-the-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Any type, without changes of the library
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#validation-of-valid-objects-doesnt-allocate" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1231,26 +1283,28 @@
 <p><strong>valigo is for Go services that validate their input structs and want the rules checked by the compiler, the validation free on valid input, and the messages in the language of the user.</strong></p>
 <h2 id="what-you-get">What you get<a class="headerlink" href="#what-you-get" title="Permanent link">&para;</a></h2>
 <h3 id="rules-are-code-checked-by-the-compiler">Rules are code, checked by the compiler<a class="headerlink" href="#rules-are-code-checked-by-the-compiler" title="Permanent link">&para;</a></h3>
-<p>Rules are configured by pointers to the fields of the model, so the field and its type are known at compile time:</p>
-<div class="language-go highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">String</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Name</span><span class="p">).</span><span class="nx">Required</span><span class="p">().</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w">   </span><span class="c1">// String accepts only string and *string fields</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Number</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">ID</span><span class="p">).</span><span class="nx">Min</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">                    </span><span class="c1">// Min takes an int64 for an int64 field</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Number</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">ID</span><span class="p">).</span><span class="nx">Min</span><span class="p">(</span><span class="s">"1"</span><span class="p">)</span><span class="w">                  </span><span class="c1">// doesn't compile</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nx">b</span><span class="p">.</span><span class="nx">String</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Age</span><span class="p">)</span><span class="w">                          </span><span class="c1">// doesn't compile: Age is an int</span>
+<p>Rules are configured by pointers to the fields of the model, so the field and its type are known at compile time. <code>As</code> converts the field to the configurator of its type, and the conversion has a type constraint:</p>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Name</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">().</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="c1">// str.Of accepts string, *string and named strings</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">ID</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Min</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">                  </span><span class="c1">// Min takes an int64 for an int64 field</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">ID</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Min</span><span class="p">(</span><span class="s">"1"</span><span class="p">)</span><span class="w">                </span><span class="c1">// doesn't compile</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Age</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">)</span><span class="w">                        </span><span class="c1">// doesn't compile: int does not satisfy ~string | *string</span>
 </span></code></pre></div>
 <p>A renamed field is renamed in the rules by the IDE, a removed field breaks the build instead of a silently skipped rule. Tag based validators keep the rules in strings, <code>validate:"required,max=64"</code>, and report a typo or a rule of a wrong type only at runtime.</p>
+<h3 id="any-type-without-changes-of-the-library">Any type, without changes of the library<a class="headerlink" href="#any-type-without-changes-of-the-library" title="Permanent link">&para;</a></h3>
+<p>The configurator knows nothing about strings, numbers or uuids: they are conversions in their packages. A type of your domain, <code>time.Time</code> or a uuid of another package gets its rules by a conversion function of a few lines, see <a href="../features/conversions/">Types and conversions</a>.</p>
 <h3 id="validation-of-valid-objects-doesnt-allocate">Validation of valid objects doesn't allocate<a class="headerlink" href="#validation-of-valid-objects-doesnt-allocate" title="Permanent link">&para;</a></h3>
 <p>The rules are built once by <code>Configure</code>. <code>Validate</code> reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it.</p>
 <h3 id="absent-values-are-handled-not-panicked-on">Absent values are handled, not panicked on<a class="headerlink" href="#absent-values-are-handled-not-panicked-on" title="Permanent link">&para;</a></h3>
 <p>A nil pointer field, a nil pointer to a slice and the fields of a nil nested struct are <em>absent</em>: every rule skips them, only <code>Required</code> fails. Optional fields need no special code:</p>
-<div class="language-go highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">String</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Phone</span><span class="p">).</span><span class="nx">Regexp</span><span class="p">(</span><span class="nx">phoneRe</span><span class="p">)</span><span class="w">  </span><span class="c1">// nil Phone is valid, a set one must match</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nx">b</span><span class="p">.</span><span class="nx">NumberPtr</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Discount</span><span class="p">).</span><span class="nx">Max</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="w">    </span><span class="c1">// nil Discount is valid</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nx">b</span><span class="p">.</span><span class="nx">String</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Address</span><span class="p">.</span><span class="nx">City</span><span class="p">).</span><span class="nx">Required</span><span class="p">()</span><span class="w"> </span><span class="c1">// fails for a nil Address too</span>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Phone</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Regexp</span><span class="p">(</span><span class="nx">phoneRe</span><span class="p">)</span><span class="w">    </span><span class="c1">// nil Phone is valid, a set one must match</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Discount</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Ptr</span><span class="p">).</span><span class="nx">Max</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="w">         </span><span class="c1">// nil Discount is valid</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Address</span><span class="p">.</span><span class="nx">City</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">()</span><span class="w">  </span><span class="c1">// fails for a nil Address too</span>
 </span></code></pre></div>
 <h3 id="conditions-and-custom-rules-at-every-level">Conditions and custom rules at every level<a class="headerlink" href="#conditions-and-custom-rules-at-every-level" title="Permanent link">&para;</a></h3>
 <p><code>When</code> on the struct enables rules by the state of the object, <code>When</code> on a field — by the value of the field. <code>Custom</code> on a field gets its typed value, <code>Custom</code> on the struct gets the whole object and reports errors on any of its fields:</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">smtp</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">When</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">_</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">Sender</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">Type</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"smtp"</span><span class="w"> </span><span class="p">})</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nx">smtp</span><span class="p">.</span><span class="nx">String</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Host</span><span class="p">).</span><span class="nx">Required</span><span class="p">()</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nx">smtp</span><span class="p">.</span><span class="nx">Number</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Port</span><span class="p">).</span><span class="nx">AnyOfInterval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">65535</span><span class="p">)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nx">smtp</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Host</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">()</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nx">smtp</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">s</span><span class="p">.</span><span class="nx">Port</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">AnyOfInterval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">65535</span><span class="p">)</span>
 </span></code></pre></div>
 <p>See <a href="../features/conditions/">Conditions</a> and <a href="../features/custom/">Custom rules</a>.</p>
 <h3 id="translated-messages">Translated messages<a class="headerlink" href="#translated-messages" title="Permanent link">&para;</a></h3>

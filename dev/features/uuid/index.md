@@ -1,15 +1,27 @@
 # UUID
 
-`UUID` configures the rules of a [`uuid.UUID`](https://pkg.go.dev/github.com/google/uuid) field or a `*uuid.UUID` field:
+The rules of [`github.com/google/uuid`](https://pkg.go.dev/github.com/google/uuid) are in the separate module `github.com/insei/valigo/uuid`, so the core doesn't depend on a uuid package:
+
+```bash
+go get github.com/insei/valigo/uuid@latest
+```
+
+`uuid.Of` converts a `uuid.UUID` field or a `*uuid.UUID` field to the uuid configurator, `uuid.Slice` — a slice of them. The module's package is also named `uuid`, import it with an alias next to `github.com/google/uuid`:
 
 ```go
+import (
+    "github.com/google/uuid"
+    vuuid "github.com/insei/valigo/uuid"
+)
+
 type Comment struct {
     ID       uuid.UUID
     ParentID *uuid.UUID
 }
 
-b.UUID(&c.ID).Required()
-b.UUID(&c.ParentID).Custom(notDeleted) // a nil ParentID is skipped
+b.Field(&c.ID).As(vuuid.Of).Required()
+b.Field(&c.ParentID).As(vuuid.Of).Custom(notDeleted) // a nil ParentID is skipped
+b.Slice(&c.Mentions).As(vuuid.Slice).MaxLen(10).AnyOf(allowed...)
 ```
 
 ## Rules
@@ -21,7 +33,7 @@ b.UUID(&c.ParentID).Custom(notDeleted) // a nil ParentID is skipped
 | `Custom(fn)`       | `fn` returns errors               | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
 | `When(fn)`         | —                                 | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
 
-Slices of uuids are configured by `UUIDSlice`, see [Slices](https://insei.github.io/valigo/latest/features/slices/index.md).
+Another uuid package gets its rules by a conversion of the same kind, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/#your-types).
 
 ## Example
 
@@ -35,6 +47,7 @@ import (
     "github.com/google/uuid"
     "github.com/insei/valigo"
     "github.com/insei/valigo/shared"
+    vuuid "github.com/insei/valigo/uuid"
 )
 
 type Comment struct {
@@ -45,7 +58,7 @@ type Comment struct {
 func main() {
     v := valigo.New()
     valigo.Configure[Comment](v, func(b valigo.Configurator[Comment], c *Comment) {
-        b.UUID(&c.ID).Required().Custom(func(ctx context.Context, h *shared.FieldCustomHelper, id uuid.UUID) []shared.Error {
+        b.Field(&c.ID).As(vuuid.Of).Required().Custom(func(ctx context.Context, h *shared.FieldCustomHelper, id uuid.UUID) []shared.Error {
             if id.Version() != 7 {
                 return []shared.Error{h.ErrorT(ctx, id, "Should be UUID v7")}
             }

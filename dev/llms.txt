@@ -17,6 +17,7 @@ valigo validates Go structs by rules configured once with pointers to the fields
 - [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md)
 - [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md)
 - [Validator and Configure](https://insei.github.io/valigo/latest/features/configure/index.md)
+- [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md)
 - [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)
 - [Errors](https://insei.github.io/valigo/latest/features/errors/index.md)
 - [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)

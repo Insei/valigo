@@ -589,6 +589,8 @@
       
         
       
+        
+      
     
     
     
@@ -658,6 +660,34 @@
     
   
     Validator and Configure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/conversions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types and conversions
   
 
     
@@ -1062,7 +1092,7 @@
 
 
 <h1 id="upgrading-from-v00x">Upgrading from v0.0.x<a class="headerlink" href="#upgrading-from-v00x" title="Permanent link">&para;</a></h1>
-<p>The configuration style is the same, <code>b.String(&amp;u.Name).Required()</code>, but the configurator is typed now. Go 1.27 is required.</p>
+<p>Rules are still configured by pointers to the fields of the model, but the configurator is typed now and knows nothing about the types of the values: a field is converted to the configurator of its type by <code>As</code>. Go 1.27 is required.</p>
 <table>
 <thead>
 <tr>
@@ -1072,16 +1102,40 @@
 </thead>
 <tbody>
 <tr>
+<td><code>b.String(&amp;u.Name)</code></td>
+<td><code>b.Field(&amp;u.Name).As(str.Of)</code></td>
+</tr>
+<tr>
+<td><code>b.Number(&amp;u.Age)</code></td>
+<td><code>b.Field(&amp;u.Age).As(num.Of)</code></td>
+</tr>
+<tr>
+<td><code>b.Number(&amp;u.Score)</code> for <code>*int</code></td>
+<td><code>b.Field(&amp;u.Score).As(num.Ptr)</code></td>
+</tr>
+<tr>
+<td><code>b.UUID(&amp;u.ID)</code></td>
+<td><code>b.Field(&amp;u.ID).As(vuuid.Of)</code> of the separate module <code>github.com/insei/valigo/uuid</code></td>
+</tr>
+<tr>
+<td><code>b.StringSlice(&amp;u.Tags)</code></td>
+<td><code>b.Slice(&amp;u.Tags).As(str.Slice)</code>, for <code>*[]string</code>: <code>b.Field(&amp;u.Tags).As(shared.SlicePtr).As(str.Slice)</code></td>
+</tr>
+<tr>
+<td><code>b.UUIDSlice(&amp;u.IDs)</code></td>
+<td><code>b.Slice(&amp;u.IDs).As(vuuid.Slice)</code></td>
+</tr>
+<tr>
+<td><code>b.Slice(any)</code> with <code>Custom(func(ctx, h, value []*any) ...)</code></td>
+<td><code>b.Slice(&amp;u.Items)</code> with <code>Custom(func(ctx, h, value shared.Elems[E]) ...)</code> and <code>Each</code></td>
+</tr>
+<tr>
 <td><code>Configurator[T]</code> is an interface</td>
 <td>a struct with generic methods, the signature of the <code>Configure</code> function is the same</td>
 </tr>
 <tr>
 <td>field configurators are interfaces: <code>str.BaseConfigurator</code>, <code>num.BaseConfigurator</code></td>
-<td>pointers to concrete types: <code>*str.BaseConfigurator</code>, <code>*num.BaseConfigurator[N]</code>, <code>*uuid.BaseConfigurator</code></td>
-</tr>
-<tr>
-<td><code>b.Number(&amp;u.Score)</code> for <code>*int</code></td>
-<td><code>b.NumberPtr(&amp;u.Score)</code></td>
+<td>pointers to concrete types: <code>*str.BaseConfigurator</code>, <code>*num.BaseConfigurator[N]</code>, <code>*vuuid.BaseConfigurator</code></td>
 </tr>
 <tr>
 <td><code>Max(any)</code>, <code>Min(any)</code>, <code>AnyOf(...any)</code>, <code>AnyOfInterval(any, any)</code></td>
@@ -1090,10 +1144,6 @@
 <tr>
 <td><code>Custom(func(ctx, h, value any) ...)</code>, <code>When(func(ctx, value any) bool)</code> of fields</td>
 <td>the value is typed: <code>string</code>, the number type, <code>uuid.UUID</code></td>
-</tr>
-<tr>
-<td><code>Slice(any)</code> with <code>Custom(func(ctx, h, value []*any) ...)</code></td>
-<td><code>Slice[E](*[]E)</code> with <code>Custom(func(ctx, h, value shared.Elems[E]) ...)</code></td>
 </tr>
 <tr>
 <td><code>StringSlice(...).MaxLen(n)</code></td>
@@ -1110,7 +1160,7 @@
 <li><code>Validate</code> returns <code>nil</code> for a valid object, it returned an empty slice. Check <code>len(errs) &gt; 0</code> or <code>errs != nil</code>, both work now.</li>
 <li>A struct value is validated by a copy, it was silently skipped.</li>
 <li>Nil pointers and the fields of nil nested structs are skipped by rules, they panicked; <code>Required</code> fails on them.</li>
-<li><code>Number(...).Required()</code> fails on zero, it did nothing. <code>NumberPtr(...).Required()</code> fails on nil.</li>
+<li><code>Required</code> of <code>num.Of</code> fails on zero, it did nothing. <code>Required</code> of <code>num.Ptr</code> fails on nil.</li>
 <li><code>AnyOfInterval(begin, end)</code> includes both ends.</li>
 <li>The errors of slice elements have the index in the location: <code>Tags[1]</code>.</li>
 <li>A field <code>When</code> isn't called for an absent value, it got the zero value.</li>

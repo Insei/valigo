@@ -600,6 +600,8 @@
       
         
       
+        
+      
     
     
     
@@ -669,6 +671,34 @@
     
   
     Validator and Configure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../features/conversions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types and conversions
   
 
     
@@ -1084,7 +1114,7 @@
 
 
 <h1 id="for-ai-agents">For AI agents<a class="headerlink" href="#for-ai-agents" title="Permanent link">&para;</a></h1>
-<p>AI agents often write the code that uses a library, and a model trained before the typed configurator doesn't know its API: it writes <code>Number(&amp;u.Score)</code> for a <code>*int</code> field or <code>Max(int64(5))</code> with an <code>any</code> argument. Give the agent the current documentation.</p>
+<p>AI agents often write the code that uses a library, and a model trained before the typed configurator doesn't know its API: it writes <code>b.String(&amp;u.Name)</code> of the old API instead of <code>b.Field(&amp;u.Name).As(str.Of)</code>, or <code>Max(int64(5))</code> with an <code>any</code> argument. Give the agent the current documentation.</p>
 <h2 id="the-skill">The skill<a class="headerlink" href="#the-skill" title="Permanent link">&para;</a></h2>
 <p><a href="https://github.com/Insei/valigo/blob/main/skills/valigo/SKILL.md"><code>skills/valigo/SKILL.md</code></a> is a short guide for agents in the <a href="https://agentskills.io">Agent Skills</a> format: the rules, complete programs, the configurators with their rules and the common mistakes. It is versioned with the code, and CI builds and runs its programs against the code of the repository, so it doesn't describe the API that doesn't exist.</p>
 <p>Claude Code finds the skill in the <code>.claude/skills</code> directory of the project or of the user:</p>

@@ -6,16 +6,20 @@
 
 ### Rules are code, checked by the compiler
 
-Rules are configured by pointers to the fields of the model, so the field and its type are known at compile time:
+Rules are configured by pointers to the fields of the model, so the field and its type are known at compile time. `As` converts the field to the configurator of its type, and the conversion has a type constraint:
 
 ```go
-b.String(&u.Name).Required().MaxLen(64)   // String accepts only string and *string fields
-b.Number(&u.ID).Min(1)                    // Min takes an int64 for an int64 field
-b.Number(&u.ID).Min("1")                  // doesn't compile
-b.String(&u.Age)                          // doesn't compile: Age is an int
+b.Field(&u.Name).As(str.Of).Required().MaxLen(64) // str.Of accepts string, *string and named strings
+b.Field(&u.ID).As(num.Of).Min(1)                  // Min takes an int64 for an int64 field
+b.Field(&u.ID).As(num.Of).Min("1")                // doesn't compile
+b.Field(&u.Age).As(str.Of)                        // doesn't compile: int does not satisfy ~string | *string
 ```
 
 A renamed field is renamed in the rules by the IDE, a removed field breaks the build instead of a silently skipped rule. Tag based validators keep the rules in strings, `validate:"required,max=64"`, and report a typo or a rule of a wrong type only at runtime.
+
+### Any type, without changes of the library
+
+The configurator knows nothing about strings, numbers or uuids: they are conversions in their packages. A type of your domain, `time.Time` or a uuid of another package gets its rules by a conversion function of a few lines, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md).
 
 ### Validation of valid objects doesn't allocate
 
@@ -26,9 +30,9 @@ The rules are built once by `Configure`. `Validate` reads the fields through pre
 A nil pointer field, a nil pointer to a slice and the fields of a nil nested struct are *absent*: every rule skips them, only `Required` fails. Optional fields need no special code:
 
 ```go
-b.String(&u.Phone).Regexp(phoneRe)  // nil Phone is valid, a set one must match
-b.NumberPtr(&u.Discount).Max(50)    // nil Discount is valid
-b.String(&u.Address.City).Required() // fails for a nil Address too
+b.Field(&u.Phone).As(str.Of).Regexp(phoneRe)    // nil Phone is valid, a set one must match
+b.Field(&u.Discount).As(num.Ptr).Max(50)         // nil Discount is valid
+b.Field(&u.Address.City).As(str.Of).Required()  // fails for a nil Address too
 ```
 
 ### Conditions and custom rules at every level
@@ -37,8 +41,8 @@ b.String(&u.Address.City).Required() // fails for a nil Address too
 
 ```go
 smtp := b.When(func(_ context.Context, s *Sender) bool { return s.Type == "smtp" })
-smtp.String(&s.Host).Required()
-smtp.Number(&s.Port).AnyOfInterval(1, 65535)
+smtp.Field(&s.Host).As(str.Of).Required()
+smtp.Field(&s.Port).As(num.Of).AnyOfInterval(1, 65535)
 ```
 
 See [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) and [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md).

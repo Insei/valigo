@@ -13,7 +13,9 @@ import (
     "strings"
 
     "github.com/insei/valigo"
+    "github.com/insei/valigo/num"
     "github.com/insei/valigo/shared"
+    "github.com/insei/valigo/str"
 )
 
 type Account struct {
@@ -24,13 +26,13 @@ type Account struct {
 func main() {
     v := valigo.New()
     valigo.Configure[Account](v, func(b valigo.Configurator[Account], a *Account) {
-        b.String(&a.Login).Required().Custom(func(ctx context.Context, h *shared.FieldCustomHelper, login string) []shared.Error {
+        b.Field(&a.Login).As(str.Of).Required().Custom(func(ctx context.Context, h *shared.FieldCustomHelper, login string) []shared.Error {
             if strings.EqualFold(login, "admin") {
                 return []shared.Error{h.ErrorT(ctx, login, "Login %q is reserved", login)}
             }
             return nil
         })
-        b.Number(&a.Age).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, age int) []shared.Error {
+        b.Field(&a.Age).As(num.Of).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, age int) []shared.Error {
             if age%2 != 0 {
                 return []shared.Error{h.ErrorT(ctx, age, "Should be even")}
             }

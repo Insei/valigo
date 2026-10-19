@@ -10,9 +10,9 @@ The descriptor knows the offset of the field and the chain of the nested pointer
 
 ## Typed rules
 
-Configurator methods are generic: `String[F ~string | *string](p *F)`, `Number[N num.Number](p *N)`. The type of the pointer selects the method and the types of the rule arguments, so a wrong field or argument type doesn't compile.
+The configurator methods are generic: `Field[F any](p *F) *shared.Field[F]`, `Slice[E any](p *[]E)`. The type of the field becomes the type parameter of the base configurator. `As` is a generic method too, it takes a conversion with a type constraint, `str.Of[S ~string | *string](f *shared.Field[S])`: the compiler checks the constraint against the type of the field, and the conversion fixes the types of the rule arguments.
 
-Every field configurator is a thin wrapper over one core type, `shared.Field[T]`. It has four primitives, all built-in rules are made of them:
+Every typed configurator is a thin wrapper over one core type, `shared.Field[T]`. It has four primitives, all built-in rules are made of them:
 
 | Primitive                 | Behavior                                                                   |
 | ------------------------- | -------------------------------------------------------------------------- |
@@ -37,12 +37,13 @@ Nothing in this path allocates for valid objects: the values are read by pointer
 
 ## Packages
 
-| Package              | Contents                                                                       |
-| -------------------- | ------------------------------------------------------------------------------ |
-| `valigo`             | `Validator`, `Configure`, `Configurator` with its generic methods, options     |
-| `shared`             | the rules core `Field[T]`, slice configurator and `Elems[E]`, `Error`, helpers |
-| `str`, `num`, `uuid` | configurators of strings, numbers and uuids built on `shared.Field[T]`         |
-| `translator`         | translator, in-memory storage, built-in locales, `Accept-Language` middleware  |
+| Package                        | Contents                                                                                                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valigo`                       | `Validator`, `Configure`, `Configurator` with `Field`, `Slice`, `When` and `Custom`, options                                                                        |
+| `shared`                       | the rules core `Field[T]`, slice configurator and `Elems[E]`, `As` and the conversions `Deref`, `Retype`, `RetypeSlice`, `SlicePtr`, `SliceRules`, `Error`, helpers |
+| `str`, `num`                   | configurators of strings and numbers built on `shared.Field[T]`, the conversions `str.Of`, `str.Slice`, `num.Of`, `num.Ptr`                                         |
+| `github.com/insei/valigo/uuid` | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package                                                           |
+| `translator`                   | translator, in-memory storage, built-in locales, `Accept-Language` middleware                                                                                       |
 
 ## Contributing
 

@@ -1,6 +1,6 @@
 # valigo
 
-**valigo** is a validation library for Go structs. Rules are configured once, in code, by pointers to the fields of a model: `b.String(&u.Name).Required().MaxLen(64)`. The compiler checks that a rule fits the field type and that its arguments have the field type, the validation itself doesn't allocate on valid objects, and error messages are translated.
+**valigo** is a validation library for Go structs. Rules are configured once, in code, by pointers to the fields of a model: `b.Field(&u.Name).As(str.Of).Required().MaxLen(64)`. The compiler checks that a rule fits the field type and that its arguments have the field type, the validation itself doesn't allocate on valid objects, and error messages are translated.
 
 One-line ideology
 
@@ -25,6 +25,7 @@ import (
     "regexp"
 
     "github.com/insei/valigo"
+    "github.com/insei/valigo/num"
     "github.com/insei/valigo/str"
 )
 
@@ -39,11 +40,11 @@ type User struct {
 func main() {
     v := valigo.New()
     valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
-        b.String(&u.Name).Trim().Required().MaxLen(64)
-        b.String(&u.Email).Required().Email()
-        b.Number(&u.Age).AnyOfInterval(18, 120)
-        b.String(&u.Phone).Regexp(regexp.MustCompile(`^\+\d{10,15}$`)) // a nil phone is skipped
-        b.StringSlice(&u.Tags).MaxLen(5).Each(func(tag *str.BaseConfigurator) {
+        b.Field(&u.Name).As(str.Of).Trim().Required().MaxLen(64)
+        b.Field(&u.Email).As(str.Of).Required().Email()
+        b.Field(&u.Age).As(num.Of).AnyOfInterval(18, 120)
+        b.Field(&u.Phone).As(str.Of).Regexp(regexp.MustCompile(`^\+\d{10,15}$`)) // a nil phone is skipped
+        b.Slice(&u.Tags).As(str.Slice).MaxLen(5).Each(func(tag *str.BaseConfigurator) {
             tag.Trim().Required().MaxLen(16)
         })
     })

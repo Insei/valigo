@@ -533,6 +533,8 @@
       
         
       
+        
+      
     
     
     
@@ -605,6 +607,34 @@
     
   
     Validator and Configure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../conversions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Types and conversions
   
 
     
@@ -875,10 +905,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#slices-of-pointers-in-slice" class="md-nav__link">
+  <a href="#slices-of-pointers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Slices of pointers in Slice
+        Slices of pointers
       
     </span>
   </a>
@@ -1075,10 +1105,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#slices-of-pointers-in-slice" class="md-nav__link">
+  <a href="#slices-of-pointers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Slices of pointers in Slice
+        Slices of pointers
       
     </span>
   </a>
@@ -1111,32 +1141,34 @@
 
 
 <h1 id="slices">Slices<a class="headerlink" href="#slices" title="Permanent link">&para;</a></h1>
+<p><code>b.Slice(&amp;m.X)</code> returns the configurator of a <code>[]E</code> field with the rules of the slice itself. <code>As</code> converts it to a typed slice configurator, the rules of the slice stay available after the conversion:</p>
 <table>
 <thead>
 <tr>
 <th>Configurator</th>
-<th>Fields</th>
+<th>Elements</th>
 <th>Rules on elements</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Slice</code></td>
-<td><code>[]E</code> of any <code>E</code></td>
-<td><code>Each</code> with <code>*shared.Field[E]</code>: <code>Check</code>, <code>Required</code>, <code>Modify</code>, <code>Custom</code>, <code>When</code></td>
+<td><code>b.Slice(&amp;m.X)</code></td>
+<td>any <code>E</code></td>
+<td><code>Each</code> with <code>*shared.Field[E]</code>: <code>Check</code>, <code>Required</code>, <code>Modify</code>, <code>Custom</code>, <code>When</code>, and <code>As</code> to convert the element</td>
 </tr>
 <tr>
-<td><code>StringSlice</code></td>
-<td><code>[]string</code>, <code>*[]string</code>, <code>[]*string</code>, <code>*[]*string</code></td>
+<td><code>.As(str.Slice)</code></td>
+<td><code>string</code>, <code>*string</code>, named strings</td>
 <td><code>Each</code> with the <a href="../strings/">string configurator</a>, <code>Trim</code>, <code>Regexp</code>, <code>Email</code></td>
 </tr>
 <tr>
-<td><code>UUIDSlice</code></td>
-<td><code>[]uuid.UUID</code>, <code>*[]uuid.UUID</code>, <code>[]*uuid.UUID</code>, <code>*[]*uuid.UUID</code></td>
+<td><code>.As(vuuid.Slice)</code></td>
+<td><code>uuid.UUID</code>, <code>*uuid.UUID</code></td>
 <td><code>Each</code> with the <a href="../uuid/">uuid configurator</a>, <code>AnyOf</code></td>
 </tr>
 </tbody>
 </table>
+<p>A pointer to a slice, <code>*[]E</code>, is converted from its field: <code>b.Field(&amp;m.Tags).As(shared.SlicePtr).As(str.Slice)</code>, a nil pointer is <a href="../absent/">absent</a>.</p>
 <h2 id="the-slice-and-its-elements">The slice and its elements<a class="headerlink" href="#the-slice-and-its-elements" title="Permanent link">&para;</a></h2>
 <p>The rules of the configurator check <strong>the slice itself</strong>, the rules inside <code>Each</code> check <strong>every element</strong>:</p>
 <table>
@@ -1170,7 +1202,7 @@
 </tr>
 </tbody>
 </table>
-<p><code>Trim</code>, <code>Regexp</code> and <code>Email</code> of <code>StringSlice</code> and <code>AnyOf</code> of <code>UUIDSlice</code> are shortcuts for the same rules in <code>Each</code>.</p>
+<p><code>Trim</code>, <code>Regexp</code> and <code>Email</code> of <code>str.Slice</code> and <code>AnyOf</code> of <code>uuid.Slice</code> are shortcuts for the same rules in <code>Each</code>. Any element is converted in <code>Each</code> too, e.g. the numbers: <code>e.As(num.Of).Min(1)</code>.</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
@@ -1193,10 +1225,10 @@
 </span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="nx">v</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">New</span><span class="p">()</span>
 </span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configure</span><span class="p">[</span><span class="nx">Post</span><span class="p">](</span><span class="nx">v</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="nx">valigo</span><span class="p">.</span><span class="nx">Configurator</span><span class="p">[</span><span class="nx">Post</span><span class="p">],</span><span class="w"> </span><span class="nx">p</span><span class="w"> </span><span class="o">*</span><span class="nx">Post</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">StringSlice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Tags</span><span class="p">).</span><span class="nx">Required</span><span class="p">().</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">3</span><span class="p">).</span><span class="nx">Each</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">tag</span><span class="w"> </span><span class="o">*</span><span class="nx">str</span><span class="p">.</span><span class="nx">BaseConfigurator</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Slice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Tags</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Slice</span><span class="p">).</span><span class="nx">Required</span><span class="p">().</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">3</span><span class="p">).</span><span class="nx">Each</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">tag</span><span class="w"> </span><span class="o">*</span><span class="nx">str</span><span class="p">.</span><span class="nx">BaseConfigurator</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">            </span><span class="nx">tag</span><span class="p">.</span><span class="nx">Trim</span><span class="p">().</span><span class="nx">Required</span><span class="p">().</span><span class="nx">MaxLen</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 </span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">        </span><span class="p">})</span>
-</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">UUIDSlice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Editors</span><span class="p">).</span><span class="nx">Each</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">id</span><span class="w"> </span><span class="o">*</span><span class="nx">vuuid</span><span class="p">.</span><span class="nx">BaseConfigurator</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Slice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Editors</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">vuuid</span><span class="p">.</span><span class="nx">Slice</span><span class="p">).</span><span class="nx">Each</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">id</span><span class="w"> </span><span class="o">*</span><span class="nx">vuuid</span><span class="p">.</span><span class="nx">BaseConfigurator</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">            </span><span class="nx">id</span><span class="p">.</span><span class="nx">Required</span><span class="p">()</span>
 </span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">        </span><span class="p">})</span>
 </span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">        </span><span class="nx">b</span><span class="p">.</span><span class="nx">Slice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Quantities</span><span class="p">).</span><span class="nx">Each</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">q</span><span class="w"> </span><span class="o">*</span><span class="nx">shared</span><span class="p">.</span><span class="nx">Field</span><span class="p">[</span><span class="kt">int</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
@@ -1224,7 +1256,7 @@
 <p>The location of an element error has the index of the element, the errors of the slice itself have the location of the field. Nil elements of slices of pointers are <a href="../absent/">absent</a>: only <code>Required</code> fails on them.</p>
 <h2 id="custom-and-when">Custom and When<a class="headerlink" href="#custom-and-when" title="Permanent link">&para;</a></h2>
 <p><code>Custom</code> and <code>When</code> of the slice configurators get the elements as <code>shared.Elems[E]</code>, a view over <code>[]E</code> and <code>[]*E</code> without copying:</p>
-<div class="language-go highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">StringSlice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Tags</span><span class="p">).</span><span class="nx">Custom</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">h</span><span class="w"> </span><span class="o">*</span><span class="nx">shared</span><span class="p">.</span><span class="nx">FieldCustomHelper</span><span class="p">,</span><span class="w"> </span><span class="nx">tags</span><span class="w"> </span><span class="nx">shared</span><span class="p">.</span><span class="nx">Elems</span><span class="p">[</span><span class="kt">string</span><span class="p">])</span><span class="w"> </span><span class="p">[]</span><span class="nx">shared</span><span class="p">.</span><span class="nx">Error</span><span class="w"> </span><span class="p">{</span>
+<div class="language-go highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Slice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Tags</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Slice</span><span class="p">).</span><span class="nx">Custom</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">h</span><span class="w"> </span><span class="o">*</span><span class="nx">shared</span><span class="p">.</span><span class="nx">FieldCustomHelper</span><span class="p">,</span><span class="w"> </span><span class="nx">tags</span><span class="w"> </span><span class="nx">shared</span><span class="p">.</span><span class="nx">Elems</span><span class="p">[</span><span class="kt">string</span><span class="p">])</span><span class="w"> </span><span class="p">[]</span><span class="nx">shared</span><span class="p">.</span><span class="nx">Error</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nx">seen</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="nx">tags</span><span class="p">.</span><span class="nx">Len</span><span class="p">())</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">tag</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">tags</span><span class="p">.</span><span class="nx">All</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// tag is *string, nil for nil elements of []*string</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">tag</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">seen</span><span class="p">[</span><span class="o">*</span><span class="nx">tag</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
@@ -1238,10 +1270,10 @@
 </span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">})</span>
 </span></code></pre></div>
 <p><code>Len()</code> returns the number of elements, <code>At(i)</code> the pointer to the element <code>i</code>, <code>All()</code> iterates over the indexes and the pointers.</p>
-<h2 id="slices-of-pointers-in-slice">Slices of pointers in Slice<a class="headerlink" href="#slices-of-pointers-in-slice" title="Permanent link">&para;</a></h2>
-<p><code>Slice</code> works with the declared element type: for <code>[]*int</code> the element is <code>*int</code>, and nil elements are regular values for its rules:</p>
+<h2 id="slices-of-pointers">Slices of pointers<a class="headerlink" href="#slices-of-pointers" title="Permanent link">&para;</a></h2>
+<p><code>Slice</code> works with the declared element type: for <code>[]*int</code> the element is <code>*int</code>. Convert the element to check the pointed values, nil elements are absent then:</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Slice</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">Limits</span><span class="p">).</span><span class="nx">Each</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">limit</span><span class="w"> </span><span class="o">*</span><span class="nx">shared</span><span class="p">.</span><span class="nx">Field</span><span class="p">[</span><span class="o">*</span><span class="kt">int</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nx">limit</span><span class="p">.</span><span class="nx">Check</span><span class="p">(</span><span class="kd">func</span><span class="p">(</span><span class="nx">v</span><span class="w"> </span><span class="o">*</span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nx">v</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="s">"Should be set"</span><span class="p">)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nx">limit</span><span class="p">.</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Ptr</span><span class="p">).</span><span class="nx">Required</span><span class="p">().</span><span class="nx">Max</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">})</span>
 </span></code></pre></div>
 
