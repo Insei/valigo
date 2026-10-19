@@ -46,38 +46,38 @@ func Ptr[T comparable](f *shared.Field[*T]) *BaseConfigurator[T] {
 func (i *BaseConfigurator[T]) Required() *BaseConfigurator[T] {
 	optional := i.optional
 	var zero T
-	i.f.Required(func(v T) bool { return optional || v != zero }, requiredLocaleKey)
+	i.f.RequiredMsg(func(v T) bool { return optional || v != zero }, shared.M("value.required", requiredLocaleKey))
 	return i
 }
 
 // OneOf checks if the value is one of the allowed values.
 func (i *BaseConfigurator[T]) OneOf(allowed ...T) *BaseConfigurator[T] {
-	i.f.Check(func(v T) bool { return slices.Contains(allowed, v) }, oneOfLocaleKey, allowed)
+	i.f.CheckMsg(func(v T) bool { return slices.Contains(allowed, v) }, shared.M("value.one_of", oneOfLocaleKey, shared.P("values", allowed)))
 	return i
 }
 
 // NotOneOf checks if the value is none of the forbidden values.
 func (i *BaseConfigurator[T]) NotOneOf(forbidden ...T) *BaseConfigurator[T] {
-	i.f.Check(func(v T) bool { return !slices.Contains(forbidden, v) }, notOneOfLocaleKey, forbidden)
+	i.f.CheckMsg(func(v T) bool { return !slices.Contains(forbidden, v) }, shared.M("value.not_one_of", notOneOfLocaleKey, shared.P("values", forbidden)))
 	return i
 }
 
 // Equal checks if the value is equal to expected, e.g. Equal(true) for an accepted agreement.
 func (i *BaseConfigurator[T]) Equal(expected T) *BaseConfigurator[T] {
-	i.f.Check(func(v T) bool { return v == expected }, equalLocaleKey, expected)
+	i.f.CheckMsg(func(v T) bool { return v == expected }, shared.M("value.equal", equalLocaleKey, shared.P("value", expected)))
 	return i
 }
 
 // EqualField checks if the value is equal to the value of another field of the object:
 // b.Field(&m.Confirmation).As(eq.Of).EqualField(&m.Password).
 func (i *BaseConfigurator[T]) EqualField(other *T) *BaseConfigurator[T] {
-	i.f.CheckWith(other, func(v, o T) bool { return v == o }, equalFieldKey)
+	i.f.CheckWithMsg(other, func(v, o T) bool { return v == o }, shared.M("value.equal_field", equalFieldKey))
 	return i
 }
 
 // NotEqual checks if the value is not equal to forbidden.
 func (i *BaseConfigurator[T]) NotEqual(forbidden T) *BaseConfigurator[T] {
-	i.f.Check(func(v T) bool { return v != forbidden }, notEqualLocaleKey, forbidden)
+	i.f.CheckMsg(func(v T) bool { return v != forbidden }, shared.M("value.not_equal", notEqualLocaleKey, shared.P("value", forbidden)))
 	return i
 }
 

@@ -190,8 +190,8 @@ func TestErrorContent(t *testing.T) {
 		})
 	}, &model{Inner: address{City: "abcd"}, Age: 7})
 	require.Len(t, errs, 2)
-	assert.Equal(t, shared.Error{Location: "Inner.City", Message: "Cannot be longer than 3 characters", Value: "abcd"}, errs[0])
-	assert.Equal(t, shared.Error{Location: "Age", Message: "custom 1", Value: 7}, errs[1])
+	assert.Equal(t, shared.Error{Location: "Inner.City", Message: "Cannot be longer than 3 characters", Value: "abcd", Code: "string.max_len", Params: map[string]any{"max": 3}}, errs[0])
+	assert.Equal(t, shared.Error{Location: "Age", Message: "custom 1", Value: 7, Code: "custom %d"}, errs[1])
 }
 
 func TestElementErrorLocation(t *testing.T) {
@@ -212,7 +212,7 @@ func TestOtherFieldLocationByNamingFn(t *testing.T) {
 	v := New(WithFieldLocationNamingFn(func(f fmap.Field) string { return f.GetTagPath("json", false) }))
 	Configure[signUp](v, func(c Configurator[signUp], m *signUp) { c.Field(&m.Repeat).As(str.Of).EqualField(&m.Password) })
 	errs := v.ValidateTyped(context.Background(), &signUp{Password: "a", Repeat: "b"})
-	assert.Equal(t, []shared.Error{{Location: "repeat", Message: "Should be equal to password", Value: "b"}}, errs)
+	assert.Equal(t, []shared.Error{{Location: "repeat", Message: "Should be equal to password", Value: "b", Code: "string.equal_field", Params: map[string]any{"field": "password"}}}, errs)
 }
 
 func TestMap(t *testing.T) {
@@ -232,9 +232,9 @@ func TestMap(t *testing.T) {
 		Ports:  map[string]int{"http": 80, "admin": 0},
 	})
 	assert.Equal(t, []shared.Error{
-		{Location: "Labels[tier!]", Message: "Should contain only letters and digits", Value: "tier!"},
-		{Location: "Labels[app]", Message: "Cannot be longer than 5 characters", Value: "valigo-api"},
-		{Location: "Ports[admin]", Message: "Only interval[1 - 65535] is allowed", Value: 0},
+		{Location: "Labels[tier!]", Message: "Should contain only letters and digits", Value: "tier!", Code: "string.alphanumeric"},
+		{Location: "Labels[app]", Message: "Cannot be longer than 5 characters", Value: "valigo-api", Code: "string.max_len", Params: map[string]any{"max": 5}},
+		{Location: "Ports[admin]", Message: "Only interval[1 - 65535] is allowed", Value: 0, Code: "number.interval", Params: map[string]any{"min": 1, "max": 65535}},
 	}, errs)
 
 	valid := &service{Labels: map[string]string{"app": "api"}, Ports: map[string]int{"http": 80}}

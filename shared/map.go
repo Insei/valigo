@@ -36,37 +36,37 @@ func (m *MapFieldConfigurator[K, V]) As[R any](conv func(m *MapFieldConfigurator
 	return conv(m)
 }
 
-func (m *MapFieldConfigurator[K, V]) check(ok func(n int) bool, localeKey string, args ...any) {
+func (m *MapFieldConfigurator[K, V]) check(ok func(n int) bool, msg Msg) {
 	field, get := m.field, m.get
 	m.add(func(ctx context.Context, h Helper, obj any) []Error {
 		v := get(obj)
 		if v == nil || ok(len(*v)) {
 			return nil
 		}
-		return []Error{h.ErrorT(ctx, field, len(*v), localeKey, args...)}
+		return []Error{msg.Error(ctx, h, field, len(*v))}
 	})
 }
 
 // MaxLen checks that the map contains no more than maxLen elements. Absent map is skipped.
 func (m *MapFieldConfigurator[K, V]) MaxLen(maxLen int) *MapFieldConfigurator[K, V] {
-	m.check(func(n int) bool { return n <= maxLen }, mapMaxLenLocaleKey, maxLen)
+	m.check(func(n int) bool { return n <= maxLen }, M("map.max_len", mapMaxLenLocaleKey, P("max", maxLen)))
 	return m
 }
 
 // MinLen checks that the map contains at least minLen elements. Absent map is skipped.
 func (m *MapFieldConfigurator[K, V]) MinLen(minLen int) *MapFieldConfigurator[K, V] {
-	m.check(func(n int) bool { return n >= minLen }, mapMinLenLocaleKey, minLen)
+	m.check(func(n int) bool { return n >= minLen }, M("map.min_len", mapMinLenLocaleKey, P("min", minLen)))
 	return m
 }
 
 // Required checks that the map is present and not empty.
 func (m *MapFieldConfigurator[K, V]) Required() *MapFieldConfigurator[K, V] {
-	field, get := m.field, m.get
+	field, get, msg := m.field, m.get, M("map.required", mapRequiredLocaleKey)
 	m.add(func(ctx context.Context, h Helper, obj any) []Error {
 		if v := get(obj); v != nil && len(*v) > 0 {
 			return nil
 		}
-		return []Error{h.ErrorT(ctx, field, nil, mapRequiredLocaleKey)}
+		return []Error{msg.Error(ctx, h, field, nil)}
 	})
 	return m
 }

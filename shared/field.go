@@ -39,19 +39,31 @@ func NewValueField[T any](field fmap.Field, h Helper, fields Fields, add func(fn
 }
 
 // Check adds a rule that fails when ok returns false. Absent values are skipped.
+// The code of the error is localeKey, use CheckMsg for a stable code and named parameters.
 func (f *Field[T]) Check(ok func(v T) bool, localeKey string, args ...any) *Field[T] {
+	return f.CheckMsg(ok, key(localeKey, args))
+}
+
+// CheckMsg adds a rule that fails with msg when ok returns false. Absent values are skipped.
+func (f *Field[T]) CheckMsg(ok func(v T) bool, msg Msg) *Field[T] {
 	field := f.field
 	f.add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
 		if v == nil || ok(*v) {
 			return nil
 		}
-		return []Error{h.ErrorT(ctx, field, *v, localeKey, args...)}
+		return []Error{msg.Error(ctx, h, field, *v)}
 	})
 	return f
 }
 
 // Required adds a rule that fails when the value is absent or ok returns false.
+// The code of the error is localeKey, use RequiredMsg for a stable code.
 func (f *Field[T]) Required(ok func(v T) bool, localeKey string) *Field[T] {
+	return f.RequiredMsg(ok, key(localeKey, nil))
+}
+
+// RequiredMsg adds a rule that fails with msg when the value is absent or ok returns false.
+func (f *Field[T]) RequiredMsg(ok func(v T) bool, msg Msg) *Field[T] {
 	field := f.field
 	f.add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
 		if v != nil && ok(*v) {
@@ -61,7 +73,7 @@ func (f *Field[T]) Required(ok func(v T) bool, localeKey string) *Field[T] {
 		if v != nil {
 			val = *v
 		}
-		return []Error{h.ErrorT(ctx, field, val, localeKey)}
+		return []Error{msg.Error(ctx, h, field, val)}
 	})
 	return f
 }
@@ -93,7 +105,14 @@ func (f *Field[T]) Custom(fn func(ctx context.Context, h *FieldCustomHelper, val
 // it fails when ok(value, other) returns false. other is a pointer to a field of the model, it panics in Configure
 // for other pointers. The location of the other field is appended to args of the message.
 // The rule is skipped when the value or the value of the other field is absent.
+// The code of the error is localeKey, use CheckWithMsg for a stable code and named parameters.
 func (f *Field[T]) CheckWith[U any](other *U, ok func(v T, other U) bool, localeKey string, args ...any) *Field[T] {
+	return f.CheckWithMsg(other, ok, key(localeKey, args))
+}
+
+// CheckWithMsg is CheckWith with msg, the location of the other field is its last format argument
+// and its "field" parameter.
+func (f *Field[T]) CheckWithMsg[U any](other *U, ok func(v T, other U) bool, msg Msg) *Field[T] {
 	field, otherField := f.field, f.fields(other)
 	get := valueGetter[U](otherField)
 	f.add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
@@ -103,8 +122,7 @@ func (f *Field[T]) CheckWith[U any](other *U, ok func(v T, other U) bool, locale
 		if o := get(obj); o == nil || ok(*v, *o) {
 			return nil
 		}
-		msgArgs := append(args[:len(args):len(args)], h.FieldLocation(otherField))
-		return []Error{h.ErrorT(ctx, field, *v, localeKey, msgArgs...)}
+		return []Error{msg.with("field", h.FieldLocation(otherField)).Error(ctx, h, field, *v)}
 	})
 	return f
 }

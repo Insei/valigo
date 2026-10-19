@@ -44,7 +44,7 @@ func TestRules(t *testing.T) {
 			name: "required nil uuid",
 			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Field(&m.ID).As(vuuid.Of).Required() },
 			obj:  &ids{},
-			want: []shared.Error{{Location: "ID", Message: "Should be fulfilled", Value: uuid.Nil}},
+			want: []shared.Error{{Location: "ID", Message: "Should be fulfilled", Value: uuid.Nil, Code: "uuid.required"}},
 		},
 		{
 			name: "required ok",
@@ -55,13 +55,13 @@ func TestRules(t *testing.T) {
 			name: "required nil pointer",
 			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Field(&m.IDPtr).As(vuuid.Of).Required() },
 			obj:  &ids{},
-			want: []shared.Error{{Location: "IDPtr", Message: "Should be fulfilled"}},
+			want: []shared.Error{{Location: "IDPtr", Message: "Should be fulfilled", Code: "uuid.required"}},
 		},
 		{
 			name: "any of",
 			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Field(&m.ID).As(vuuid.Of).AnyOf(id1) },
 			obj:  &ids{ID: id2},
-			want: []shared.Error{{Location: "ID", Message: "Only [" + id1.String() + "] values is allowed", Value: id2}},
+			want: []shared.Error{{Location: "ID", Message: "Only [" + id1.String() + "] values is allowed", Value: id2, Code: "uuid.any_of", Params: map[string]any{"values": []uuid.UUID{id1}}}},
 		},
 		{
 			name: "any of skips nil pointer",
@@ -79,7 +79,7 @@ func TestRules(t *testing.T) {
 				})
 			},
 			obj:  &ids{ID: id1},
-			want: []shared.Error{{Location: "ID", Message: "Should be v7", Value: id1}},
+			want: []shared.Error{{Location: "ID", Message: "Should be v7", Value: id1, Code: "Should be v7"}},
 		},
 		{
 			name: "when",
@@ -92,7 +92,7 @@ func TestRules(t *testing.T) {
 			name: "slice length",
 			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Slice(&m.IDs).As(vuuid.Slice).MinLen(1).MaxLen(1) },
 			obj:  &ids{IDs: []uuid.UUID{id1, id2}},
-			want: []shared.Error{{Location: "IDs", Message: "Cannot contain more than 1 elements", Value: 2}},
+			want: []shared.Error{{Location: "IDs", Message: "Cannot contain more than 1 elements", Value: 2, Code: "slice.max_len", Params: map[string]any{"max": 1}}},
 		},
 		{
 			name: "slice required",
@@ -100,13 +100,13 @@ func TestRules(t *testing.T) {
 				c.Field(&m.IDsPtr).As(shared.SlicePtr).As(vuuid.Slice).Required()
 			},
 			obj:  &ids{},
-			want: []shared.Error{{Location: "IDsPtr", Message: "Should be fulfilled"}},
+			want: []shared.Error{{Location: "IDsPtr", Message: "Should be fulfilled", Code: "slice.required"}},
 		},
 		{
 			name: "slice any of",
 			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Slice(&m.IDPtrs).As(vuuid.Slice).AnyOf(id1) },
 			obj:  &ids{IDPtrs: []*uuid.UUID{&id1, nil, &id2}},
-			want: []shared.Error{{Location: "IDPtrs[2]", Message: "Only [" + id1.String() + "] values is allowed", Value: id2}},
+			want: []shared.Error{{Location: "IDPtrs[2]", Message: "Only [" + id1.String() + "] values is allowed", Value: id2, Code: "uuid.any_of", Params: map[string]any{"values": []uuid.UUID{id1}}}},
 		},
 		{
 			name: "slice each",
@@ -114,7 +114,7 @@ func TestRules(t *testing.T) {
 				c.Field(&m.Parents).As(shared.SlicePtr).As(vuuid.Slice).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
 			},
 			obj:  &ids{Parents: &[]*uuid.UUID{nil, &id1}},
-			want: []shared.Error{{Location: "Parents[0]", Message: "Should be fulfilled"}},
+			want: []shared.Error{{Location: "Parents[0]", Message: "Should be fulfilled", Code: "uuid.required"}},
 		},
 		{
 			name: "slice custom",
@@ -131,7 +131,7 @@ func TestRules(t *testing.T) {
 				})
 			},
 			obj:  &ids{IDs: []uuid.UUID{id1, id2, id1}},
-			want: []shared.Error{{Location: "IDs", Message: "Should be unique", Value: id1}},
+			want: []shared.Error{{Location: "IDs", Message: "Should be unique", Value: id1, Code: "Should be unique"}},
 		},
 		{
 			name: "slice when",

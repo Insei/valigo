@@ -139,37 +139,37 @@ func (s *SliceFieldConfigurator[E]) EachField() *Field[E] {
 	return &Field[E]{field: s.field, h: s.h, fields: s.fields, add: eachSource(s.add, s.get)}
 }
 
-func (s *SliceFieldConfigurator[E]) check(ok func(n int) bool, localeKey string, args ...any) {
+func (s *SliceFieldConfigurator[E]) check(ok func(n int) bool, msg Msg) {
 	field, get := s.field, s.get
 	s.add(func(ctx context.Context, h Helper, obj any) []Error {
 		elems, present := get(obj)
 		if !present || ok(elems.n) {
 			return nil
 		}
-		return []Error{h.ErrorT(ctx, field, elems.n, localeKey, args...)}
+		return []Error{msg.Error(ctx, h, field, elems.n)}
 	})
 }
 
 // MaxLen checks that the slice contains no more than maxLen elements. Absent slice is skipped.
 func (s *SliceFieldConfigurator[E]) MaxLen(maxLen int) *SliceFieldConfigurator[E] {
-	s.check(func(n int) bool { return n <= maxLen }, sliceMaxLenLocaleKey, maxLen)
+	s.check(func(n int) bool { return n <= maxLen }, M("slice.max_len", sliceMaxLenLocaleKey, P("max", maxLen)))
 	return s
 }
 
 // MinLen checks that the slice contains at least minLen elements. Absent slice is skipped.
 func (s *SliceFieldConfigurator[E]) MinLen(minLen int) *SliceFieldConfigurator[E] {
-	s.check(func(n int) bool { return n >= minLen }, sliceMinLenLocaleKey, minLen)
+	s.check(func(n int) bool { return n >= minLen }, M("slice.min_len", sliceMinLenLocaleKey, P("min", minLen)))
 	return s
 }
 
 // Required checks that the slice is present and not empty.
 func (s *SliceFieldConfigurator[E]) Required() *SliceFieldConfigurator[E] {
-	field, get := s.field, s.get
+	field, get, msg := s.field, s.get, M("slice.required", sliceRequiredLocaleKey)
 	s.add(func(ctx context.Context, h Helper, obj any) []Error {
 		if elems, _ := get(obj); elems.n > 0 {
 			return nil
 		}
-		return []Error{h.ErrorT(ctx, field, nil, sliceRequiredLocaleKey)}
+		return []Error{msg.Error(ctx, h, field, nil)}
 	})
 	return s
 }

@@ -68,7 +68,16 @@ func (r *rules) add(fn ValidationFn) {
 	*r = append(*r, fn)
 }
 
+// validate returns the errors without the codes and the parameters, TestMessages checks them.
 func (r *rules) validate(obj any) []Error {
+	errs := r.validateFull(obj)
+	for i := range errs {
+		errs[i].Code, errs[i].Params = "", nil
+	}
+	return errs
+}
+
+func (r *rules) validateFull(obj any) []Error {
 	var errs []Error
 	for _, fn := range *r {
 		errs = append(errs, fn(context.Background(), pathHelper{}, obj)...)

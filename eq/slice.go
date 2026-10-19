@@ -38,9 +38,10 @@ func (s *SliceConfigurator[E]) OneOf(allowed ...E) *SliceConfigurator[E] {
 // Unique checks that the slice has no duplicate elements, the error value is the first duplicate.
 // Slices up to 32 elements are checked without allocations.
 func (s *SliceConfigurator[E]) Unique() *SliceConfigurator[E] {
+	msg := shared.M("value.unique", uniqueLocaleKey)
 	s.Slice().Custom(func(ctx context.Context, h *shared.FieldCustomHelper, elems shared.Elems[E]) []shared.Error {
 		if dup, ok := duplicate(elems); ok {
-			return []shared.Error{h.ErrorT(ctx, dup, uniqueLocaleKey)}
+			return []shared.Error{h.ErrorMsg(ctx, dup, msg)}
 		}
 		return nil
 	})

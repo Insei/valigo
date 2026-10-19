@@ -41,52 +41,52 @@ func Of[T time.Time | *time.Time](f *shared.Field[T]) *BaseConfigurator {
 
 // Required checks if the time is present and not zero.
 func (i *BaseConfigurator) Required() *BaseConfigurator {
-	i.f.Required(func(v time.Time) bool { return !v.IsZero() }, requiredLocaleKey)
+	i.f.RequiredMsg(func(v time.Time) bool { return !v.IsZero() }, shared.M("time.required", requiredLocaleKey))
 	return i
 }
 
 // Before checks if the time is before t.
 func (i *BaseConfigurator) Before(t time.Time) *BaseConfigurator {
-	i.f.Check(func(v time.Time) bool { return v.Before(t) }, beforeLocaleKey, t.Format(time.RFC3339))
+	i.f.CheckMsg(func(v time.Time) bool { return v.Before(t) }, shared.M("time.before", beforeLocaleKey, shared.P("time", t.Format(time.RFC3339))))
 	return i
 }
 
 // After checks if the time is after t.
 func (i *BaseConfigurator) After(t time.Time) *BaseConfigurator {
-	i.f.Check(func(v time.Time) bool { return v.After(t) }, afterLocaleKey, t.Format(time.RFC3339))
+	i.f.CheckMsg(func(v time.Time) bool { return v.After(t) }, shared.M("time.after", afterLocaleKey, shared.P("time", t.Format(time.RFC3339))))
 	return i
 }
 
 // Between checks if the time is within [from, to], both ends are included.
 func (i *BaseConfigurator) Between(from, to time.Time) *BaseConfigurator {
-	i.f.Check(func(v time.Time) bool { return !v.Before(from) && !v.After(to) }, betweenLocaleKey,
-		from.Format(time.RFC3339), to.Format(time.RFC3339))
+	i.f.CheckMsg(func(v time.Time) bool { return !v.Before(from) && !v.After(to) }, shared.M("time.between", betweenLocaleKey,
+		shared.P("from", from.Format(time.RFC3339)), shared.P("to", to.Format(time.RFC3339))))
 	return i
 }
 
 // BeforeField checks if the time is before the time of another field of the object:
 // b.Field(&m.StartsAt).As(timex.Of).BeforeField(&m.EndsAt).
 func (i *BaseConfigurator) BeforeField(other *time.Time) *BaseConfigurator {
-	i.f.CheckWith(other, func(v, o time.Time) bool { return v.Before(o) }, beforeLocaleKey)
+	i.f.CheckWithMsg(other, func(v, o time.Time) bool { return v.Before(o) }, shared.M("time.before_field", beforeLocaleKey))
 	return i
 }
 
 // AfterField checks if the time is after the time of another field of the object:
 // b.Field(&m.EndsAt).As(timex.Of).AfterField(&m.StartsAt).
 func (i *BaseConfigurator) AfterField(other *time.Time) *BaseConfigurator {
-	i.f.CheckWith(other, func(v, o time.Time) bool { return v.After(o) }, afterLocaleKey)
+	i.f.CheckWithMsg(other, func(v, o time.Time) bool { return v.After(o) }, shared.M("time.after_field", afterLocaleKey))
 	return i
 }
 
 // InPast checks if the time is before the moment of the validation.
 func (i *BaseConfigurator) InPast() *BaseConfigurator {
-	i.f.Check(func(v time.Time) bool { return v.Before(now()) }, pastLocaleKey)
+	i.f.CheckMsg(func(v time.Time) bool { return v.Before(now()) }, shared.M("time.in_past", pastLocaleKey))
 	return i
 }
 
 // InFuture checks if the time is after the moment of the validation.
 func (i *BaseConfigurator) InFuture() *BaseConfigurator {
-	i.f.Check(func(v time.Time) bool { return v.After(now()) }, futureLocaleKey)
+	i.f.CheckMsg(func(v time.Time) bool { return v.After(now()) }, shared.M("time.in_future", futureLocaleKey))
 	return i
 }
 

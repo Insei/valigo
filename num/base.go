@@ -48,45 +48,45 @@ func Ptr[N Number](f *shared.Field[*N]) *BaseConfigurator[N] {
 // Required checks if the number is not zero, for pointer fields checks if the pointer is not nil.
 func (i *BaseConfigurator[N]) Required() *BaseConfigurator[N] {
 	optional := i.optional
-	i.f.Required(func(v N) bool { return optional || v != 0 }, requiredLocaleKey)
+	i.f.RequiredMsg(func(v N) bool { return optional || v != 0 }, shared.M("number.required", requiredLocaleKey))
 	return i
 }
 
 // Max checks if the number is not greater than maxNum.
 func (i *BaseConfigurator[N]) Max(maxNum N) *BaseConfigurator[N] {
-	i.f.Check(func(v N) bool { return v <= maxNum }, maxLocaleKey, maxNum)
+	i.f.CheckMsg(func(v N) bool { return v <= maxNum }, shared.M("number.max", maxLocaleKey, shared.P("max", maxNum)))
 	return i
 }
 
 // Min checks if the number is not less than minNum.
 func (i *BaseConfigurator[N]) Min(minNum N) *BaseConfigurator[N] {
-	i.f.Check(func(v N) bool { return v >= minNum }, minLocaleKey, minNum)
+	i.f.CheckMsg(func(v N) bool { return v >= minNum }, shared.M("number.min", minLocaleKey, shared.P("min", minNum)))
 	return i
 }
 
 // MinField checks if the number is not less than the value of another numeric field of the object:
 // b.Field(&m.Price).As(num.Of).MinField(&m.MinPrice).
 func (i *BaseConfigurator[N]) MinField(other *N) *BaseConfigurator[N] {
-	i.f.CheckWith(other, func(v, o N) bool { return v >= o }, minLocaleKey)
+	i.f.CheckWithMsg(other, func(v, o N) bool { return v >= o }, shared.M("number.min_field", minLocaleKey))
 	return i
 }
 
 // MaxField checks if the number is not greater than the value of another numeric field of the object:
 // b.Field(&m.Used).As(num.Of).MaxField(&m.Limit).
 func (i *BaseConfigurator[N]) MaxField(other *N) *BaseConfigurator[N] {
-	i.f.CheckWith(other, func(v, o N) bool { return v <= o }, maxLocaleKey)
+	i.f.CheckWithMsg(other, func(v, o N) bool { return v <= o }, shared.M("number.max_field", maxLocaleKey))
 	return i
 }
 
 // AnyOf checks if the number is one of the allowed values.
 func (i *BaseConfigurator[N]) AnyOf(allowed ...N) *BaseConfigurator[N] {
-	i.f.Check(func(v N) bool { return slices.Contains(allowed, v) }, anyOfLocaleKey, allowed)
+	i.f.CheckMsg(func(v N) bool { return slices.Contains(allowed, v) }, shared.M("number.any_of", anyOfLocaleKey, shared.P("values", allowed)))
 	return i
 }
 
 // AnyOfInterval checks if the number is within [begin, end] interval, both ends inclusive.
 func (i *BaseConfigurator[N]) AnyOfInterval(begin, end N) *BaseConfigurator[N] {
-	i.f.Check(func(v N) bool { return v >= begin && v <= end }, anyOfIntervalLocalKey, begin, end)
+	i.f.CheckMsg(func(v N) bool { return v >= begin && v <= end }, shared.M("number.interval", anyOfIntervalLocalKey, shared.P("min", begin), shared.P("max", end)))
 	return i
 }
 

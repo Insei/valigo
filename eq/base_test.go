@@ -115,7 +115,7 @@ func TestUniqueErrorValue(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[account](v, func(c valigo.Configurator[account], m *account) { c.Slice(&m.Roles).As(eq.Slice).Unique() })
 	errs := v.ValidateTyped(context.Background(), &account{Roles: []status{active, blocked, blocked}})
-	assert.Equal(t, []shared.Error{{Location: "Roles", Message: "Should contain unique values", Value: blocked}}, errs)
+	assert.Equal(t, []shared.Error{{Location: "Roles", Message: "Should contain unique values", Value: blocked, Code: "value.unique"}}, errs)
 }
 
 func TestZeroAllocationsOnValid(t *testing.T) {
@@ -133,4 +133,17 @@ func TestZeroAllocationsOnValid(t *testing.T) {
 	ctx := context.Background()
 	assert.Nil(t, v.Validate(ctx, obj))
 	assert.Zero(t, testing.AllocsPerRun(100, func() { v.Validate(ctx, obj) }))
+}
+
+func TestCodes(t *testing.T) {
+	v := valigo.New()
+	valigo.Configure[account](v, func(c valigo.Configurator[account], m *account) {
+		c.Field(&m.Status).As(eq.Of).Required().OneOf(active).NotOneOf("").Equal(blocked).NotEqual("").EqualField(&m.Previous)
+		c.Slice(&m.Roles).As(eq.Slice).Unique()
+	})
+	var codes []string
+	for _, err := range v.ValidateTyped(context.Background(), &account{Previous: active, Roles: []status{active, active}}) {
+		codes = append(codes, err.Code)
+	}
+	assert.Equal(t, []string{"value.required", "value.one_of", "value.not_one_of", "value.equal", "value.not_equal", "value.equal_field", "value.unique"}, codes)
 }

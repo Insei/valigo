@@ -165,3 +165,30 @@ func TestFormatRulesDontAllocate(t *testing.T) {
 	assert.Nil(t, v.Validate(ctx, obj))
 	assert.Zero(t, testing.AllocsPerRun(100, func() { v.Validate(ctx, obj) }))
 }
+
+func TestCodes(t *testing.T) {
+	re := regexp.MustCompile(`^x$`)
+	v := valigo.New()
+	valigo.Configure[texts](v, func(c valigo.Configurator[texts], m *texts) {
+		c.Field(&m.Name).As(str.Of).Required().MinLen(5).MaxLen(1).MinRunes(5).MaxRunes(1).AnyOf("x").Regexp(re).Email().URL().
+			IP().IPv4().IPv6().Hostname().UUID().Alphanumeric().Prefix("x").Suffix("x").Contains("x").EqualField(&m.Repeat)
+	})
+	var codes []string
+	params := map[string]map[string]any{}
+	for _, err := range v.ValidateTyped(context.Background(), &texts{Name: "a b", Repeat: "c"}) {
+		codes = append(codes, err.Code)
+		params[err.Code] = err.Params
+	}
+	assert.Equal(t, []string{
+		"string.min_len", "string.max_len", "string.min_runes", "string.max_runes", "string.any_of", "string.regexp",
+		"string.email", "string.url", "string.ip", "string.ipv4", "string.ipv6", "string.hostname", "string.uuid",
+		"string.alphanumeric", "string.prefix", "string.suffix", "string.contains", "string.equal_field",
+	}, codes)
+	assert.Equal(t, map[string]any{"min": 5}, params["string.min_len"])
+	assert.Equal(t, map[string]any{"values": []string{"x"}}, params["string.any_of"])
+	assert.Equal(t, map[string]any{"substring": "x"}, params["string.contains"])
+	assert.Equal(t, map[string]any{"field": "Repeat"}, params["string.equal_field"])
+
+	required := v.ValidateTyped(context.Background(), &texts{})[0]
+	assert.Equal(t, "string.required", required.Code)
+}
