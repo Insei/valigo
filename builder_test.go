@@ -256,6 +256,7 @@ func TestValidate(t *testing.T) {
 	assert.Nil(t, v.Validate(ctx, (*model)(nil)))
 	assert.Nil(t, v.Validate(ctx, nil))
 	assert.Nil(t, v.Validate(ctx, &address{}))
+	assert.Nil(t, v.Validate(ctx, address{}), "value of a type without rules")
 }
 
 func TestConfigurePanics(t *testing.T) {
@@ -283,6 +284,32 @@ func TestConfigureRecursiveType(t *testing.T) {
 	v := New()
 	Configure[node](v, func(c Configurator[node], m *node) { c.String(&m.Name).Required() })
 	assert.Len(t, v.ValidateTyped(context.Background(), &node{Next: &node{}}), 1)
+}
+
+func TestNilWhen(t *testing.T) {
+	errs := validateModel(t, func(c Configurator[model], m *model) {
+		c.When(nil).String(&m.Name).Required()
+	}, &model{})
+	assert.Len(t, errs, 1)
+}
+
+func TestStructCustomForeignPointerPanics(t *testing.T) {
+	foreign := 0
+	v := New()
+	Configure[model](v, func(c Configurator[model], m *model) {
+		c.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *model) []shared.Error {
+			return []shared.Error{h.ErrorT(ctx, &foreign, foreign, "never")}
+		})
+	})
+	assert.PanicsWithValue(t, "valigo: *int is not a pointer to a field of *valigo.model: field not found", func() {
+		v.Validate(context.Background(), &model{})
+	})
+}
+
+func TestConfigureNonStructPanics(t *testing.T) {
+	assert.Panics(t, func() {
+		Configure[int](New(), func(Configurator[int], *int) {})
+	})
 }
 
 func TestZeroAllocationsOnValid(t *testing.T) {
