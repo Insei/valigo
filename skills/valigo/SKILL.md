@@ -180,7 +180,7 @@ func main() {
 
 ## Rules from tags
 
-`b.Tags("validate")` in `Configure` applies go-playground/validator tags (`required`, `min`/`max`/`len`, `oneof`, `email`, `url`, `uuid`, `gte`/`lte`, `eqfield`, `gtefield`, `dive`, `unique`, `omitempty`...) as valigo rules, mixable with code rules. Unknown rules, `|`, `keys`, dive into structs panic in Configure: write them in code. Fields of nil nested structs are skipped (unlike code rules).
+`b.Tags("validate")` in `Configure` applies go-playground/validator tags as valigo rules, mixable with code rules: `required`, `omitempty`, `required_if`/`required_with`/`required_without`..., `a|b`, lengths and comparisons (`min`, `max`, `len`, `gt`, `lt`, `eq`, `ne`, `oneof`), the formats, the rules on fields (`eqfield`, `gtfield`...), `dive` into elements (structs too, by their tags), `keys`/`endkeys` of `map[string]V`, `unique`. Unsupported tags (`excluded_*`, `*csfield`, `uuid4`, `isbn`..., custom tags) panic in Configure: write them in code. Fields of nil nested structs are skipped (unlike code rules).
 
 ## JSON Schema
 
