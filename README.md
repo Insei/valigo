@@ -61,8 +61,8 @@ and a conversion that doesn't fit the field doesn't compile:
 
 | Conversion | Fields | Rules |
 |---|---|---|
-| `str.Of` | `string`, `*string`, named strings | `Required`, lengths in bytes and runes, `AnyOf`, `Prefix`, `Suffix`, `Contains`, `Regexp`, `Email`, `URL`, `IP`, `CIDR`, `MAC`, `Hostname`, `UUID`, `E164`, `Base64`, `JSON`, `Semver`, `HexColor`, `Datetime`, `CountryCode`, `CurrencyCode`, `CreditCard`, `Trim`... |
-| `num.Of`, `num.Ptr` | integers, floats, named numbers, pointers to them | `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval`, `Latitude`, `Longitude` |
+| `str.Of` | `string`, `*string`, named strings | `Required`, lengths in bytes and runes, `AnyOf`, `Prefix`, `Suffix`, `Contains`, `Excludes`, `Alpha`, `Digits`, `Numeric`, `Hexadecimal`, `Regexp`, `Email`, `URL`, `IP`, `CIDR`, `MAC`, `Hostname`, `UUID`, `E164`, `Base64`, `JSON`, `Semver`, `HexColor`, `Datetime`, `CountryCode`, `CurrencyCode`, `CreditCard`, `Trim`... |
+| `num.Of`, `num.Ptr` | integers, floats, named numbers, pointers to them | `Required`, `Min`, `Max`, `GreaterThan`, `LessThan`, `AnyOf`, `AnyOfInterval`, `Latitude`, `Longitude` |
 | `timex.Of` | `time.Time`, `*time.Time` | `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture` |
 | `eq.Of`, `eq.Ptr` | any `comparable`: enums, bools | `Required`, `OneOf`, `NotOneOf`, `Equal`, `NotEqual` |
 | `vuuid.Of` | `uuid.UUID`, `*uuid.UUID`, the separate module `github.com/insei/valigo/rules/uuid` | `Required`, `AnyOf` |

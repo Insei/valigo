@@ -14,13 +14,13 @@ Every `shared.Constraint` has the configured struct, the field, the path from th
 |---|---|
 | `str`: `Required` | `required`, `minLength: 1` |
 | `str`: `MinRunes`, `MaxRunes`, `MaxLen` | `minLength`, `maxLength` |
-| `str`: `Regexp`, `Prefix`, `Suffix`, `Contains`, `Alphanumeric`, `Semver`, `E164`, `HexColor` | `pattern` |
+| `str`: `Regexp`, `Prefix`, `Suffix`, `Contains`, `Alphanumeric`, `Alpha`, `Digits`, `Numeric`, `Hexadecimal`, `Semver`, `E164`, `HexColor` | `pattern` |
 | `str`: `Email`, `URL`, `IPv4`, `IPv6`, `Hostname`, `UUID` | `format`: `email`, `uri`, `ipv4`, `ipv6`, `hostname`, `uuid` |
 | `str`: `Datetime(time.RFC3339)`, `Datetime(time.DateOnly)` | `format`: `date-time`, `date` |
 | `str`: `Base64`, `Base64URL` | `contentEncoding` |
 | `str`, `num`, `uuid`: `AnyOf`; `eq`: `OneOf` | `enum` |
 | `eq`: `Equal` | `const` |
-| `num`: `Min`, `Max`, `AnyOfInterval`, `Latitude`, `Longitude` | `minimum`, `maximum` |
+| `num`: `Min`, `Max`, `AnyOfInterval`, `Latitude`, `Longitude`, `GreaterThan`, `LessThan` | `minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum` |
 | `num`, `eq`, `uuid`: `Required` | `required` |
 | slices: `Required`, `MinLen`, `MaxLen`, `Unique`, `Each` | `required` and `minItems: 1`, `minItems`, `maxItems`, `uniqueItems`, `items` |
 | maps: `Required`, `MinLen`, `MaxLen`, `EachKey`, `EachValue` | `required` and `minProperties: 1`, `minProperties`, `maxProperties`, `propertyNames`, `additionalProperties` |

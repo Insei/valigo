@@ -83,12 +83,17 @@ Output:
 | `string.max_len`, `string.max_runes` | `max` |
 | `string.any_of` | `values` |
 | `string.prefix`, `string.suffix`, `string.contains` | `prefix`, `suffix`, `substring` |
-| `string.equal_field` | `field` |
+| `string.equal_field`, `string.not_equal_field` | `field` |
+| `string.excludes`, `string.not_prefix`, `string.not_suffix` | `substring`, `prefix`, `suffix` |
+| `string.contains_any`, `string.excludes_any` | `chars` |
+| `string.equal_fold` | `value` |
+| `string.alpha`, `string.digits`, `string.numeric`, `string.hexadecimal` | — |
 | `string.base64`, `string.base64url`, `string.json`, `string.semver`, `string.cidr`, `string.mac`, `string.e164`, `string.hex_color`, `string.ascii`, `string.lowercase`, `string.uppercase`, `string.country_code`, `string.currency_code`, `string.luhn`, `string.credit_card` | — |
 | `string.datetime` | `layout` |
 | `number.required` | — |
 | `number.min`, `number.max` | `min`, `max` |
-| `number.min_field`, `number.max_field` | `field` |
+| `number.min_field`, `number.max_field`, `number.greater_field`, `number.less_field` | `field` |
+| `number.greater_than`, `number.less_than` | `min`, `max` |
 | `number.any_of` | `values` |
 | `number.interval` | `min`, `max` |
 | `number.latitude`, `number.longitude` | — |
@@ -99,7 +104,7 @@ Output:
 | `value.required`, `value.unique` | — |
 | `value.one_of`, `value.not_one_of` | `values` |
 | `value.equal`, `value.not_equal` | `value` |
-| `value.equal_field` | `field` |
+| `value.equal_field`, `value.not_equal_field` | `field` |
 | `uuid.required` | — |
 | `uuid.any_of` | `values` |
 | `slice.required`, `map.required` | — |
