@@ -25,6 +25,7 @@ Rules are configured once by `valigo.Configure[T]` with pointers to the fields o
 |---|---|
 | `b.Field(&m.S).As(str.Of)` | `Required`, `MinLen`/`MaxLen` (bytes), `MinRunes`/`MaxRunes` (characters), `AnyOf`, `Prefix`, `Suffix`, `Contains`, `Regexp(re, str.WithRegexpLocaleKey(key))`, `Email`, `URL`, `IP`, `IPv4`, `IPv6`, `Hostname`, `UUID`, `Alphanumeric`, `Trim`, `Custom`, `When`; formats fail on empty strings |
 | `b.Field(&m.N).As(num.Of)`, `b.Field(&m.P).As(num.Ptr)` | `Required` (zero for `num.Of`, nil for `num.Ptr`), `Min`, `Max`, `AnyOf`, `AnyOfInterval` (inclusive), `Custom`, `When` |
+| `b.Field(&m.At).As(timex.Of)` | `time.Time` and `*time.Time`: `Required` (not zero), `Before`, `After`, `Between` (inclusive), `InPast`, `InFuture`, `Custom`, `When`; slices: `b.Slice(&m.Dates).As(timex.Slice)` |
 | `b.Field(&m.ID).As(vuuid.Of)` | `Required` (not `uuid.Nil`), `AnyOf`, `Custom`, `When` |
 | `b.Slice(&m.Items)` | `Required`, `MinLen`, `MaxLen`, `Custom`, `When`, `Each(func(*shared.Field[E]))` with `Check(ok, message)`, `Required(ok, message)`, `As` to convert the element: `e.As(num.Of).Min(1)` |
 | `b.Slice(&m.Tags).As(str.Slice)` | the rules of the slice and `Each(func(*str.BaseConfigurator))`, `Trim`, `Regexp`, `Email` |

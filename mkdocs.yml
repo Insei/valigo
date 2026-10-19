@@ -83,6 +83,7 @@ nav:
       - Custom rules: features/custom.md
       - Strings: features/strings.md
       - Numbers: features/numbers.md
+      - Time: features/time.md
       - UUID: features/uuid.md
       - Slices: features/slices.md
       - Errors: features/errors.md
