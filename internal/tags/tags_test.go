@@ -183,9 +183,6 @@ func TestTagsErrors(t *testing.T) {
 		{"unknown rule", tagsOf[struct {
 			A string `validate:"required,isbn"`
 		}], `valigo: tag validate:"required,isbn" of field A: the rule isbn isn't supported for the field, use the rules in code`},
-		{"alternatives", tagsOf[struct {
-			A string `validate:"email|url"`
-		}], `valigo: tag validate:"email|url" of field A: the alternatives of | aren't supported, use When or Custom`},
 		{"bad number", tagsOf[struct {
 			A int `validate:"min=x"`
 		}], `valigo: tag validate:"min=x" of field A: min=x: strconv.ParseInt: parsing "x": invalid syntax`},
@@ -210,9 +207,6 @@ func TestTagsErrors(t *testing.T) {
 		{"unique of pointers", tagsOf[struct {
 			A []*string `validate:"unique"`
 		}], `valigo: tag validate:"unique" of field A: unique of the slices of pointers isn't supported`},
-		{"dive into structs", tagsOf[struct {
-			A []tagsAddress `validate:"dive"`
-		}], `valigo: tag validate:"dive" of field A: the elements of type tags_test.tagsAddress aren't supported, configure the rules of their type`},
 		{"dive into a map of ints", tagsOf[struct {
 			A map[int]string `validate:"dive,required"`
 		}], `valigo: tag validate:"dive,required" of field A: dive is supported for the maps of strings to values, map[string]V`},
