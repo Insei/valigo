@@ -17,21 +17,25 @@ type ValidationFn func(ctx context.Context, h Helper, obj any) []Error
 type checkFn[T any] func(ctx context.Context, h Helper, v *T) []Error
 
 // Field is a typed rules set for a single value: a struct field or every element of a slice.
+// Its rules are the primitives of the typed configurators, convert it to one with As, e.g. f.As(str.Of).
 type Field[T any] struct {
 	field fmap.Field
 	h     Helper
 	add   func(fn checkFn[T])
+	// root registers validation functions of the struct field itself, nil for the fields derived by When,
+	// conversions and for slice elements
+	root func(fn ValidationFn)
 }
 
 // NewValueField creates a Field for the struct field of type T or *T,
 // named types with the same underlying layout are allowed.
 // add registers a validation function of the configured struct.
 func NewValueField[T any](field fmap.Field, h Helper, add func(fn ValidationFn)) *Field[T] {
-	return &Field[T]{field: field, h: h, add: fieldSource(add, valueGetter[T](field))}
+	return &Field[T]{field: field, h: h, add: fieldSource(add, valueGetter[T](field)), root: add}
 }
 
 // Check adds a rule that fails when ok returns false. Absent values are skipped.
-func (f *Field[T]) Check(ok func(v T) bool, localeKey string, args ...any) {
+func (f *Field[T]) Check(ok func(v T) bool, localeKey string, args ...any) *Field[T] {
 	field := f.field
 	f.add(func(ctx context.Context, h Helper, v *T) []Error {
 		if v == nil || ok(*v) {
@@ -39,10 +43,11 @@ func (f *Field[T]) Check(ok func(v T) bool, localeKey string, args ...any) {
 		}
 		return []Error{h.ErrorT(ctx, field, *v, localeKey, args...)}
 	})
+	return f
 }
 
 // Required adds a rule that fails when the value is absent or ok returns false.
-func (f *Field[T]) Required(ok func(v T) bool, localeKey string) {
+func (f *Field[T]) Required(ok func(v T) bool, localeKey string) *Field[T] {
 	field := f.field
 	f.add(func(ctx context.Context, h Helper, v *T) []Error {
 		if v != nil && ok(*v) {
@@ -54,20 +59,22 @@ func (f *Field[T]) Required(ok func(v T) bool, localeKey string) {
 		}
 		return []Error{h.ErrorT(ctx, field, val, localeKey)}
 	})
+	return f
 }
 
 // Modify adds a step that changes the value in place, e.g. trims a string. Absent values are skipped.
-func (f *Field[T]) Modify(fn func(v *T)) {
+func (f *Field[T]) Modify(fn func(v *T)) *Field[T] {
 	f.add(func(_ context.Context, _ Helper, v *T) []Error {
 		if v != nil {
 			fn(v)
 		}
 		return nil
 	})
+	return f
 }
 
 // Custom adds a user defined rule. Absent values are skipped.
-func (f *Field[T]) Custom(fn func(ctx context.Context, h *FieldCustomHelper, value T) []Error) {
+func (f *Field[T]) Custom(fn func(ctx context.Context, h *FieldCustomHelper, value T) []Error) *Field[T] {
 	customHelper := NewFieldCustomHelper(f.field, f.h)
 	f.add(func(ctx context.Context, _ Helper, v *T) []Error {
 		if v == nil {
@@ -75,6 +82,7 @@ func (f *Field[T]) Custom(fn func(ctx context.Context, h *FieldCustomHelper, val
 		}
 		return fn(ctx, customHelper, *v)
 	})
+	return f
 }
 
 // When returns a Field whose rules are applied only if cond returns true.
