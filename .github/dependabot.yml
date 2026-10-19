@@ -5,6 +5,7 @@ updates:
       - "/"
       - "/uuid"
       - "/huma"
+      - "/gin"
       - "/bench"
       - "/examples/*"
     schedule:

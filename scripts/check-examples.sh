@@ -53,24 +53,14 @@ if [ "$n" -eq 0 ]; then
 	echo "no programs in $*" >&2
 	exit 1
 fi
-cat > "$work/go.mod" <<MOD
-module examplescheck
-
-go 1.27
-
-require (
-	github.com/insei/valigo v0.1.0
-	github.com/insei/valigo/huma v0.1.0
-	github.com/insei/valigo/uuid v0.1.0
-)
-
-replace (
-	github.com/insei/valigo => $root
-	github.com/insei/valigo/huma => $root/huma
-	github.com/insei/valigo/uuid => $root/uuid
-)
-MOD
-cat "$root/go.sum" "$root/uuid/go.sum" "$root/huma/go.sum" | sort -u > "$work/go.sum"
+. "$root/scripts/modules.sh"
+{
+	printf 'module examplescheck\n\ngo 1.27\n\nrequire github.com/insei/valigo v0.1.0\n\nreplace github.com/insei/valigo => %s\n' "$root"
+	for module in $MODULES; do
+		printf '\nrequire github.com/insei/valigo/%s v0.1.0\n\nreplace github.com/insei/valigo/%s => %s/%s\n' "$module" "$module" "$root" "$module"
+	done
+} > "$work/go.mod"
+cat "$root/go.sum" $(for m in $MODULES; do echo "$root/$m/go.sum"; done) | sort -u > "$work/go.sum"
 cd "$work"
 go mod tidy >/dev/null
 go vet ./...
