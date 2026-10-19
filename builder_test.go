@@ -186,6 +186,14 @@ func TestErrorContent(t *testing.T) {
 	assert.Equal(t, shared.Error{Location: "Age", Message: "custom 1", Value: 7}, errs[1])
 }
 
+func TestReconfigureReplacesRules(t *testing.T) {
+	v := New()
+	for range 3 {
+		Configure[model](v, func(c Configurator[model], m *model) { c.String(&m.Name).Required() })
+	}
+	assert.Len(t, v.ValidateTyped(context.Background(), &model{}), 1)
+}
+
 func TestTrim(t *testing.T) {
 	obj := &model{Name: "  a  ", NamePtr: ptr(" b "), Tags: []string{" c ", "d "}, TagPtrs: []*string{ptr(" e"), nil}}
 	errs := validateModel(t, func(c Configurator[model], m *model) {

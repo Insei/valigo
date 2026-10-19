@@ -84,11 +84,12 @@ func New(opts ...Option) *Validator {
 	return v
 }
 
-// Configure configures validation rules for the struct type T.
+// Configure configures validation rules for the struct type T, replacing the rules of previous Configure calls for T.
 // fn receives a model with all nested pointer structs allocated, rules are configured
 // by pointers to the model fields. Configure panics on invalid configuration,
 // call it on application start and not concurrently with Validate.
 func Configure[T any](v *Validator, fn func(builder Configurator[T], m *T)) {
+	delete(v.validators, reflect.TypeFor[*T]())
 	model := new(T)
 	// allocate all pointer fields values recursively
 	mustZero(model)
