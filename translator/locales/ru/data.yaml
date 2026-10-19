@@ -26,6 +26,18 @@ validation:
     "Should start with %s": Должно начинаться с %s
     "Should end with %s": Должно заканчиваться на %s
     "Should contain %s": Должно содержать %s
+    "Should be base64 encoded": Должно быть в кодировке base64
+    "Should be base64url encoded": Должно быть в кодировке base64url
+    "Should be JSON": Должно быть JSON
+    "Should be semantic version": Должно быть семантической версией
+    "Should be CIDR": Должно быть подсетью в нотации CIDR
+    "Should be MAC address": Должно быть MAC-адресом
+    "Should be E.164 phone number": Должно быть номером телефона в формате E.164
+    "Should be hex color": Должно быть цветом в шестнадцатеричном формате
+    "Should contain only ASCII characters": Должно содержать только символы ASCII
+    "Should be lowercase": Должно быть в нижнем регистре
+    "Should be uppercase": Должно быть в верхнем регистре
+    "Should be date and time in %s format": Должно быть датой и временем в формате %s
   num:
     "Cannot be less than %v": Не может быть меньше %v
     "Cannot be greater than %v": Не может быть больше %v
