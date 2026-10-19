@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Checks that the unit tests of every package cover 100% of its statements, in the root module and in the uuid module.
+# Checks that the unit tests of every package cover 100% of its statements, in the root, uuid and huma modules.
 # Every package is measured by its own tests only, so a package can't rely on the tests of another one.
 set -euo pipefail
 
@@ -8,7 +8,7 @@ profile=$(mktemp)
 trap 'rm -f "$profile"' EXIT
 
 failed=0
-for module in "$root" "$root/uuid"; do
+for module in "$root" "$root/uuid" "$root/huma"; do
 	cd "$module"
 	go test -count=1 -coverprofile="$profile" ./... >/dev/null
 	# the blocks with zero count, a block is printed as file:line.col,line.col

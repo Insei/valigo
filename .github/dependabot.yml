@@ -4,6 +4,7 @@ updates:
     directories:
       - "/"
       - "/uuid"
+      - "/huma"
       - "/bench"
       - "/examples/*"
     schedule:
