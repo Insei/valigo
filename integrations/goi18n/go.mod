@@ -5,7 +5,7 @@ go 1.27
 replace github.com/insei/valigo => ../../
 
 require (
-	github.com/insei/valigo v0.0.0-00010101000000-000000000000
+	github.com/insei/valigo v0.2.0
 	github.com/nicksnyder/go-i18n/v2 v2.6.1
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/text v0.43.0
