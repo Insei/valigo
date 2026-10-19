@@ -31,6 +31,13 @@ validation:
     "Should be between %s and %s": Should be between %s and %s
     "Should be in the past": Should be in the past
     "Should be in the future": Should be in the future
+  value:
+    "Should be fulfilled": Should be fulfilled
+    "Only %v values is allowed": Only %v values is allowed
+    "Values %v are not allowed": Values %v are not allowed
+    "Should be %v": Should be %v
+    "Cannot be %v": Cannot be %v
+    "Should contain unique values": Should contain unique values
   uuid:
     "Should be fulfilled": Should be fulfilled
     "Only %s values is allowed": Only %s values is allowed
