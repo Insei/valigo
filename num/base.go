@@ -64,6 +64,20 @@ func (i *BaseConfigurator[N]) Min(minNum N) *BaseConfigurator[N] {
 	return i
 }
 
+// MinField checks if the number is not less than the value of another numeric field of the object:
+// b.Field(&m.Price).As(num.Of).MinField(&m.MinPrice).
+func (i *BaseConfigurator[N]) MinField(other *N) *BaseConfigurator[N] {
+	i.f.CheckWith(other, func(v, o N) bool { return v >= o }, minLocaleKey)
+	return i
+}
+
+// MaxField checks if the number is not greater than the value of another numeric field of the object:
+// b.Field(&m.Used).As(num.Of).MaxField(&m.Limit).
+func (i *BaseConfigurator[N]) MaxField(other *N) *BaseConfigurator[N] {
+	i.f.CheckWith(other, func(v, o N) bool { return v <= o }, maxLocaleKey)
+	return i
+}
+
 // AnyOf checks if the number is one of the allowed values.
 func (i *BaseConfigurator[N]) AnyOf(allowed ...N) *BaseConfigurator[N] {
 	i.f.Check(func(v N) bool { return slices.Contains(allowed, v) }, anyOfLocaleKey, allowed)

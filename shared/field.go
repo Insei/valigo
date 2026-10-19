@@ -12,16 +12,20 @@ import (
 // ValidationFn validates an object, obj is a pointer to the configured struct.
 type ValidationFn func(ctx context.Context, h Helper, obj any) []Error
 
-// checkFn checks a single value: a struct field or a slice element.
+// checkFn checks a single value: a struct field or a slice element, obj is the validated object.
 // v is nil when the value is absent, i.e. a nil pointer field or a field of a nil nested struct.
-type checkFn[T any] func(ctx context.Context, h Helper, v *T) []Error
+type checkFn[T any] func(ctx context.Context, h Helper, obj any, v *T) []Error
+
+// Fields resolves a pointer to a field of the model of the configured struct to the field, it panics for other pointers.
+type Fields func(fieldPtr any) fmap.Field
 
 // Field is a typed rules set for a single value: a struct field or every element of a slice.
 // Its rules are the primitives of the typed configurators, convert it to one with As, e.g. f.As(str.Of).
 type Field[T any] struct {
-	field fmap.Field
-	h     Helper
-	add   func(fn checkFn[T])
+	field  fmap.Field
+	h      Helper
+	fields Fields
+	add    func(fn checkFn[T])
 	// root registers validation functions of the struct field itself, nil for the fields derived by When,
 	// conversions and for slice elements
 	root func(fn ValidationFn)
@@ -29,15 +33,15 @@ type Field[T any] struct {
 
 // NewValueField creates a Field for the struct field of type T or *T,
 // named types with the same underlying layout are allowed.
-// add registers a validation function of the configured struct.
-func NewValueField[T any](field fmap.Field, h Helper, add func(fn ValidationFn)) *Field[T] {
-	return &Field[T]{field: field, h: h, add: fieldSource(add, valueGetter[T](field)), root: add}
+// fields resolves the pointers to other fields of the model, add registers a validation function of the configured struct.
+func NewValueField[T any](field fmap.Field, h Helper, fields Fields, add func(fn ValidationFn)) *Field[T] {
+	return &Field[T]{field: field, h: h, fields: fields, add: fieldSource(add, valueGetter[T](field)), root: add}
 }
 
 // Check adds a rule that fails when ok returns false. Absent values are skipped.
 func (f *Field[T]) Check(ok func(v T) bool, localeKey string, args ...any) *Field[T] {
 	field := f.field
-	f.add(func(ctx context.Context, h Helper, v *T) []Error {
+	f.add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
 		if v == nil || ok(*v) {
 			return nil
 		}
@@ -49,7 +53,7 @@ func (f *Field[T]) Check(ok func(v T) bool, localeKey string, args ...any) *Fiel
 // Required adds a rule that fails when the value is absent or ok returns false.
 func (f *Field[T]) Required(ok func(v T) bool, localeKey string) *Field[T] {
 	field := f.field
-	f.add(func(ctx context.Context, h Helper, v *T) []Error {
+	f.add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
 		if v != nil && ok(*v) {
 			return nil
 		}
@@ -64,7 +68,7 @@ func (f *Field[T]) Required(ok func(v T) bool, localeKey string) *Field[T] {
 
 // Modify adds a step that changes the value in place, e.g. trims a string. Absent values are skipped.
 func (f *Field[T]) Modify(fn func(v *T)) *Field[T] {
-	f.add(func(_ context.Context, _ Helper, v *T) []Error {
+	f.add(func(_ context.Context, _ Helper, _ any, v *T) []Error {
 		if v != nil {
 			fn(v)
 		}
@@ -76,11 +80,31 @@ func (f *Field[T]) Modify(fn func(v *T)) *Field[T] {
 // Custom adds a user defined rule. Absent values are skipped.
 func (f *Field[T]) Custom(fn func(ctx context.Context, h *FieldCustomHelper, value T) []Error) *Field[T] {
 	customHelper := NewFieldCustomHelper(f.field, f.h)
-	f.add(func(ctx context.Context, _ Helper, v *T) []Error {
+	f.add(func(ctx context.Context, _ Helper, _ any, v *T) []Error {
 		if v == nil {
 			return nil
 		}
 		return fn(ctx, customHelper, *v)
+	})
+	return f
+}
+
+// CheckWith adds a rule that compares the value with the value of another field of the validated object,
+// it fails when ok(value, other) returns false. other is a pointer to a field of the model, it panics in Configure
+// for other pointers. The location of the other field is appended to args of the message.
+// The rule is skipped when the value or the value of the other field is absent.
+func (f *Field[T]) CheckWith[U any](other *U, ok func(v T, other U) bool, localeKey string, args ...any) *Field[T] {
+	field, otherField := f.field, f.fields(other)
+	get := valueGetter[U](otherField)
+	f.add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
+		if v == nil {
+			return nil
+		}
+		if o := get(obj); o == nil || ok(*v, *o) {
+			return nil
+		}
+		msgArgs := append(args[:len(args):len(args)], h.FieldLocation(otherField))
+		return []Error{h.ErrorT(ctx, field, *v, localeKey, msgArgs...)}
 	})
 	return f
 }
@@ -92,12 +116,12 @@ func (f *Field[T]) When(cond func(ctx context.Context, value T) bool) *Field[T] 
 		return f
 	}
 	add := f.add
-	return &Field[T]{field: f.field, h: f.h, add: func(fn checkFn[T]) {
-		add(func(ctx context.Context, h Helper, v *T) []Error {
+	return &Field[T]{field: f.field, h: f.h, fields: f.fields, add: func(fn checkFn[T]) {
+		add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
 			if v == nil || !cond(ctx, *v) {
 				return nil
 			}
-			return fn(ctx, h, v)
+			return fn(ctx, h, obj, v)
 		})
 	}}
 }
@@ -115,7 +139,7 @@ func fieldSource[T any](add func(fn ValidationFn), get func(obj any) *T) func(fn
 			v := get(obj)
 			var errs []Error
 			for _, check := range checks {
-				errs = append(errs, check(ctx, h, v)...)
+				errs = append(errs, check(ctx, h, obj, v)...)
 			}
 			return errs
 		})

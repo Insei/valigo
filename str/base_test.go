@@ -16,6 +16,7 @@ import (
 type status string
 
 type texts struct {
+	Repeat  string
 	Name    string
 	NamePtr *string
 	Status  status
@@ -80,6 +81,8 @@ func TestRules(t *testing.T) {
 		{"max runes", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).MaxRunes(2) }, &texts{Name: "яяя"}, []string{"Name: Cannot be longer than 2 characters"}},
 		{"max runes counts runes", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).MaxRunes(2) }, &texts{Name: "яя"}, nil},
 		{"min runes", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).MinRunes(3) }, &texts{Name: "яя"}, []string{"Name: Cannot be shorter than 3 characters"}},
+		{"equal field", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).EqualField(&m.Repeat) }, &texts{Name: "a", Repeat: "b"}, []string{"Name: Should be equal to Repeat"}},
+		{"equal field ok", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).EqualField(&m.Repeat) }, &texts{Name: "a", Repeat: "a"}, nil},
 		{"nil pointer skipped", func(c valigo.Configurator[texts], m *texts) {
 			c.Field(&m.NamePtr).As(str.Of).MinLen(1).MaxLen(0).AnyOf("x").Regexp(digits).Email()
 		}, &texts{}, nil},

@@ -1,6 +1,7 @@
 ---
 validation:
   string:
+    "Should be equal to %s": Должно совпадать с %s
     "Should be fulfilled": Должно быть заполнено
     "Cannot be longer than %d characters": Не может быть длиннее %d символов
     "Cannot be shorter than %d characters": Не может быть короче %d символов
@@ -32,6 +33,7 @@ validation:
     "Should be in the past": Должно быть в прошлом
     "Should be in the future": Должно быть в будущем
   value:
+    "Should be equal to %s": Должно совпадать с %s
     "Should be fulfilled": Должно быть заполнено
     "Only %v values is allowed": Только %v значения разрешены
     "Values %v are not allowed": Значения %v запрещены

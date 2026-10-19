@@ -13,6 +13,7 @@ import (
 )
 
 type event struct {
+	Start  time.Time
 	At     time.Time
 	AtPtr  *time.Time
 	Dates  []time.Time
@@ -63,6 +64,10 @@ func TestRules(t *testing.T) {
 		{"in past ok", func(c valigo.Configurator[event], m *event) { c.Field(&m.At).As(Of).InPast() }, &event{At: day1}, nil},
 		{"in future", func(c valigo.Configurator[event], m *event) { c.Field(&m.At).As(Of).InFuture() }, &event{At: day1}, []string{"At: Should be in the future"}},
 		{"in future ok", func(c valigo.Configurator[event], m *event) { c.Field(&m.At).As(Of).InFuture() }, &event{At: day3}, nil},
+		{"before field", func(c valigo.Configurator[event], m *event) { c.Field(&m.At).As(Of).BeforeField(&m.Start) }, &event{At: day2, Start: day1}, []string{"At: Should be before Start"}},
+		{"before field ok", func(c valigo.Configurator[event], m *event) { c.Field(&m.At).As(Of).BeforeField(&m.Start) }, &event{At: day1, Start: day2}, nil},
+		{"after field", func(c valigo.Configurator[event], m *event) { c.Field(&m.AtPtr).As(Of).AfterField(&m.Start) }, &event{AtPtr: &day1, Start: day2}, []string{"AtPtr: Should be after Start"}},
+		{"after field ok", func(c valigo.Configurator[event], m *event) { c.Field(&m.AtPtr).As(Of).AfterField(&m.Start) }, &event{AtPtr: &day3, Start: day2}, nil},
 		{"nil skipped", func(c valigo.Configurator[event], m *event) {
 			c.Field(&m.AtPtr).As(Of).Before(day1).After(day3).InPast().InFuture()
 		}, &event{}, nil},

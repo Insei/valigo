@@ -14,6 +14,8 @@ import (
 type score uint16
 
 type numbers struct {
+	Min     int
+	Max     int
 	Int     int
 	Int8    int8
 	Int64   int64
@@ -66,6 +68,11 @@ func TestRules(t *testing.T) {
 			c.Field(&m.Float).As(num.Ptr).Min(1).Max(0).AnyOf(5).AnyOfInterval(2, 3)
 		}, &numbers{}, nil},
 		{"ptr checked", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Float).As(num.Ptr).Max(1.5) }, &numbers{Float: ptr(2.5)}, []string{"Cannot be greater than 1.5"}},
+		{"min field", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Int).As(num.Of).MinField(&m.Min) }, &numbers{Int: 1, Min: 2}, []string{"Cannot be less than Min"}},
+		{"min field ok", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Int).As(num.Of).MinField(&m.Min) }, &numbers{Int: 2, Min: 2}, nil},
+		{"max field", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Int).As(num.Of).MaxField(&m.Max) }, &numbers{Int: 3, Max: 2}, []string{"Cannot be greater than Max"}},
+		{"max field ok", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Int).As(num.Of).MaxField(&m.Max) }, &numbers{Int: 2, Max: 2}, nil},
+		{"ptr field with min field", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.IntPtr).As(num.Ptr).MinField(&m.Min) }, &numbers{Min: 5}, nil},
 		{"when true", func(c valigo.Configurator[numbers], m *numbers) {
 			c.Field(&m.Int).As(num.Of).When(func(_ context.Context, v int) bool { return v > 10 }).Max(20)
 		}, &numbers{Int: 21}, []string{"Cannot be greater than 20"}},

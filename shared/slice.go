@@ -101,7 +101,7 @@ func eachSource[E any](add func(fn ValidationFn), get func(obj any) (Elems[E], b
 				v := elems.At(i)
 				n := len(errs)
 				for _, check := range checks {
-					errs = append(errs, check(ctx, h, v)...)
+					errs = append(errs, check(ctx, h, obj, v)...)
 				}
 				for j := n; j < len(errs); j++ {
 					errs[j].Location += "[" + strconv.Itoa(i) + "]"
@@ -114,17 +114,18 @@ func eachSource[E any](add func(fn ValidationFn), get func(obj any) (Elems[E], b
 
 // SliceFieldConfigurator configures rules for the slice itself, e.g. its length.
 type SliceFieldConfigurator[E any] struct {
-	field fmap.Field
-	h     Helper
-	get   func(obj any) (Elems[E], bool)
-	add   func(fn ValidationFn)
+	field  fmap.Field
+	h      Helper
+	fields Fields
+	get    func(obj any) (Elems[E], bool)
+	add    func(fn ValidationFn)
 }
 
 // NewSliceFieldConfigurator creates a SliceFieldConfigurator for the field of type []E, *[]E, []*E or *[]*E,
 // named types with the same underlying layout are allowed.
-// add registers a validation function of the configured struct.
-func NewSliceFieldConfigurator[E any](field fmap.Field, h Helper, add func(fn ValidationFn)) *SliceFieldConfigurator[E] {
-	return &SliceFieldConfigurator[E]{field: field, h: h, get: elemsGetter[E](field), add: add}
+// fields resolves the pointers to other fields of the model, add registers a validation function of the configured struct.
+func NewSliceFieldConfigurator[E any](field fmap.Field, h Helper, fields Fields, add func(fn ValidationFn)) *SliceFieldConfigurator[E] {
+	return &SliceFieldConfigurator[E]{field: field, h: h, fields: fields, get: elemsGetter[E](field), add: add}
 }
 
 // Each configures rules applied to every element of the slice.
@@ -135,7 +136,7 @@ func (s *SliceFieldConfigurator[E]) Each(fn func(elem *Field[E])) *SliceFieldCon
 
 // EachField returns a Field that applies rules to every element of the slice.
 func (s *SliceFieldConfigurator[E]) EachField() *Field[E] {
-	return &Field[E]{field: s.field, h: s.h, add: eachSource(s.add, s.get)}
+	return &Field[E]{field: s.field, h: s.h, fields: s.fields, add: eachSource(s.add, s.get)}
 }
 
 func (s *SliceFieldConfigurator[E]) check(ok func(n int) bool, localeKey string, args ...any) {
@@ -194,7 +195,7 @@ func (s *SliceFieldConfigurator[E]) When(whenFn func(ctx context.Context, value 
 		return s
 	}
 	add, get := s.add, s.get
-	return &SliceFieldConfigurator[E]{field: s.field, h: s.h, get: get, add: func(fn ValidationFn) {
+	return &SliceFieldConfigurator[E]{field: s.field, h: s.h, fields: s.fields, get: get, add: func(fn ValidationFn) {
 		add(func(ctx context.Context, h Helper, obj any) []Error {
 			elems, _ := get(obj)
 			if !whenFn(ctx, elems) {

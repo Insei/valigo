@@ -1,6 +1,7 @@
 ---
 validation:
   string:
+    "Should be equal to %s": Should be equal to %s
     "Should be fulfilled": Should be fulfilled
     "Cannot be longer than %d characters": Cannot be longer than %d characters
     "Cannot be shorter than %d characters": Cannot be shorter than %d characters
@@ -32,6 +33,7 @@ validation:
     "Should be in the past": Should be in the past
     "Should be in the future": Should be in the future
   value:
+    "Should be equal to %s": Should be equal to %s
     "Should be fulfilled": Should be fulfilled
     "Only %v values is allowed": Only %v values is allowed
     "Values %v are not allowed": Values %v are not allowed

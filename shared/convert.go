@@ -25,13 +25,13 @@ func (s *SliceFieldConfigurator[E]) As[R any](conv func(s *SliceFieldConfigurato
 // Use it in conversions of pointer fields, e.g. num.Ptr is num.Of of the dereferenced field.
 func Deref[T any](f *Field[*T]) *Field[T] {
 	add := f.add
-	return &Field[T]{field: f.field, h: f.h, add: func(fn checkFn[T]) {
-		add(func(ctx context.Context, h Helper, v **T) []Error {
+	return &Field[T]{field: f.field, h: f.h, fields: f.fields, add: func(fn checkFn[T]) {
+		add(func(ctx context.Context, h Helper, obj any, v **T) []Error {
 			var p *T
 			if v != nil {
 				p = *v
 			}
-			return fn(ctx, h, p)
+			return fn(ctx, h, obj, p)
 		})
 	}}
 }
@@ -44,9 +44,9 @@ func Retype[T, U any](f *Field[T]) *Field[U] {
 	}
 	mustLayout[U](f.field, reflect.TypeFor[T]())
 	add := f.add
-	return &Field[U]{field: f.field, h: f.h, add: func(fn checkFn[U]) {
-		add(func(ctx context.Context, h Helper, v *T) []Error {
-			return fn(ctx, h, (*U)(unsafe.Pointer(v)))
+	return &Field[U]{field: f.field, h: f.h, fields: f.fields, add: func(fn checkFn[U]) {
+		add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
+			return fn(ctx, h, obj, (*U)(unsafe.Pointer(v)))
 		})
 	}}
 }
@@ -57,7 +57,7 @@ func RetypeSlice[E, U any](s *SliceFieldConfigurator[E]) *SliceFieldConfigurator
 	if same, ok := any(s).(*SliceFieldConfigurator[U]); ok {
 		return same
 	}
-	return &SliceFieldConfigurator[U]{field: s.field, h: s.h, get: elemsGetter[U](s.field), add: s.add}
+	return &SliceFieldConfigurator[U]{field: s.field, h: s.h, fields: s.fields, get: elemsGetter[U](s.field), add: s.add}
 }
 
 // SlicePtr converts the field of a pointer to a slice, *[]E, to the slice configurator, a nil pointer is absent:
@@ -66,7 +66,7 @@ func SlicePtr[E any](f *Field[*[]E]) *SliceFieldConfigurator[E] {
 	if f.root == nil {
 		panic(fmt.Sprintf("valigo: SlicePtr of field %s must be called before When and other conversions", f.field.GetStructPath()))
 	}
-	return NewSliceFieldConfigurator[E](f.field, f.h, f.root)
+	return NewSliceFieldConfigurator[E](f.field, f.h, f.fields, f.root)
 }
 
 // SliceRules are the rules of the slice itself for the typed slice configurators, S is the type of the configurator.

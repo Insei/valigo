@@ -29,3 +29,10 @@ func TestHelperErrorT(t *testing.T) {
 		t.Errorf("expected error, got %v", err.Message)
 	}
 }
+
+func TestHelperFieldLocation(t *testing.T) {
+	strg, _ := fmap.GetFrom(admin{})
+	if got := newHelper().FieldLocation(strg.MustFind("Name")); got != "Name" {
+		t.Errorf("FieldLocation() = %q, want Name", got)
+	}
+}

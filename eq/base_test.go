@@ -21,6 +21,7 @@ const (
 )
 
 type account struct {
+	Previous status
 	Status   status
 	Agreed   bool
 	Level    int
@@ -72,6 +73,8 @@ func TestRules(t *testing.T) {
 		{"equal", func(c valigo.Configurator[account], m *account) { c.Field(&m.Agreed).As(eq.Of).Equal(true) }, &account{}, []string{"Agreed: Should be true"}},
 		{"equal ok", func(c valigo.Configurator[account], m *account) { c.Field(&m.Agreed).As(eq.Of).Equal(true) }, &account{Agreed: true}, nil},
 		{"not equal", func(c valigo.Configurator[account], m *account) { c.Field(&m.Level).As(eq.Of).NotEqual(13) }, &account{Level: 13}, []string{"Level: Cannot be 13"}},
+		{"equal field", func(c valigo.Configurator[account], m *account) { c.Field(&m.Status).As(eq.Of).EqualField(&m.Previous) }, &account{Status: active, Previous: blocked}, []string{"Status: Should be equal to Previous"}},
+		{"equal field ok", func(c valigo.Configurator[account], m *account) { c.Field(&m.Status).As(eq.Of).EqualField(&m.Previous) }, &account{Status: active, Previous: active}, nil},
 		{"when", func(c valigo.Configurator[account], m *account) {
 			c.Field(&m.Status).As(eq.Of).When(func(_ context.Context, v status) bool { return v != "" }).OneOf(active)
 		}, &account{}, nil},

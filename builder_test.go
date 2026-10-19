@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/insei/fmap/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -201,6 +202,17 @@ func TestElementErrorLocation(t *testing.T) {
 	assert.Equal(t, "Tags", errs[0].Location)
 	assert.Equal(t, "Tags[1]", errs[1].Location)
 	assert.Equal(t, "Tags[2]", errs[2].Location)
+}
+
+func TestOtherFieldLocationByNamingFn(t *testing.T) {
+	type signUp struct {
+		Password string `json:"password"`
+		Repeat   string `json:"repeat"`
+	}
+	v := New(WithFieldLocationNamingFn(func(f fmap.Field) string { return f.GetTagPath("json", false) }))
+	Configure[signUp](v, func(c Configurator[signUp], m *signUp) { c.Field(&m.Repeat).As(str.Of).EqualField(&m.Password) })
+	errs := v.ValidateTyped(context.Background(), &signUp{Password: "a", Repeat: "b"})
+	assert.Equal(t, []shared.Error{{Location: "repeat", Message: "Should be equal to password", Value: "b"}}, errs)
 }
 
 func TestReconfigureReplacesRules(t *testing.T) {

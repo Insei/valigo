@@ -64,6 +64,20 @@ func (i *BaseConfigurator) Between(from, to time.Time) *BaseConfigurator {
 	return i
 }
 
+// BeforeField checks if the time is before the time of another field of the object:
+// b.Field(&m.StartsAt).As(timex.Of).BeforeField(&m.EndsAt).
+func (i *BaseConfigurator) BeforeField(other *time.Time) *BaseConfigurator {
+	i.f.CheckWith(other, func(v, o time.Time) bool { return v.Before(o) }, beforeLocaleKey)
+	return i
+}
+
+// AfterField checks if the time is after the time of another field of the object:
+// b.Field(&m.EndsAt).As(timex.Of).AfterField(&m.StartsAt).
+func (i *BaseConfigurator) AfterField(other *time.Time) *BaseConfigurator {
+	i.f.CheckWith(other, func(v, o time.Time) bool { return v.After(o) }, afterLocaleKey)
+	return i
+}
+
 // InPast checks if the time is before the moment of the validation.
 func (i *BaseConfigurator) InPast() *BaseConfigurator {
 	i.f.Check(func(v time.Time) bool { return v.Before(now()) }, pastLocaleKey)
