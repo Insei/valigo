@@ -63,6 +63,7 @@ func TestGetPriorityLanguagesOrder(t *testing.T) {
 		{acceptLanguage: "en-US, ru;q=0.8", expected: []string{"en", "ru"}},
 		{acceptLanguage: "fr ; q=0.5 , de", expected: []string{"de", "fr"}},
 		{acceptLanguage: "RU-ru,en;q=0.9", expected: []string{"ru", "en"}},
+		{acceptLanguage: "ru;q=0, en", expected: []string{"en"}},
 	}
 	for _, test := range tests {
 		if result := getPriorityLanguages(test.acceptLanguage); !slices.Equal(result, test.expected) {
