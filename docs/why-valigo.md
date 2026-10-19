@@ -62,6 +62,14 @@ How the libraries compare, by their documentation:
 | Codes for clients | `Code` and named `Params` of every error | the tag and one string parameter of a field error | the code and the parameters of an error |
 | Messages of own rules | the message is its locale key, translated when a translation is added | a translation is registered for every tag | the message of the error |
 
+### Slices, maps and other fields
+
+The rules of a slice check the slice itself and, by `Each`, every element with the rules of its type; maps have `EachKey` and `EachValue`; a rule can compare a field with another one by its pointer — `b.Field(&o.EndsAt).As(timex.Of).AfterField(&o.StartsAt)` — with the type of the other field checked by the compiler. See [Slices](features/slices.md), [Maps](features/maps.md) and [Rules on other fields](features/fields.md).
+
+### Ready for HTTP APIs
+
+The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](features/problem.md) and [huma](features/huma.md).
+
 ### Errors that point to the field
 
 Every error has the message, the location and the value: `Tags[1]` for an element of a slice, `Address.City` for a nested field, or the JSON path of the field with a custom location function. See [Errors](features/errors.md).

@@ -106,15 +106,18 @@ plugins:
       base_url: !ENV [LLMSTXT_BASE_URL, "https://insei.github.io/valigo/latest/"]
       markdown_description: >-
         valigo validates Go structs by rules configured once with pointers to the fields of a model:
-        b.String(&u.Name).Required().MaxLen(64). The configurator methods are generic (Go 1.27), so the compiler
-        checks the field types and the rule arguments. Validation of valid objects doesn't allocate, absent values
-        are skipped by all rules except Required, errors have field locations and translated messages.
-        The module path is github.com/insei/valigo.
+        b.Field(&u.Name).As(str.Of).Required().MaxLen(64). The configurator has Field, Slice, Map, When and Custom,
+        As converts a field to the configurator of its type by a conversion with a type constraint (str.Of, num.Of,
+        num.Ptr, timex.Of, eq.Of, str.Slice...), so the compiler checks the field types and the rule arguments
+        (Go 1.27 generic methods). Validation of valid objects doesn't allocate, absent values are skipped by all
+        rules except Required, errors have field locations, translated messages (en, de, es, fr, ru), stable codes
+        and named params; the problem package writes RFC 9457 problem details, the github.com/insei/valigo/huma
+        module validates huma inputs. The module path is github.com/insei/valigo.
       sections:
         Start:
           - index.md: installation and the first validator
           - why-valigo.md: what it gives compared to tag based validators
-          - performance.md: benchmarks with go-playground/validator and ozzo-validation
+          - performance.md: benchmarks with go-playground/validator, ozzo-validation, zog, gookit/validate and hand-written code
           - upgrading.md: upgrading from v0.0.x
           - ai-agents.md: the skill for AI agents
         Features:
