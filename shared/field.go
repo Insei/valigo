@@ -167,6 +167,48 @@ func (f *Field[T]) When(cond func(ctx context.Context, value T) bool) *Field[T] 
 	}}
 }
 
+// Or adds a rule that passes when the rules of any of the alternatives pass, every alternative configures its rules
+// on its own field: f.Or(func(a *Field[T]) { a.As(str.Of).Email() }, func(a *Field[T]) { a.As(str.Of).URL() }).
+// When no alternative passes, the errors of the first one are reported. The alternatives are checked in order
+// and the next ones are skipped after one passes. A value that passes the first alternative is checked without
+// allocations; the errors of the failed alternatives are built and dropped, so the next alternatives allocate them.
+func (f *Field[T]) Or(alternatives ...func(alt *Field[T])) *Field[T] {
+	alts := make([][]checkFn[T], len(alternatives))
+	for i, configure := range alternatives {
+		configure(&Field[T]{field: f.field, h: f.h, fields: f.fields, add: func(fn checkFn[T]) {
+			alts[i] = append(alts[i], fn)
+		}})
+	}
+	f.add(func(ctx context.Context, h Helper, obj any, v *T, errs []Error) []Error {
+		n, first := len(errs), len(errs)
+		for i, checks := range alts {
+			start := len(errs)
+			for _, check := range checks {
+				errs = check(ctx, h, obj, v, errs)
+			}
+			if len(errs) == start {
+				clear(errs[n:start])
+				return errs[:n]
+			}
+			if i == 0 {
+				first = len(errs)
+				continue
+			}
+			clear(errs[start:])
+			errs = errs[:start]
+		}
+		return errs[:first]
+	})
+	return f
+}
+
+// Getter returns a function that reads a pointer to the value of the field of type T or *T from obj,
+// a pointer to the configured struct, nil when the value is absent. Named types with the layout of T are allowed,
+// it panics for other types. It reads the value without allocations, e.g. for the conditions of the rules.
+func Getter[T any](field fmap.Field) func(obj any) *T {
+	return valueGetter[T](field)
+}
+
 // fieldSource applies checks to the struct field value read by get.
 // All checks of the field are registered as a single validation function, so the value is read once.
 func fieldSource[T any](add func(fn ValidationFn), get func(obj any) *T) func(fn checkFn[T]) {
