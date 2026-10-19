@@ -182,4 +182,4 @@ v := valigo.New(valigo.WithErrorsTransformer(func(errs []shared.Error) []error {
 }))
 ```
 
-The transformer is called only when there are errors.
+The transformer is called only when there are errors. For an HTTP API the [`problem`](problem.md) package has the transformer of the problem details of RFC 9457.

@@ -30,4 +30,5 @@ Reference of valigo capabilities grouped by area.
 | Page | What's inside |
 |---|---|
 | [Errors](errors.md) | `Validate` and `ValidateTyped`, `shared.Error`, locations of fields and elements, errors transformer |
+| [HTTP problem details](problem.md) | `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers and codes |
 | [Translations](translations.md) | Built-in locales, own messages, languages from the context, `Accept-Language` middleware |
