@@ -52,3 +52,11 @@ func TestNewTranslator(t *testing.T) {
 	tr = New(WithStorage(&mockStorage{}), WithDefaultLang("fr"))
 	assert.NotNil(t, tr)
 }
+
+func TestTranslatorErrorTKeepsPercent(t *testing.T) {
+	storage := NewInMemStorage()
+	storage.Add("en", map[string]string{"discount": "Discount %d%% is too big"})
+	tr := New(WithStorage(storage))
+	err := tr.ErrorT(context.Background(), "discount", 50)
+	assert.EqualError(t, err, "Discount 50% is too big")
+}
