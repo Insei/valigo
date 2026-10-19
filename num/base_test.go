@@ -112,7 +112,19 @@ func TestErrorValueAndLocation(t *testing.T) {
 		c.Field(&m.IntPtr).As(num.Ptr).Required()
 	}, &numbers{Score: 11})
 	assert.Equal(t, []shared.Error{
-		{Location: "Score", Message: "Cannot be greater than 10", Value: score(11)},
-		{Location: "IntPtr", Message: "Should be fulfilled"},
+		{Location: "Score", Message: "Cannot be greater than 10", Value: score(11), Code: "number.max", Params: map[string]any{"max": score(10)}},
+		{Location: "IntPtr", Message: "Should be fulfilled", Code: "number.required"},
 	}, errs)
+}
+
+func TestCodes(t *testing.T) {
+	v := valigo.New()
+	valigo.Configure[numbers](v, func(c valigo.Configurator[numbers], m *numbers) {
+		c.Field(&m.Int).As(num.Of).Required().Min(5).Max(-1).MinField(&m.Min).MaxField(&m.Max).AnyOf(7).AnyOfInterval(1, 2)
+	})
+	var codes []string
+	for _, err := range v.ValidateTyped(context.Background(), &numbers{Min: 1, Max: -1}) {
+		codes = append(codes, err.Code)
+	}
+	assert.Equal(t, []string{"number.required", "number.min", "number.max", "number.min_field", "number.max_field", "number.any_of", "number.interval"}, codes)
 }

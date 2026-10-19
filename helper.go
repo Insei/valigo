@@ -16,7 +16,7 @@ type helper struct {
 }
 
 // ErrorT returns a shared.Error with the given location, message, and value.
-// The message is translated using the translator.
+// The message is translated using the translator, the code of the error is the locale key.
 func (h *helper) ErrorT(ctx context.Context, field fmap.Field, value any, localeKey string, args ...any) shared.Error {
 	location := h.getFieldLocation(field)
 	msg := h.t.T(ctx, localeKey, args...)
@@ -24,6 +24,7 @@ func (h *helper) ErrorT(ctx context.Context, field fmap.Field, value any, locale
 		Location: location,
 		Message:  msg,
 		Value:    value,
+		Code:     localeKey,
 	}
 }
 

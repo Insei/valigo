@@ -103,7 +103,7 @@ func TestErrorValue(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[event](v, func(c valigo.Configurator[event], m *event) { c.Field(&m.At).As(Of).After(day2) })
 	errs := v.ValidateTyped(context.Background(), &event{At: day1})
-	assert.Equal(t, []shared.Error{{Location: "At", Message: "Should be after 2026-01-02T00:00:00Z", Value: day1}}, errs)
+	assert.Equal(t, []shared.Error{{Location: "At", Message: "Should be after 2026-01-02T00:00:00Z", Value: day1, Code: "time.after", Params: map[string]any{"time": "2026-01-02T00:00:00Z"}}}, errs)
 }
 
 func TestZeroAllocationsOnValid(t *testing.T) {
@@ -120,4 +120,31 @@ func TestZeroAllocationsOnValid(t *testing.T) {
 	ctx := context.Background()
 	assert.Nil(t, v.Validate(ctx, obj))
 	assert.Zero(t, testing.AllocsPerRun(100, func() { v.Validate(ctx, obj) }))
+}
+
+func TestCodes(t *testing.T) {
+	now = func() time.Time { return day2 }
+	t.Cleanup(func() { now = time.Now })
+	tests := []struct {
+		code string
+		cfg  func(c *BaseConfigurator, m *event)
+		obj  *event
+	}{
+		{"time.required", func(c *BaseConfigurator, m *event) { c.Required() }, &event{}},
+		{"time.before", func(c *BaseConfigurator, m *event) { c.Before(day1) }, &event{At: day2}},
+		{"time.after", func(c *BaseConfigurator, m *event) { c.After(day3) }, &event{At: day2}},
+		{"time.between", func(c *BaseConfigurator, m *event) { c.Between(day3, day3) }, &event{At: day2}},
+		{"time.before_field", func(c *BaseConfigurator, m *event) { c.BeforeField(&m.Start) }, &event{At: day2, Start: day1}},
+		{"time.after_field", func(c *BaseConfigurator, m *event) { c.AfterField(&m.Start) }, &event{At: day1, Start: day2}},
+		{"time.in_past", func(c *BaseConfigurator, m *event) { c.InPast() }, &event{At: day3}},
+		{"time.in_future", func(c *BaseConfigurator, m *event) { c.InFuture() }, &event{At: day1}},
+	}
+	for _, tt := range tests {
+		v := valigo.New()
+		valigo.Configure[event](v, func(c valigo.Configurator[event], m *event) { tt.cfg(c.Field(&m.At).As(Of), m) })
+		errs := v.ValidateTyped(context.Background(), tt.obj)
+		if assert.Len(t, errs, 1, tt.code) {
+			assert.Equal(t, tt.code, errs[0].Code)
+		}
+	}
 }

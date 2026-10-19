@@ -35,6 +35,11 @@ func (h *FieldCustomHelper) ErrorT(ctx context.Context, value any, localeKey str
 	return h.h.ErrorT(ctx, h.field, value, localeKey, args...)
 }
 
+// ErrorMsg returns the error of the field with the translated message, the code and the parameters of msg.
+func (h *FieldCustomHelper) ErrorMsg(ctx context.Context, value any, msg Msg) Error {
+	return msg.Error(ctx, h.h, h.field, value)
+}
+
 // NewFieldCustomHelper function creates a new FieldCustomHelper
 // instance with the provided field and Helper implementation.
 func NewFieldCustomHelper(field fmap.Field, h Helper) *FieldCustomHelper {
