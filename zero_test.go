@@ -250,3 +250,23 @@ func TestZeroRecursiveTypes(t *testing.T) {
 		t.Errorf("zero() must allocate non recursive pointers only, got %+v", obj)
 	}
 }
+
+func TestZeroErrors(t *testing.T) {
+	if err := zero(new(int)); err == nil {
+		t.Errorf("zero() of a non-struct must fail")
+	}
+}
+
+func TestZeroSkipsUnexportedFields(t *testing.T) {
+	type withHidden struct {
+		hidden *struct{ X int }
+		Shown  *struct{ X int }
+	}
+	obj := &withHidden{}
+	if err := zero(obj); err != nil {
+		t.Fatalf("zero() error = %v", err)
+	}
+	if obj.hidden != nil || obj.Shown == nil {
+		t.Errorf("zero() must allocate exported fields only, got %+v", obj)
+	}
+}
