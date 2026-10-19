@@ -33,7 +33,11 @@ b.Slice(&u.Emails).As(str.Slice).MaxLen(3).Email()
 | `MaxRunes(n)` | the number of characters (runes) is greater than `n` | Cannot be longer than %d characters |
 | `AnyOf(values...)` | the value isn't one of `values` | Only %s values is allowed |
 | `EqualField(&m.X)` | the value isn't equal to the value of the string field `X`, see [Rules on other fields](fields.md) | Should be equal to %s |
+| `NotEqualField(&m.X)` | the value is equal to the value of the string field `X` | Cannot be equal to %s |
+| `EqualFold(s)` | the value isn't equal to `s` ignoring case, by Unicode case folding | Should be equal to %s ignoring case |
 | `Prefix(s)`, `Suffix(s)`, `Contains(s)` | the value doesn't start with, end with or contain `s` | Should start with %s, Should end with %s, Should contain %s |
+| `NotPrefix(s)`, `NotSuffix(s)`, `Excludes(s)` | the value starts with, ends with or contains `s` | Cannot start with %s, Cannot end with %s, Cannot contain %s |
+| `ContainsAny(chars)`, `ExcludesAny(chars)` | the value has none / one of the characters of `chars` | Should contain any of the characters %s, Cannot contain the characters %s |
 | `Regexp(re, opts...)` | the value doesn't match `re` | Doesn't match required regexp pattern |
 | `Email()` | the value isn't an email address | Should be email address |
 | `URL()` | the value isn't an absolute URL with a scheme and a host | Should be URL |
@@ -41,6 +45,10 @@ b.Slice(&u.Emails).As(str.Slice).MaxLen(3).Email()
 | `Hostname()` | the value isn't a hostname by RFC 1123 | Should be hostname |
 | `UUID()` | the value isn't a UUID in the canonical form, any case | Should be UUID |
 | `Alphanumeric()` | the value is empty or has characters other than ASCII letters and digits | Should contain only letters and digits |
+| `Alpha()` | the value is empty or has characters other than ASCII letters | Should contain only letters |
+| `Digits()` | the value is empty or has characters other than ASCII digits, `0042` | Should contain only digits |
+| `Numeric()` | the value isn't a decimal number with an optional sign and fraction, `-12`, `+3.5` | Should be a number |
+| `Hexadecimal()` | the value isn't a hexadecimal number with an optional `0x`, `ff`, `0x1A` | Should be hexadecimal |
 | `ASCII()` | the value is empty or has non-ASCII characters | Should contain only ASCII characters |
 | `Lowercase()`, `Uppercase()` | the value is empty or has upper / lower case letters | Should be lowercase, Should be uppercase |
 | `Base64()`, `Base64URL()` | the value isn't base64 of RFC 4648 with the standard alphabet and padding / with the URL alphabet, padding optional | Should be base64 encoded, Should be base64url encoded |
