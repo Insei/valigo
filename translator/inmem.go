@@ -54,14 +54,32 @@ func (t *inMemTranslatorStorage) Merge(locales map[string]map[string]string) {
 }
 
 // Get returns the translated value for a given format and language preferences.
+// A format with plural forms (format#one, format#few, format#many, format#other) is translated
+// by the plural category of the first integer argument in the language.
 func (t *inMemTranslatorStorage) Get(prefer []string, format string, args ...any) string {
 	translatedFormat := format
 	for _, preferLang := range prefer {
-		langFormat, ok := t.translations[preferLang][format]
-		if ok {
+		if langFormat, ok := t.translate(preferLang, format, args); ok {
 			translatedFormat = langFormat
 			break
 		}
 	}
 	return fmt.Sprintf(translatedFormat, args...)
+}
+
+// translate returns the translation of format in lang, the plural form if the format has plural forms.
+func (t *inMemTranslatorStorage) translate(lang, format string, args []any) (string, bool) {
+	translations := t.translations[lang]
+	if langFormat, ok := translations[format]; ok {
+		return langFormat, true
+	}
+	n, ok := pluralCount(args)
+	if !ok {
+		return "", false
+	}
+	if langFormat, ok := translations[format+"#"+pluralCategory(lang, n)]; ok {
+		return langFormat, true
+	}
+	langFormat, ok := translations[format+"#"+pluralOther]
+	return langFormat, ok
 }

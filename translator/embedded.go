@@ -15,13 +15,20 @@ import (
 var EmbedFSLocalesYAML embed.FS
 
 // fromMap recursively flattens a map of any type into a map of strings.
-// It prefixes each key with the given prefix.
+// It prefixes each key with the given prefix. A map of the plural categories of CLDR is the plural forms
+// of the message of its key, they are stored as key#one, key#few, key#many and key#other.
 func fromMap(source map[string]any, dest map[string]string, prefix string) {
 	if len(prefix) > 0 {
 		prefix += ":"
 	}
 	for k, v := range source {
-		if recMap, ok := v.(map[string]any); ok {
+		if recMap, ok := v.(map[string]any); ok && isPluralForms(recMap) {
+			for category, form := range recMap {
+				if strVal, ok := form.(string); ok {
+					dest[prefix+k+"#"+category] = strVal
+				}
+			}
+		} else if ok {
 			fromMap(recMap, dest, prefix+k)
 		} else if strVal, ok := v.(string); ok {
 			dest[prefix+k] = strVal
