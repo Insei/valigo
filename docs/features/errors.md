@@ -16,13 +16,94 @@ func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error
 
 ```go
 type Error struct {
-	Message  string // translated message
-	Location string // location of the field, Address.City or Tags[1] by default
-	Value    any    // the checked value, nil for absent values
+	Message  string         // translated message
+	Location string         // location of the field, Address.City or Tags[1] by default
+	Value    any            // the checked value, nil for absent values
+	Code     string         // stable code of the rule, e.g. string.max_len
+	Params   map[string]any // named parameters of the message, e.g. {"max": 64}
 }
 ```
 
-`Error()` returns `Message (Location: Value)`, or `Message` alone when both the location and the value are empty. `Error` has JSON field names of its own: `{"Message":"...","Location":"...","Value":...}`, convert it to your API format by the transformer.
+`Error()` returns `Message (Location: Value)`, or `Message` alone when both the location and the value are empty. `Error` has JSON field names of its own: `{"Message":"...","Location":"...","Value":...,"Code":"...","Params":{...}}`, `Code` and `Params` are omitted when empty. Convert it to your API format by the [transformer](#errors-transformer).
+
+## Codes for clients
+
+The message is translated on the backend, see [Translations](translations.md). A client that translates the messages itself — a web or a mobile application with its own locales — uses `Code` and `Params` instead: the code is stable, the parameters are named.
+
+```go
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/insei/valigo"
+	"github.com/insei/valigo/num"
+	"github.com/insei/valigo/str"
+	"github.com/insei/valigo/timex"
+)
+
+type Event struct {
+	Title    string
+	Seats    int
+	StartsAt time.Time
+	EndsAt   time.Time
+}
+
+func main() {
+	v := valigo.New()
+	valigo.Configure[Event](v, func(b valigo.Configurator[Event], e *Event) {
+		b.Field(&e.Title).As(str.Of).MaxLen(5)
+		b.Field(&e.Seats).As(num.Of).AnyOfInterval(1, 100)
+		b.Field(&e.EndsAt).As(timex.Of).AfterField(&e.StartsAt)
+	})
+
+	start := time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC)
+	for _, err := range v.ValidateTyped(context.Background(), &Event{Title: "Conference", StartsAt: start, EndsAt: start}) {
+		body, _ := json.Marshal(map[string]any{"field": err.Location, "code": err.Code, "params": err.Params})
+		fmt.Println(string(body))
+	}
+}
+```
+
+Output:
+
+```text
+{"code":"string.max_len","field":"Title","params":{"max":5}}
+{"code":"number.interval","field":"Seats","params":{"max":100,"min":1}}
+{"code":"time.after_field","field":"EndsAt","params":{"field":"StartsAt"}}
+```
+
+| Code | Params |
+|---|---|
+| `string.required`, `string.email`, `string.url`, `string.ip`, `string.ipv4`, `string.ipv6`, `string.hostname`, `string.uuid`, `string.alphanumeric`, `string.regexp` | — |
+| `string.min_len`, `string.min_runes` | `min` |
+| `string.max_len`, `string.max_runes` | `max` |
+| `string.any_of` | `values` |
+| `string.prefix`, `string.suffix`, `string.contains` | `prefix`, `suffix`, `substring` |
+| `string.equal_field` | `field` |
+| `number.required` | — |
+| `number.min`, `number.max` | `min`, `max` |
+| `number.min_field`, `number.max_field` | `field` |
+| `number.any_of` | `values` |
+| `number.interval` | `min`, `max` |
+| `time.required`, `time.in_past`, `time.in_future` | — |
+| `time.before`, `time.after` | `time` (RFC 3339) |
+| `time.between` | `from`, `to` (RFC 3339) |
+| `time.before_field`, `time.after_field` | `field` |
+| `value.required`, `value.unique` | — |
+| `value.one_of`, `value.not_one_of` | `values` |
+| `value.equal`, `value.not_equal` | `value` |
+| `value.equal_field` | `field` |
+| `uuid.required` | — |
+| `uuid.any_of` | `values` |
+| `slice.required`, `map.required` | — |
+| `slice.min_len`, `map.min_len` | `min` |
+| `slice.max_len`, `map.max_len` | `max` |
+
+The `field` parameter is the location of the other field by the location function of the validator. The errors of [custom rules](custom.md) have the locale key as the code, or the code of `shared.M` with `ErrorMsg`.
 
 ## Location of fields
 

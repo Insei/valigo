@@ -20,7 +20,7 @@ Rules are configured once by `valigo.Configure[T]` with pointers to the fields o
 - `MaxLen`, `MinLen` and `Required` of slice configurators check the slice itself, rules on elements are set by `Each(func(e *str.BaseConfigurator) { ... })`.
 - Absent values (nil pointers, nil `*[]T`, fields of nil nested structs, nil elements of `[]*T`) are skipped by every rule except `Required`.
 - Rules run in the order of the chain, `Trim()` changes the field of the validated object.
-- `Validate` returns `[]error`, `ValidateTyped` returns `[]shared.Error{Message, Location, Value}`, both are `nil` for valid objects.
+- `Validate` returns `[]error`, `ValidateTyped` returns `[]shared.Error{Message, Location, Value, Code, Params}`, both are `nil` for valid objects. `Message` is translated on the backend; `Code` (`string.max_len`, `number.interval`, `time.after_field`...) and `Params` (`{"max": 64}`) are stable, for the clients that translate themselves. Custom rules: `h.ErrorT(ctx, v, "message")` has the message as the code, `h.ErrorMsg(ctx, v, shared.M("my.code", "message %v", shared.P("name", x)))` sets a code and params.
 
 | Configurator | Rules |
 |---|---|
