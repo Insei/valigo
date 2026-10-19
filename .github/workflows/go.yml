@@ -30,7 +30,7 @@ jobs:
       run: |
         . scripts/modules.sh
         for module in $MODULES; do
-          (cd "$module" && golangci-lint run --config ../.golangci.yml ./...)
+          (cd "$module" && golangci-lint run --config "$GITHUB_WORKSPACE/.golangci.yml" ./...)
         done
 
   test:
