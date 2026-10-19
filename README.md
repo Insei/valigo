@@ -67,7 +67,7 @@ except `Required`.
 * Zero allocations on valid objects
 * Conditions on the struct and on fields, custom rules of fields and structs
 * Errors with the locations of fields and slice elements, `Tags[1]`, or JSON paths
-* Translated messages: English and Russian out of the box, own messages, `Accept-Language` middleware
+* Translated messages: English, German, Spanish, French and Russian out of the box, own messages, `Accept-Language` middleware
 
 # Roadmap
 * [ ] Other default types validations: time, bool, maps
