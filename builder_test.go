@@ -192,6 +192,16 @@ func TestErrorContent(t *testing.T) {
 	assert.Equal(t, shared.Error{Location: "Age", Message: "custom 1", Value: 7}, errs[1])
 }
 
+func TestElementErrorLocation(t *testing.T) {
+	errs := validateModel(t, func(c Configurator[model], m *model) {
+		c.StringSlice(&m.Tags).MaxLen(2).Email()
+	}, &model{Tags: []string{"a@b.cc", "x", "y"}})
+	require.Len(t, errs, 3)
+	assert.Equal(t, "Tags", errs[0].Location)
+	assert.Equal(t, "Tags[1]", errs[1].Location)
+	assert.Equal(t, "Tags[2]", errs[2].Location)
+}
+
 func TestReconfigureReplacesRules(t *testing.T) {
 	v := New()
 	for range 3 {
