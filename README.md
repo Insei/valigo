@@ -86,7 +86,7 @@ The same struct and rules, Intel Core i9-14900HX, Go 1.27.0, see [Performance](h
 | | valid object | invalid object, 6 errors |
 |---|---|---|
 | hand-written code | 286 ns, 0 allocs | 590 ns, without messages |
-| **valigo** | **458 ns, 0 allocs** | **2 205 ns, 14 allocs, translated messages** |
+| **valigo** | **407 ns, 0 allocs** | **2 205 ns, 14 allocs, translated messages** |
 | go-playground/validator | 1 785 ns, 16 allocs | 4 150 ns, 69 allocs, with `Error()` |
 | ozzo-validation | 2 950 ns, 38 allocs | 12 665 ns, 140 allocs, with `Error()` |
 

@@ -173,9 +173,10 @@ func valueGetter[T any](field fmap.Field) func(obj any) *T {
 		t = t.Elem()
 	}
 	mustLayout[T](field, t)
+	addr := fieldAddr(field)
 	if isPtr {
 		return func(obj any) *T {
-			p := (**T)(dataPtr(field.GetPtr(obj)))
+			p := (**T)(addr(dataPtr(obj)))
 			if p == nil {
 				return nil
 			}
@@ -183,7 +184,36 @@ func valueGetter[T any](field fmap.Field) func(obj any) *T {
 		}
 	}
 	return func(obj any) *T {
-		return (*T)(dataPtr(field.GetPtr(obj)))
+		return (*T)(addr(dataPtr(obj)))
+	}
+}
+
+// fieldAddr returns a function that computes the address of the field in the struct at root by the offsets of fmap,
+// without reflect: the offset of a field is from the root struct or from the struct of its nearest ancestor stored
+// by pointer, so the address follows the pointers of these ancestors. It returns nil if one of them is nil.
+func fieldAddr(field fmap.Field) func(root unsafe.Pointer) unsafe.Pointer {
+	// the offsets of the ancestors stored by pointer, from the root down to the field
+	var owners []uintptr
+	for parent := field.GetParent(); parent != nil; parent = parent.GetParent() {
+		if t := parent.GetType(); t.Kind() == reflect.Pointer && t.Elem().Kind() == reflect.Struct {
+			owners = append([]uintptr{parent.GetOffset()}, owners...)
+		}
+	}
+	offset := field.GetOffset()
+	if len(owners) == 0 {
+		return func(root unsafe.Pointer) unsafe.Pointer {
+			return unsafe.Add(root, offset)
+		}
+	}
+	return func(root unsafe.Pointer) unsafe.Pointer {
+		base := root
+		for _, owner := range owners {
+			base = *(*unsafe.Pointer)(unsafe.Add(base, owner))
+			if base == nil {
+				return nil
+			}
+		}
+		return unsafe.Add(base, offset)
 	}
 }
 
