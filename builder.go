@@ -113,3 +113,10 @@ func (c Configurator[T]) Slice[E any](sliceFieldPtr *[]E) *shared.SliceFieldConf
 	field := c.field(sliceFieldPtr)
 	return shared.NewSliceFieldConfigurator[E](field, c.b.v.helper, c.field, c.add)
 }
+
+// Map returns the configurator of the map field with the rules of the map itself, EachKey and EachValue:
+// b.Map(&m.Labels).MaxLen(10).EachKey(func(k *shared.Field[string]) { k.As(str.Of).Hostname() }).
+func (c Configurator[T]) Map[K comparable, V any](mapFieldPtr *map[K]V) *shared.MapFieldConfigurator[K, V] {
+	field := c.field(mapFieldPtr)
+	return shared.NewMapFieldConfigurator[K, V](field, c.b.v.helper, c.field, c.add)
+}
