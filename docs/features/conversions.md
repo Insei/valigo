@@ -24,9 +24,11 @@ b.Field(&u.Age).As(str.Of)
 | `num.Of` | numbers and named numbers | [numbers](numbers.md) |
 | `num.Ptr` | pointers to numbers | [numbers](numbers.md), `Required` checks only that the pointer isn't nil |
 | `timex.Of` | `time.Time`, `*time.Time` | [time](time.md) |
+| `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](values.md) |
 | `vuuid.Of` | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid` | [uuid](uuid.md), the separate module `github.com/insei/valigo/uuid` |
 | `str.Slice` | `Slice` of strings, `*string` or named strings | [slices](slices.md) with the string rules of elements |
 | `timex.Slice` | `Slice` of `time.Time`, `*time.Time` | [slices](slices.md) with the time rules of elements |
+| `eq.Slice` | `Slice` of a `comparable` type | [slices](slices.md) with `Unique` and the equality rules of elements |
 | `vuuid.Slice` | `Slice` of `uuid.UUID`, `*uuid.UUID` | [slices](slices.md) with the uuid rules of elements |
 | `shared.SlicePtr` | `Field` of `*[]E` | the slice configurator, a nil pointer is absent |
 
