@@ -24,6 +24,7 @@ type numbers struct {
 	Float64 float64
 	Score   score
 	IntPtr  *int
+	Sizes   []int
 	Float   *float64
 }
 
@@ -73,6 +74,9 @@ func TestRules(t *testing.T) {
 		{"max field", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Int).As(num.Of).MaxField(&m.Max) }, &numbers{Int: 3, Max: 2}, []string{"Cannot be greater than Max"}},
 		{"max field ok", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.Int).As(num.Of).MaxField(&m.Max) }, &numbers{Int: 2, Max: 2}, nil},
 		{"ptr field with min field", func(c valigo.Configurator[numbers], m *numbers) { c.Field(&m.IntPtr).As(num.Ptr).MinField(&m.Min) }, &numbers{Min: 5}, nil},
+		{"slice", func(c valigo.Configurator[numbers], m *numbers) {
+			c.Slice(&m.Sizes).As(num.Slice).MaxLen(2).Each(func(e *num.BaseConfigurator[int]) { e.Min(1).MaxField(&m.Max) })
+		}, &numbers{Sizes: []int{1, 0, 9}, Max: 5}, []string{"Cannot contain more than 2 elements", "Cannot be less than 1", "Cannot be greater than Max"}},
 		{"when true", func(c valigo.Configurator[numbers], m *numbers) {
 			c.Field(&m.Int).As(num.Of).When(func(_ context.Context, v int) bool { return v > 10 }).Max(20)
 		}, &numbers{Int: 21}, []string{"Cannot be greater than 20"}},
