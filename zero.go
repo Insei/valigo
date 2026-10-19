@@ -14,8 +14,8 @@ import (
 // zero does not allocate private fields.
 func zero(obj interface{}) error {
 	val := reflect.ValueOf(obj)
-	if val.Kind() != reflect.Ptr || val.IsNil() {
-		return fmt.Errorf("Input interface is not addressable (can't Set the memory address): %#v",
+	if val.Kind() != reflect.Pointer || val.IsNil() {
+		return fmt.Errorf("input interface is not addressable (can't Set the memory address): %#v",
 			obj)
 	}
 	if val.Elem().Kind() != reflect.Struct {
@@ -38,7 +38,7 @@ func zeroStruct(val reflect.Value, path []reflect.Type) {
 		field := val.Field(i)
 
 		// pre-allocate pointer fields
-		if field.Kind() == reflect.Ptr && field.IsNil() {
+		if field.Kind() == reflect.Pointer && field.IsNil() {
 			if slices.Contains(path, field.Type().Elem()) {
 				continue
 			}
