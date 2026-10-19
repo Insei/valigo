@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/insei/valigo"
+	"github.com/insei/valigo/str"
 )
 
 type year struct {
@@ -142,7 +143,7 @@ func TestStringSliceBuilderMaxLen(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[user](v, func(builder valigo.Configurator[user], obj *user) {
 		builder.StringSlice(&obj.PhoneNumbers).
-			MaxLen(12)
+			Each(func(e *str.BaseConfigurator) { e.MaxLen(12) })
 	})
 
 	testCases := []struct {
@@ -181,7 +182,7 @@ func TestStringSliceBuilderMinLen(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[user](v, func(builder valigo.Configurator[user], obj *user) {
 		builder.StringSlice(&obj.PhoneNumbers).
-			MinLen(9)
+			Each(func(e *str.BaseConfigurator) { e.MinLen(9) })
 	})
 
 	testCases := []struct {

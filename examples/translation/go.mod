@@ -1,6 +1,6 @@
 module example
 
-go 1.22
+go 1.27
 
 require (
 	github.com/google/uuid v1.6.0
@@ -8,8 +8,7 @@ require (
 )
 
 require (
-	github.com/insei/fmap/v3 v3.1.1 // indirect
-	golang.org/x/exp v0.0.0-20240808152545-0cdaa3abc0fa // indirect
+	github.com/insei/fmap/v3 v3.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
