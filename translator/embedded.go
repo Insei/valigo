@@ -24,8 +24,6 @@ func fromMap(source map[string]any, dest map[string]string, prefix string) {
 	for k, v := range source {
 		if recMap, ok := v.(map[string]any); ok {
 			fromMap(recMap, dest, prefix+k)
-		} else if recMap, ok := v.(map[string]string); ok {
-			dest[prefix+k] = recMap[prefix+k]
 		} else if strVal, ok := v.(string); ok {
 			dest[prefix+k] = strVal
 		}
