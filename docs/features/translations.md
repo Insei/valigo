@@ -89,7 +89,7 @@ The languages of the request are taken from the context, `translator.NewAcceptLa
 handler := translator.NewAcceptLanguageMiddleware()(mux)
 ```
 
-Another source of the languages is set by `translator.WithPreferredLanguagesFn`, e.g. the language of the user profile.
+Without the middleware of `net/http`, e.g. in the `Resolve` of a huma input, put the languages of the header to the context by `translator.ContextWithAcceptLanguage(ctx, header)`, or any languages by `translator.ContextWithLanguages(ctx, "ru")`, e.g. the language of the user profile. Another source of the languages is set by `translator.WithPreferredLanguagesFn`.
 
 ## Own messages
 

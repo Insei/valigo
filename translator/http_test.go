@@ -175,3 +175,21 @@ func slicesEqual(a, b []string) bool {
 	}
 	return true
 }
+
+func TestContextWithAcceptLanguage(t *testing.T) {
+	ctx := ContextWithAcceptLanguage(context.Background(), "fr;q=0.5, de")
+	if got := GetPreferredLanguagesFromContext(ctx); !slices.Equal(got, []string{"de", "fr"}) {
+		t.Errorf("got %v", got)
+	}
+	if got := GetPreferredLanguagesFromContext(ContextWithAcceptLanguage(context.Background(), "")); got != nil {
+		t.Errorf("got %v for an empty header", got)
+	}
+}
+
+func TestContextWithLanguages(t *testing.T) {
+	tr := New()
+	ctx := ContextWithLanguages(context.Background(), "ru")
+	if got := tr.T(ctx, "validation:string:Should be email address"); got != "Должно быть электронным адресом" {
+		t.Errorf("got %q", got)
+	}
+}

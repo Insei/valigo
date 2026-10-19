@@ -105,19 +105,29 @@ func parseQuotient(parts []string) (float32, bool) {
 func NewAcceptLanguageMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var priorityLanguages []string
-			acceptLanguage := r.Header.Get("Accept-Language")
-			if acceptLanguage != "" {
-				priorityLanguages = getPriorityLanguages(acceptLanguage)
-			}
-			r = r.WithContext(context.WithValue(r.Context(), languagesContextKeyVal, priorityLanguages))
+			r = r.WithContext(ContextWithAcceptLanguage(r.Context(), r.Header.Get("Accept-Language")))
 			next.ServeHTTP(w, r)
 		})
 	}
 }
 
-// GetPreferredLanguagesFromContext gets preferred languages from context.Context.
-// SHOULD be used with NewAcceptLanguageMiddleware.
+// ContextWithAcceptLanguage returns a context with the languages of the Accept-Language header, ordered by their q,
+// for the frameworks that don't use the middleware of net/http, e.g. in the Resolve of a huma input.
+func ContextWithAcceptLanguage(ctx context.Context, acceptLanguage string) context.Context {
+	var priorityLanguages []string
+	if acceptLanguage != "" {
+		priorityLanguages = getPriorityLanguages(acceptLanguage)
+	}
+	return ContextWithLanguages(ctx, priorityLanguages...)
+}
+
+// ContextWithLanguages returns a context with the preferred languages of the translations, e.g. of the user profile.
+func ContextWithLanguages(ctx context.Context, languages ...string) context.Context {
+	return context.WithValue(ctx, languagesContextKeyVal, languages)
+}
+
+// GetPreferredLanguagesFromContext gets preferred languages from context.Context,
+// set by NewAcceptLanguageMiddleware, ContextWithAcceptLanguage or ContextWithLanguages.
 func GetPreferredLanguagesFromContext(ctx context.Context) []string {
 	preferredAny := ctx.Value(languagesContextKeyVal)
 	if preferredAny == nil {
