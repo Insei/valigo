@@ -23,7 +23,7 @@ Rules are configured once by `valigo.Configure[T]` with pointers to the fields o
 
 | Configurator | Rules |
 |---|---|
-| `b.Field(&m.S).As(str.Of)` | `Required`, `MinLen`, `MaxLen`, `AnyOf`, `Regexp(re, str.WithRegexpLocaleKey(key))`, `Email`, `Trim`, `Custom`, `When` |
+| `b.Field(&m.S).As(str.Of)` | `Required`, `MinLen`/`MaxLen` (bytes), `MinRunes`/`MaxRunes` (characters), `AnyOf`, `Prefix`, `Suffix`, `Contains`, `Regexp(re, str.WithRegexpLocaleKey(key))`, `Email`, `URL`, `IP`, `IPv4`, `IPv6`, `Hostname`, `UUID`, `Alphanumeric`, `Trim`, `Custom`, `When`; formats fail on empty strings |
 | `b.Field(&m.N).As(num.Of)`, `b.Field(&m.P).As(num.Ptr)` | `Required` (zero for `num.Of`, nil for `num.Ptr`), `Min`, `Max`, `AnyOf`, `AnyOfInterval` (inclusive), `Custom`, `When` |
 | `b.Field(&m.ID).As(vuuid.Of)` | `Required` (not `uuid.Nil`), `AnyOf`, `Custom`, `When` |
 | `b.Slice(&m.Items)` | `Required`, `MinLen`, `MaxLen`, `Custom`, `When`, `Each(func(*shared.Field[E]))` with `Check(ok, message)`, `Required(ok, message)`, `As` to convert the element: `e.As(num.Of).Min(1)` |
