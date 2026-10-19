@@ -22,6 +22,7 @@ Reference of valigo capabilities grouped by area.
 | [Time](https://insei.github.io/valigo/latest/features/time/index.md)                | `timex.Of`: `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture`                                                                         |
 | [Comparable values](https://insei.github.io/valigo/latest/features/values/index.md) | `eq.Of`, `eq.Ptr`, `eq.Slice`: enums, bools — `Required`, `OneOf`, `NotOneOf`, `Equal`, `NotEqual`, `Unique`                                       |
 | [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)                | `uuid.Of` of the separate module: `Required`, `AnyOf`                                                                                              |
+| [Maps](https://insei.github.io/valigo/latest/features/maps/index.md)                | `Map`: length rules, `EachKey` and `EachValue` with conversions                                                                                    |
 | [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)            | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements                                                                              |
 
 ## Results

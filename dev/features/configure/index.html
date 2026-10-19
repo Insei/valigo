@@ -541,6 +541,8 @@
       
         
       
+        
+      
     
     
     
@@ -1043,6 +1045,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../maps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../errors/" class="md-nav__link">
         
   
@@ -1292,7 +1322,7 @@
 </span></code></pre></div>
 <p>The function is called once, with:</p>
 <ul>
-<li><code>b</code> — the configurator of <code>T</code>: <code>Field</code> and <code>Slice</code> return the base configurators of fields, converted to the configurators of their types by <code>As</code>, see <a href="../conversions/">Types and conversions</a>; <a href="../conditions/"><code>When</code></a> and <a href="../custom/"><code>Custom</code></a> are the rules of the struct;</li>
+<li><code>b</code> — the configurator of <code>T</code>: <code>Field</code>, <code>Slice</code> and <code>Map</code> return the base configurators of fields, converted to the configurators of their types by <code>As</code>, see <a href="../conversions/">Types and conversions</a>; <a href="../conditions/"><code>When</code></a> and <a href="../custom/"><code>Custom</code></a> are the rules of the struct;</li>
 <li><code>u</code> — the <em>model</em>, a <code>*User</code> created by <code>Configure</code>. Rules are bound to the fields of the model by their pointers.</li>
 </ul>
 <p>The rules are applied to objects of type <code>*T</code>: <code>v.Validate(ctx, &amp;user)</code>. A struct value is validated too, by a copy, see <a href="../errors/#validate-and-validatetyped">Errors</a>.</p>

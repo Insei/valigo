@@ -237,6 +237,7 @@ Reference of valigo capabilities grouped by area.
 | [Time](https://insei.github.io/valigo/latest/features/time/index.md)                | `timex.Of`: `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture`                                                                         |
 | [Comparable values](https://insei.github.io/valigo/latest/features/values/index.md) | `eq.Of`, `eq.Ptr`, `eq.Slice`: enums, bools — `Required`, `OneOf`, `NotOneOf`, `Equal`, `NotEqual`, `Unique`                                       |
 | [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)                | `uuid.Of` of the separate module: `Required`, `AnyOf`                                                                                              |
+| [Maps](https://insei.github.io/valigo/latest/features/maps/index.md)                | `Map`: length rules, `EachKey` and `EachValue` with conversions                                                                                    |
 | [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)            | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements                                                                              |
 
 ## Results
@@ -424,7 +425,7 @@ valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
 
 The function is called once, with:
 
-- `b` — the configurator of `T`: `Field` and `Slice` return the base configurators of fields, converted to the configurators of their types by `As`, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md); [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md) and [`Custom`](https://insei.github.io/valigo/latest/features/custom/index.md) are the rules of the struct;
+- `b` — the configurator of `T`: `Field`, `Slice` and `Map` return the base configurators of fields, converted to the configurators of their types by `As`, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md); [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md) and [`Custom`](https://insei.github.io/valigo/latest/features/custom/index.md) are the rules of the struct;
 - `u` — the *model*, a `*User` created by `Configure`. Rules are bound to the fields of the model by their pointers.
 
 The rules are applied to objects of type `*T`: `v.Validate(ctx, &user)`. A struct value is validated too, by a copy, see [Errors](https://insei.github.io/valigo/latest/features/errors/#validate-and-validatetyped).
@@ -516,7 +517,8 @@ valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
 The configurator knows nothing about the types of the values. It has two methods for the fields:
 
 - `b.Field(&m.X)` returns `*shared.Field[T]`, the base configurator of a field of type `T`;
-- `b.Slice(&m.X)` returns `*shared.SliceFieldConfigurator[E]` of a `[]E` field, with the rules of the slice itself: `Required`, `MinLen`, `MaxLen`, `Custom`, `When` and `Each`.
+- `b.Slice(&m.X)` returns `*shared.SliceFieldConfigurator[E]` of a `[]E` field, with the rules of the slice itself: `Required`, `MinLen`, `MaxLen`, `Custom`, `When` and `Each`;
+- `b.Map(&m.X)` returns `*shared.MapFieldConfigurator[K, V]` of a `map[K]V` field, with the rules of the map itself, `EachKey` and `EachValue`, see [Maps](https://insei.github.io/valigo/latest/features/maps/index.md).
 
 `As` converts a base configurator to the configurator of its type. A conversion is a function with a type constraint, so a conversion that doesn't fit the field doesn't compile:
 
@@ -941,6 +943,82 @@ Should be equal to Password (Repeat: Secret)
 ```
 
 For a comparison of several fields that doesn't fit one rule, use a [struct custom rule](https://insei.github.io/valigo/latest/features/custom/#struct-rules).
+
+# Maps
+
+`b.Map(&m.X)` returns the configurator of a `map[K]V` field: the rules of the map itself, of its keys and of its values. The keys and the values are converted to the configurators of their types by `As`, like the elements of [slices](https://insei.github.io/valigo/latest/features/slices/index.md):
+
+```go
+b.Map(&s.Labels).Required().MaxLen(10).
+    EachKey(func(k *shared.Field[string]) { k.As(str.Of).Alphanumeric().MaxLen(32) }).
+    EachValue(func(v *shared.Field[string]) { v.As(str.Of).MaxLen(64) })
+b.Map(&s.Ports).EachValue(func(p *shared.Field[int]) { p.As(num.Of).AnyOfInterval(1, 65535) })
+```
+
+## Rules
+
+| Rule            | Fails when                                 | Message                                                                                           |
+| --------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `Required()`    | the map is absent or empty                 | Should be fulfilled                                                                               |
+| `MinLen(n)`     | the map has less than `n` elements         | Cannot contain less than %d elements                                                              |
+| `MaxLen(n)`     | the map has more than `n` elements         | Cannot contain more than %d elements                                                              |
+| `EachKey(fn)`   | —                                          | `fn` configures the rules of the keys                                                             |
+| `EachValue(fn)` | —                                          | `fn` configures the rules of the values                                                           |
+| `Custom(fn)`    | `fn` returns errors, it gets the whole map | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md) |
+| `When(fn)`      | —                                          | the next rules are applied only if `fn` returns true for the map, a nil map for an absent one     |
+
+- The location of an error of a key or a value is `Labels[key]`, the error value is the key or the value.
+- The order of a map is random, so the errors of the keys and the errors of the values are sorted by location.
+- The values of a map aren't addressable: [`Trim`](https://insei.github.io/valigo/latest/features/strings/#trim) and other modifying rules change a copy, which is checked by the next rules, the map keeps the original value.
+- A nil map of a value field is present and empty, the map of a nil nested struct is [absent](https://insei.github.io/valigo/latest/features/absent/index.md).
+- Valid maps are validated without allocations, the copy of the checked key or value is pooled.
+
+## Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/num"
+    "github.com/insei/valigo/shared"
+    "github.com/insei/valigo/str"
+)
+
+type Service struct {
+    Labels map[string]string
+    Ports  map[string]int
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[Service](v, func(b valigo.Configurator[Service], s *Service) {
+        b.Map(&s.Labels).Required().MaxLen(10).
+            EachKey(func(k *shared.Field[string]) { k.As(str.Of).Alphanumeric() }).
+            EachValue(func(v *shared.Field[string]) { v.As(str.Of).MaxLen(5) })
+        b.Map(&s.Ports).EachValue(func(p *shared.Field[int]) { p.As(num.Of).AnyOfInterval(1, 65535) })
+    })
+
+    errs := v.Validate(context.Background(), &Service{
+        Labels: map[string]string{"app": "valigo-api", "tier!": "web"},
+        Ports:  map[string]int{"http": 80, "admin": 0},
+    })
+    for _, err := range errs {
+        fmt.Println(err)
+    }
+}
+```
+
+Output:
+
+```text
+Should contain only letters and digits (Labels[tier!]: tier!)
+Cannot be longer than 5 characters (Labels[app]: valigo-api)
+Only interval[1 - 65535] is allowed (Ports[admin]: 0)
+```
 
 # Numbers
 

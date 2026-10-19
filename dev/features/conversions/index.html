@@ -541,6 +541,8 @@
       
         
       
+        
+      
     
     
     
@@ -1021,6 +1023,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../maps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../errors/" class="md-nav__link">
         
   
@@ -1234,7 +1264,8 @@
 <p>The configurator knows nothing about the types of the values. It has two methods for the fields:</p>
 <ul>
 <li><code>b.Field(&amp;m.X)</code> returns <code>*shared.Field[T]</code>, the base configurator of a field of type <code>T</code>;</li>
-<li><code>b.Slice(&amp;m.X)</code> returns <code>*shared.SliceFieldConfigurator[E]</code> of a <code>[]E</code> field, with the rules of the slice itself: <code>Required</code>, <code>MinLen</code>, <code>MaxLen</code>, <code>Custom</code>, <code>When</code> and <code>Each</code>.</li>
+<li><code>b.Slice(&amp;m.X)</code> returns <code>*shared.SliceFieldConfigurator[E]</code> of a <code>[]E</code> field, with the rules of the slice itself: <code>Required</code>, <code>MinLen</code>, <code>MaxLen</code>, <code>Custom</code>, <code>When</code> and <code>Each</code>;</li>
+<li><code>b.Map(&amp;m.X)</code> returns <code>*shared.MapFieldConfigurator[K, V]</code> of a <code>map[K]V</code> field, with the rules of the map itself, <code>EachKey</code> and <code>EachValue</code>, see <a href="../maps/">Maps</a>.</li>
 </ul>
 <p><code>As</code> converts a base configurator to the configurator of its type. A conversion is a function with a type constraint, so a conversion that doesn't fit the field doesn't compile:</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Name</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">()</span><span class="w">       </span><span class="c1">// string</span>

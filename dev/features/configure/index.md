@@ -26,7 +26,7 @@ valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
 
 The function is called once, with:
 
-- `b` — the configurator of `T`: `Field` and `Slice` return the base configurators of fields, converted to the configurators of their types by `As`, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md); [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md) and [`Custom`](https://insei.github.io/valigo/latest/features/custom/index.md) are the rules of the struct;
+- `b` — the configurator of `T`: `Field`, `Slice` and `Map` return the base configurators of fields, converted to the configurators of their types by `As`, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md); [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md) and [`Custom`](https://insei.github.io/valigo/latest/features/custom/index.md) are the rules of the struct;
 - `u` — the *model*, a `*User` created by `Configure`. Rules are bound to the fields of the model by their pointers.
 
 The rules are applied to objects of type `*T`: `v.Validate(ctx, &user)`. A struct value is validated too, by a copy, see [Errors](https://insei.github.io/valigo/latest/features/errors/#validate-and-validatetyped).
