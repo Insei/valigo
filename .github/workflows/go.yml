@@ -26,6 +26,9 @@ jobs:
     - name: Lint the core module
       run: golangci-lint run ./...
 
+    - name: Check that the modules require a released core
+      run: scripts/check-modules.sh
+
     - name: Lint the modules
       run: |
         . scripts/modules.sh
