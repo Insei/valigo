@@ -1,0 +1,65 @@
+---
+validation:
+  string:
+    "Should be equal to %s": Debe ser igual a %s
+    "Should be fulfilled": Es obligatorio
+    "Cannot be longer than %d characters":
+      one: No puede tener más de %d carácter
+      other: No puede tener más de %d caracteres
+    "Cannot be shorter than %d characters":
+      one: No puede tener menos de %d carácter
+      other: No puede tener menos de %d caracteres
+    "Doesn't match required regexp pattern": No coincide con el patrón requerido
+    "Only %s values is allowed": Solo se permiten los valores %s
+    "Should be email address": Debe ser una dirección de correo electrónico
+    "Should be URL": Debe ser una URL
+    "Should be IP address": Debe ser una dirección IP
+    "Should be IPv4 address": Debe ser una dirección IPv4
+    "Should be IPv6 address": Debe ser una dirección IPv6
+    "Should be hostname": Debe ser un nombre de host
+    "Should be UUID": Debe ser un UUID
+    "Should contain only letters and digits": Solo puede contener letras y dígitos
+    "Should start with %s": Debe empezar por %s
+    "Should end with %s": Debe terminar en %s
+    "Should contain %s": Debe contener %s
+  num:
+    "Cannot be less than %v": No puede ser menor que %v
+    "Cannot be greater than %v": No puede ser mayor que %v
+    "Should be fulfilled": Es obligatorio
+    "Only %v values is allowed": Solo se permiten los valores %v
+    "Only interval[%v - %v] is allowed": Solo se permite el intervalo [%v - %v]
+    "Invalid value": Valor no válido
+  time:
+    "Should be fulfilled": Es obligatorio
+    "Should be before %s": Debe ser anterior a %s
+    "Should be after %s": Debe ser posterior a %s
+    "Should be between %s and %s": Debe estar entre %s y %s
+    "Should be in the past": Debe estar en el pasado
+    "Should be in the future": Debe estar en el futuro
+  value:
+    "Should be equal to %s": Debe ser igual a %s
+    "Should be fulfilled": Es obligatorio
+    "Only %v values is allowed": Solo se permiten los valores %v
+    "Values %v are not allowed": Los valores %v no están permitidos
+    "Should be %v": Debe ser %v
+    "Cannot be %v": No puede ser %v
+    "Should contain unique values": Debe contener valores únicos
+  uuid:
+    "Should be fulfilled": Es obligatorio
+    "Only %s values is allowed": Solo se permiten los valores %s
+  map:
+    "Should be fulfilled": Es obligatorio
+    "Cannot contain more than %d elements":
+      one: No puede contener más de %d elemento
+      other: No puede contener más de %d elementos
+    "Cannot contain less than %d elements":
+      one: No puede contener menos de %d elemento
+      other: No puede contener menos de %d elementos
+  slice:
+    "Should be fulfilled": Es obligatorio
+    "Cannot contain more than %d elements":
+      one: No puede contener más de %d elemento
+      other: No puede contener más de %d elementos
+    "Cannot contain less than %d elements":
+      one: No puede contener menos de %d elemento
+      other: No puede contener menos de %d elementos
