@@ -77,7 +77,7 @@ func (f *Field[T]) Custom(fn func(ctx context.Context, h *FieldCustomHelper, val
 }
 
 // When returns a Field whose rules are applied only if cond returns true.
-// cond receives the zero value when the value is absent.
+// When the value is absent, cond is not called and the rules, including Required, are skipped.
 func (f *Field[T]) When(cond func(ctx context.Context, value T) bool) *Field[T] {
 	if cond == nil {
 		return f
@@ -85,11 +85,7 @@ func (f *Field[T]) When(cond func(ctx context.Context, value T) bool) *Field[T] 
 	add := f.add
 	return NewField(f.field, f.h, func(fn CheckFn[T]) {
 		add(func(ctx context.Context, h Helper, v *T) []Error {
-			var val T
-			if v != nil {
-				val = *v
-			}
-			if !cond(ctx, val) {
+			if v == nil || !cond(ctx, *v) {
 				return nil
 			}
 			return fn(ctx, h, v)
