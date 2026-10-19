@@ -1,6 +1,9 @@
 package shared
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Error define a custom error struct.
 type Error struct {
@@ -22,4 +25,20 @@ func (e Error) Error() string {
 		return e.Message
 	}
 	return fmt.Sprintf("%s (%s: %v)", e.Message, e.Location, e.Value)
+}
+
+// Errors is the errors of a validation as one error, e.g. for the validator interfaces of the frameworks.
+// Get it back from an error by errors.As(err, &errs).
+type Errors []Error
+
+// Error returns the errors joined by "; ".
+func (e Errors) Error() string {
+	var b strings.Builder
+	for i, err := range e {
+		if i > 0 {
+			b.WriteString("; ")
+		}
+		b.WriteString(err.Error())
+	}
+	return b.String()
 }
