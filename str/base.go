@@ -30,6 +30,15 @@ func NewBaseConfigurator(f *shared.Field[string]) *BaseConfigurator {
 	return &BaseConfigurator{f: f}
 }
 
+// Of converts a field of a string, *string or named string type to the string configurator:
+// b.Field(&m.Name).As(str.Of). A nil *string is absent.
+func Of[S ~string | *string](f *shared.Field[S]) *BaseConfigurator {
+	if p, ok := any(f).(*shared.Field[*string]); ok {
+		return NewBaseConfigurator(shared.Deref(p))
+	}
+	return NewBaseConfigurator(shared.Retype[S, string](f))
+}
+
 // Trim removes leading and trailing whitespace from the string value.
 func (i *BaseConfigurator) Trim() *BaseConfigurator {
 	i.f.Modify(func(v *string) {

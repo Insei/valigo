@@ -34,6 +34,17 @@ func NewBaseConfigurator[N Number](f *shared.Field[N], optional bool) *BaseConfi
 	return &BaseConfigurator[N]{f: f, optional: optional}
 }
 
+// Of converts a numeric field to the number configurator: b.Field(&m.Age).As(num.Of).
+func Of[N Number](f *shared.Field[N]) *BaseConfigurator[N] {
+	return NewBaseConfigurator(f, false)
+}
+
+// Ptr converts a pointer to numeric field to the number configurator: b.Field(&m.Discount).As(num.Ptr).
+// A nil pointer is absent, Required checks only that the pointer is not nil, zero is allowed.
+func Ptr[N Number](f *shared.Field[*N]) *BaseConfigurator[N] {
+	return NewBaseConfigurator(shared.Deref(f), true)
+}
+
 // Required checks if the number is not zero, for pointer fields checks if the pointer is not nil.
 func (i *BaseConfigurator[N]) Required() *BaseConfigurator[N] {
 	optional := i.optional

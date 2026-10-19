@@ -24,6 +24,15 @@ func NewBaseConfigurator(f *shared.Field[uuid.UUID]) *BaseConfigurator {
 	return &BaseConfigurator{f: f}
 }
 
+// Of converts a field of uuid.UUID or *uuid.UUID to the uuid configurator: b.Field(&m.ID).As(uuid.Of).
+// A nil *uuid.UUID is absent.
+func Of[U uuid.UUID | *uuid.UUID](f *shared.Field[U]) *BaseConfigurator {
+	if p, ok := any(f).(*shared.Field[*uuid.UUID]); ok {
+		return NewBaseConfigurator(shared.Deref(p))
+	}
+	return NewBaseConfigurator(shared.Retype[U, uuid.UUID](f))
+}
+
 // Required checks if the uuid is present and not uuid.Nil.
 func (i *BaseConfigurator) Required() *BaseConfigurator {
 	i.f.Required(func(v uuid.UUID) bool { return v != uuid.Nil }, requiredLocaleKey)

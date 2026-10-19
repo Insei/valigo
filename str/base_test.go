@@ -46,31 +46,31 @@ func TestRules(t *testing.T) {
 		obj  *texts
 		want []string
 	}{
-		{"max len", func(c valigo.Configurator[texts], m *texts) { c.String(&m.Name).MaxLen(2) }, &texts{Name: "abc"}, []string{"Name: Cannot be longer than 2 characters"}},
-		{"min len", func(c valigo.Configurator[texts], m *texts) { c.String(&m.Name).MinLen(4) }, &texts{Name: "abc"}, []string{"Name: Cannot be shorter than 4 characters"}},
-		{"len in bytes", func(c valigo.Configurator[texts], m *texts) { c.String(&m.Name).MaxLen(2) }, &texts{Name: "яя"}, []string{"Name: Cannot be longer than 2 characters"}},
-		{"required empty", func(c valigo.Configurator[texts], m *texts) { c.String(&m.Name).Required() }, &texts{}, []string{"Name: Should be fulfilled"}},
-		{"required nil", func(c valigo.Configurator[texts], m *texts) { c.String(&m.NamePtr).Required() }, &texts{}, []string{"NamePtr: Should be fulfilled"}},
-		{"required empty pointer", func(c valigo.Configurator[texts], m *texts) { c.String(&m.NamePtr).Required() }, &texts{NamePtr: ptr("")}, []string{"NamePtr: Should be fulfilled"}},
-		{"any of", func(c valigo.Configurator[texts], m *texts) { c.String(&m.Status).AnyOf("on", "off") }, &texts{Status: "idle"}, []string{"Status: Only [on off] values is allowed"}},
-		{"regexp", func(c valigo.Configurator[texts], m *texts) { c.String(&m.Name).Regexp(digits) }, &texts{Name: "12a"}, []string{"Name: Doesn't match required regexp pattern"}},
+		{"max len", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).MaxLen(2) }, &texts{Name: "abc"}, []string{"Name: Cannot be longer than 2 characters"}},
+		{"min len", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).MinLen(4) }, &texts{Name: "abc"}, []string{"Name: Cannot be shorter than 4 characters"}},
+		{"len in bytes", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).MaxLen(2) }, &texts{Name: "яя"}, []string{"Name: Cannot be longer than 2 characters"}},
+		{"required empty", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Required() }, &texts{}, []string{"Name: Should be fulfilled"}},
+		{"required nil", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.NamePtr).As(str.Of).Required() }, &texts{}, []string{"NamePtr: Should be fulfilled"}},
+		{"required empty pointer", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.NamePtr).As(str.Of).Required() }, &texts{NamePtr: ptr("")}, []string{"NamePtr: Should be fulfilled"}},
+		{"any of", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Status).As(str.Of).AnyOf("on", "off") }, &texts{Status: "idle"}, []string{"Status: Only [on off] values is allowed"}},
+		{"regexp", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Regexp(digits) }, &texts{Name: "12a"}, []string{"Name: Doesn't match required regexp pattern"}},
 		{"regexp custom key", func(c valigo.Configurator[texts], m *texts) {
-			c.String(&m.Name).Regexp(digits, str.WithRegexpLocaleKey("Only digits"))
+			c.Field(&m.Name).As(str.Of).Regexp(digits, str.WithRegexpLocaleKey("Only digits"))
 		}, &texts{Name: "12a"}, []string{"Name: Only digits"}},
 		{"regexp empty key keeps default", func(c valigo.Configurator[texts], m *texts) {
-			c.String(&m.Name).Regexp(digits, str.WithRegexpLocaleKey(""))
+			c.Field(&m.Name).As(str.Of).Regexp(digits, str.WithRegexpLocaleKey(""))
 		}, &texts{Name: "a"}, []string{"Name: Doesn't match required regexp pattern"}},
-		{"email ok", func(c valigo.Configurator[texts], m *texts) { c.String(&m.Name).Email() }, &texts{Name: "user@mail.example.com"}, nil},
-		{"email fail", func(c valigo.Configurator[texts], m *texts) { c.String(&m.Name).Email() }, &texts{Name: "user@"}, []string{"Name: Should be email address"}},
+		{"email ok", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Email() }, &texts{Name: "user@mail.example.com"}, nil},
+		{"email fail", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Email() }, &texts{Name: "user@"}, []string{"Name: Should be email address"}},
 		{"nil pointer skipped", func(c valigo.Configurator[texts], m *texts) {
-			c.String(&m.NamePtr).MinLen(1).MaxLen(0).AnyOf("x").Regexp(digits).Email()
+			c.Field(&m.NamePtr).As(str.Of).MinLen(1).MaxLen(0).AnyOf("x").Regexp(digits).Email()
 		}, &texts{}, nil},
-		{"trim before checks", func(c valigo.Configurator[texts], m *texts) { c.String(&m.Name).Trim().Required() }, &texts{Name: "  "}, []string{"Name: Should be fulfilled"}},
+		{"trim before checks", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Trim().Required() }, &texts{Name: "  "}, []string{"Name: Should be fulfilled"}},
 		{"when", func(c valigo.Configurator[texts], m *texts) {
-			c.String(&m.Name).When(func(_ context.Context, v string) bool { return v != "" }).Email()
+			c.Field(&m.Name).As(str.Of).When(func(_ context.Context, v string) bool { return v != "" }).Email()
 		}, &texts{}, nil},
 		{"custom", func(c valigo.Configurator[texts], m *texts) {
-			c.String(&m.Name).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v string) []shared.Error {
+			c.Field(&m.Name).As(str.Of).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v string) []shared.Error {
 				if v == "admin" {
 					return []shared.Error{h.ErrorT(ctx, v, "Is reserved")}
 				}
@@ -78,23 +78,25 @@ func TestRules(t *testing.T) {
 			})
 		}, &texts{Name: "admin"}, []string{"Name: Is reserved"}},
 
-		{"slice length", func(c valigo.Configurator[texts], m *texts) { c.StringSlice(&m.Tags).MinLen(3).MaxLen(1) }, &texts{Tags: []string{"a", "b"}}, []string{
+		{"slice length", func(c valigo.Configurator[texts], m *texts) { c.Slice(&m.Tags).As(str.Slice).MinLen(3).MaxLen(1) }, &texts{Tags: []string{"a", "b"}}, []string{
 			"Tags: Cannot contain less than 3 elements", "Tags: Cannot contain more than 1 elements",
 		}},
-		{"slice required", func(c valigo.Configurator[texts], m *texts) { c.StringSlice(&m.TagsPtr).Required() }, &texts{}, []string{"TagsPtr: Should be fulfilled"}},
+		{"slice required", func(c valigo.Configurator[texts], m *texts) {
+			c.Field(&m.TagsPtr).As(shared.SlicePtr).As(str.Slice).Required()
+		}, &texts{}, []string{"TagsPtr: Should be fulfilled"}},
 		{"slice each", func(c valigo.Configurator[texts], m *texts) {
-			c.StringSlice(&m.TagPtrs).Each(func(e *str.BaseConfigurator) { e.Required().MaxLen(1) })
+			c.Slice(&m.TagPtrs).As(str.Slice).Each(func(e *str.BaseConfigurator) { e.Required().MaxLen(1) })
 		}, &texts{TagPtrs: []*string{ptr("ab"), nil, ptr("c")}}, []string{
 			"TagPtrs[0]: Cannot be longer than 1 characters", "TagPtrs[1]: Should be fulfilled",
 		}},
-		{"slice regexp", func(c valigo.Configurator[texts], m *texts) { c.StringSlice(&m.Tags).Regexp(digits) }, &texts{Tags: []string{"1", "a"}}, []string{
+		{"slice regexp", func(c valigo.Configurator[texts], m *texts) { c.Slice(&m.Tags).As(str.Slice).Regexp(digits) }, &texts{Tags: []string{"1", "a"}}, []string{
 			"Tags[1]: Doesn't match required regexp pattern",
 		}},
-		{"slice email", func(c valigo.Configurator[texts], m *texts) { c.StringSlice(&m.Tags).Email() }, &texts{Tags: []string{"a@b.cc", "a"}}, []string{
+		{"slice email", func(c valigo.Configurator[texts], m *texts) { c.Slice(&m.Tags).As(str.Slice).Email() }, &texts{Tags: []string{"a@b.cc", "a"}}, []string{
 			"Tags[1]: Should be email address",
 		}},
 		{"slice custom", func(c valigo.Configurator[texts], m *texts) {
-			c.StringSlice(&m.Tags).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v shared.Elems[string]) []shared.Error {
+			c.Slice(&m.Tags).As(str.Slice).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v shared.Elems[string]) []shared.Error {
 				if v.Len()%2 != 0 {
 					return []shared.Error{h.ErrorT(ctx, v.Len(), "Should contain pairs")}
 				}
@@ -102,7 +104,7 @@ func TestRules(t *testing.T) {
 			})
 		}, &texts{Tags: []string{"a"}}, []string{"Tags: Should contain pairs"}},
 		{"slice when", func(c valigo.Configurator[texts], m *texts) {
-			c.StringSlice(&m.Tags).When(func(_ context.Context, v shared.Elems[string]) bool { return v.Len() > 0 }).Email()
+			c.Slice(&m.Tags).As(str.Slice).When(func(_ context.Context, v shared.Elems[string]) bool { return v.Len() > 0 }).Email()
 		}, &texts{}, nil},
 	}
 	for _, tt := range tests {
@@ -115,10 +117,10 @@ func TestRules(t *testing.T) {
 func TestTrim(t *testing.T) {
 	obj := &texts{Name: " a ", NamePtr: ptr(" b "), Tags: []string{" c "}, TagPtrs: []*string{ptr(" d "), nil}}
 	assert.Empty(t, validate(t, func(c valigo.Configurator[texts], m *texts) {
-		c.String(&m.Name).Trim()
-		c.String(&m.NamePtr).Trim()
-		c.StringSlice(&m.Tags).Trim()
-		c.StringSlice(&m.TagPtrs).Trim()
+		c.Field(&m.Name).As(str.Of).Trim()
+		c.Field(&m.NamePtr).As(str.Of).Trim()
+		c.Slice(&m.Tags).As(str.Slice).Trim()
+		c.Slice(&m.TagPtrs).As(str.Slice).Trim()
 	}, obj))
 	assert.Equal(t, "a", obj.Name)
 	assert.Equal(t, "b", *obj.NamePtr)
