@@ -185,4 +185,6 @@ v := valigo.New(valigo.WithErrorsTransformer(func(errs []shared.Error) []error {
 }))
 ```
 
+`shared.Errors` is a `[]shared.Error` as one error, its `Error()` joins the errors by `;`; the adapters of the frameworks return it, get it back by `errors.As(err, &errs)`.
+
 The transformer is called only when there are errors. For an HTTP API the [`problem`](https://insei.github.io/valigo/latest/features/problem/index.md) package has the transformer of the problem details of RFC 9457.
