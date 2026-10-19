@@ -45,6 +45,7 @@ valigo validates Go structs by rules configured once with pointers to the fields
 - [huma](https://insei.github.io/valigo/dev/features/huma/index.md): huma inputs, the rules in the OpenAPI document
 - [gin](https://insei.github.io/valigo/dev/features/gin/index.md): gin binding
 - [echo](https://insei.github.io/valigo/dev/features/echo/index.md): echo validator
+- [go-i18n](https://insei.github.io/valigo/dev/features/goi18n/index.md): the translations of go-i18n bundles
 
 ## Architecture
 

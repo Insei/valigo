@@ -158,3 +158,29 @@ Output:
 - `storage.Merge(locales)` adds the translations of several languages at once, e.g. from your own YAML files read by `translator.LocalesFromFS(fsys)`: `locales/<lang>/data.yaml` with the same nested format as the built-in locales.
 - `translator.NewInMemStorage(translator.WithInMemData(data))` replaces the built-in locales with yours.
 - [`str.WithRegexpLocaleKey`](https://insei.github.io/valigo/dev/features/strings/#regexp-message) sets the key of a `Regexp` rule.
+
+## Sources of translations
+
+The translator looks the messages up in its sources: the built-in YAML locales by default, your catalogs of an i18n library, your own source. `translator.WithSources` chains them — for every language of a request in order, the first source with a translation of the key wins:
+
+```go
+tr := translator.New(translator.WithSources(goi18n.Source(bundle), translator.Embedded()))
+v := valigo.New(valigo.WithTranslator(tr))
+```
+
+Your messages in go-i18n override the built-in ones, the built-in YAML translates the rest; a German request gets the built-in German before your English. `translator.Embedded(opts...)` is the built-in YAML locales as a source, with your additions by `WithInMemData`.
+
+A source implements `translator.Source`:
+
+```go
+type Source interface {
+    Translate(lang, key string, args []any, params map[string]any) (string, bool)
+}
+```
+
+`args` are the format arguments of the key, `params` are the same values by their names, `{"max": 64}`, for the libraries with named placeholders; `false` passes the language to the next source. The sources:
+
+| Source                                                                 | Module                                        |
+| ---------------------------------------------------------------------- | --------------------------------------------- |
+| the built-in YAML locales                                              | `translator.Embedded()`                       |
+| [go-i18n](https://insei.github.io/valigo/dev/features/goi18n/index.md) | `github.com/insei/valigo/integrations/goi18n` |

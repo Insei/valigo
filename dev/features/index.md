@@ -49,4 +49,5 @@ The separate modules for the frameworks.
 | [JSON Schema](https://insei.github.io/valigo/dev/features/schema/index.md) | the rules as the keywords of JSON Schema for the generators of API schemas, `Constraints`                                                     |
 | [huma](https://insei.github.io/valigo/dev/features/huma/index.md)          | `github.com/insei/valigo/integrations/huma`: the rules in the `Resolve` of huma inputs with the locations of huma and in its OpenAPI document |
 | [gin](https://insei.github.io/valigo/dev/features/gin/index.md)            | `github.com/insei/valigo/integrations/gin`: the `binding.StructValidator` of gin and validation with the language of the request              |
+| [go-i18n](https://insei.github.io/valigo/dev/features/goi18n/index.md)     | `github.com/insei/valigo/integrations/goi18n`: the messages from a bundle of go-i18n, the built-in ones for the rest                          |
 | [echo](https://insei.github.io/valigo/dev/features/echo/index.md)          | `github.com/insei/valigo/integrations/echo`: the `echo.Validator` and validation with the language of the request                             |
