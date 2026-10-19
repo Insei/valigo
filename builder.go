@@ -103,7 +103,7 @@ func (c Configurator[T]) Custom(fn func(ctx context.Context, h shared.StructCust
 // b.Field(&m.Name).As(str.Of), b.Field(&m.Discount).As(num.Ptr).
 func (c Configurator[T]) Field[F any](fieldPtr *F) *shared.Field[F] {
 	field := c.field(fieldPtr)
-	return shared.NewValueField[F](field, c.b.v.helper, c.add)
+	return shared.NewValueField[F](field, c.b.v.helper, c.field, c.add)
 }
 
 // Slice returns the configurator of the slice field with the rules of the slice itself,
@@ -111,5 +111,5 @@ func (c Configurator[T]) Field[F any](fieldPtr *F) *shared.Field[F] {
 // A pointer to a slice field is converted from its field: b.Field(&m.Tags).As(shared.SlicePtr).
 func (c Configurator[T]) Slice[E any](sliceFieldPtr *[]E) *shared.SliceFieldConfigurator[E] {
 	field := c.field(sliceFieldPtr)
-	return shared.NewSliceFieldConfigurator[E](field, c.b.v.helper, c.add)
+	return shared.NewSliceFieldConfigurator[E](field, c.b.v.helper, c.field, c.add)
 }

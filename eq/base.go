@@ -15,6 +15,7 @@ const (
 	notOneOfLocaleKey = "validation:value:Values %v are not allowed"
 	equalLocaleKey    = "validation:value:Should be %v"
 	notEqualLocaleKey = "validation:value:Cannot be %v"
+	equalFieldKey     = "validation:value:Should be equal to %s"
 )
 
 // BaseConfigurator configures rules for a comparable value.
@@ -64,6 +65,13 @@ func (i *BaseConfigurator[T]) NotOneOf(forbidden ...T) *BaseConfigurator[T] {
 // Equal checks if the value is equal to expected, e.g. Equal(true) for an accepted agreement.
 func (i *BaseConfigurator[T]) Equal(expected T) *BaseConfigurator[T] {
 	i.f.Check(func(v T) bool { return v == expected }, equalLocaleKey, expected)
+	return i
+}
+
+// EqualField checks if the value is equal to the value of another field of the object:
+// b.Field(&m.Confirmation).As(eq.Of).EqualField(&m.Password).
+func (i *BaseConfigurator[T]) EqualField(other *T) *BaseConfigurator[T] {
+	i.f.CheckWith(other, func(v, o T) bool { return v == o }, equalFieldKey)
 	return i
 }
 

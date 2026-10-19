@@ -87,3 +87,7 @@ func (m *mockHelper) ErrorT(ctx context.Context, field fmap.Field, value any, lo
 	m.args = args
 	return Error{}
 }
+
+func (m *mockHelper) FieldLocation(field fmap.Field) string {
+	return field.GetStructPath()
+}

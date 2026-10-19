@@ -21,6 +21,7 @@ type sample struct {
 	Text      string
 	TextPtr   *string
 	Label     label
+	Label2    string
 	Num       int
 	Inner     *inner
 	Texts     []string
@@ -38,6 +39,26 @@ var format = fmt.Sprintf
 
 func (pathHelper) ErrorT(_ context.Context, field fmap.Field, value any, localeKey string, args ...any) Error {
 	return Error{Location: field.GetStructPath(), Message: format(localeKey, args...), Value: value}
+}
+
+func (pathHelper) FieldLocation(field fmap.Field) string {
+	return field.GetStructPath()
+}
+
+// sampleModel is the model of the sample fields, its nested structs are allocated like in valigo.Configure.
+var sampleModel = &sample{Inner: &inner{}}
+
+// sampleFields resolves the pointers to the fields of sampleModel.
+func sampleFields(fieldPtr any) fmap.Field {
+	fields, err := fmap.GetFrom(sampleModel)
+	if err != nil {
+		panic(err)
+	}
+	field, err := fields.GetFieldByPtr(sampleModel, fieldPtr)
+	if err != nil {
+		panic(err)
+	}
+	return field
 }
 
 // rules collects validation functions registered by the configurators.
@@ -187,7 +208,7 @@ func TestFieldRules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var r rules
-			tt.setup(NewValueField[string](sampleField(t, "TextPtr"), pathHelper{}, r.add))
+			tt.setup(NewValueField[string](sampleField(t, "TextPtr"), pathHelper{}, sampleFields, r.add))
 			assert.Equal(t, tt.want, r.validate(tt.obj))
 		})
 	}
@@ -201,7 +222,7 @@ func customEcho(f *Field[string]) {
 
 func TestFieldRegistersOneValidationFn(t *testing.T) {
 	var r rules
-	f := NewValueField[string](sampleField(t, "Text"), pathHelper{}, r.add)
+	f := NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add)
 	f.Check(func(string) bool { return true }, "a")
 	f.When(func(context.Context, string) bool { return true }).Check(func(string) bool { return true }, "b")
 	f.Modify(func(*string) {})
@@ -210,7 +231,7 @@ func TestFieldRegistersOneValidationFn(t *testing.T) {
 
 func TestModifySkipsAbsent(t *testing.T) {
 	var r rules
-	NewValueField[string](sampleField(t, "TextPtr"), pathHelper{}, r.add).Modify(func(*string) { panic("must not be called") })
+	NewValueField[string](sampleField(t, "TextPtr"), pathHelper{}, sampleFields, r.add).Modify(func(*string) { panic("must not be called") })
 	assert.Empty(t, r.validate(&sample{}))
 }
 
@@ -219,4 +240,69 @@ func TestDataPtr(t *testing.T) {
 	assert.Equal(t, &v, (*int)(dataPtr(&v)))
 	assert.Nil(t, dataPtr((*int)(nil)))
 	assert.Nil(t, dataPtr(nil))
+}
+
+func TestCheckWith(t *testing.T) {
+	same := func(v, o string) bool { return v == o }
+	tests := []struct {
+		name  string
+		setup func(r *rules)
+		obj   *sample
+		want  []Error
+	}{
+		{
+			name: "fails with the location of the other field",
+			setup: func(r *rules) {
+				NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add).CheckWith(&sampleModel.Label2, same, "Should be %s %s", "equal to")
+			},
+			obj:  &sample{Text: "a", Label2: "b"},
+			want: []Error{{Location: "Text", Message: "Should be equal to Label2", Value: "a"}},
+		},
+		{
+			name: "passes",
+			setup: func(r *rules) {
+				NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add).CheckWith(&sampleModel.Label2, same, "bad")
+			},
+			obj: &sample{Text: "a", Label2: "a"},
+		},
+		{
+			name: "absent value is skipped",
+			setup: func(r *rules) {
+				NewValueField[*string](sampleField(t, "TextPtr"), pathHelper{}, sampleFields, r.add).As(Deref).CheckWith(&sampleModel.Label2, same, "bad")
+			},
+			obj: &sample{Label2: "a"},
+		},
+		{
+			name: "absent other value is skipped",
+			setup: func(r *rules) {
+				NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add).CheckWith(&sampleModel.Inner.Text, same, "bad")
+			},
+			obj: &sample{Text: "a"},
+		},
+		{
+			name: "elements are compared with a field of the object",
+			setup: func(r *rules) {
+				NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add).Each(func(e *Field[string]) {
+					e.CheckWith(&sampleModel.Label2, func(v, o string) bool { return v != o }, "Cannot be %s")
+				})
+			},
+			obj:  &sample{Texts: []string{"a", "b"}, Label2: "b"},
+			want: []Error{{Location: "Texts[1]", Message: "Cannot be Label2", Value: "b"}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var r rules
+			tt.setup(&r)
+			assert.Equal(t, tt.want, r.validate(tt.obj))
+		})
+	}
+}
+
+func TestCheckWithForeignPointerPanics(t *testing.T) {
+	var r rules
+	var foreign string
+	assert.Panics(t, func() {
+		NewValueField[string](sampleField(t, "Text"), pathHelper{}, sampleFields, r.add).CheckWith(&foreign, func(string, string) bool { return true }, "bad")
+	})
 }

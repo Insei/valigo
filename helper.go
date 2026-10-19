@@ -27,6 +27,11 @@ func (h *helper) ErrorT(ctx context.Context, field fmap.Field, value any, locale
 	}
 }
 
+// FieldLocation returns the location of the field in errors.
+func (h *helper) FieldLocation(field fmap.Field) string {
+	return h.getFieldLocation(field)
+}
+
 // newHelper returns a new helper with a default translator and getFieldLocation function.
 func newHelper() *helper {
 	return &helper{

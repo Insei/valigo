@@ -193,7 +193,7 @@ func TestSliceFieldConfigurator(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var r rules
-			tt.setup(NewSliceFieldConfigurator[string](sampleField(t, tt.path), pathHelper{}, r.add))
+			tt.setup(NewSliceFieldConfigurator[string](sampleField(t, tt.path), pathHelper{}, sampleFields, r.add))
 			assert.Equal(t, tt.want, r.validate(tt.obj))
 		})
 	}
@@ -201,7 +201,7 @@ func TestSliceFieldConfigurator(t *testing.T) {
 
 func TestEachRegistersOneValidationFn(t *testing.T) {
 	var r rules
-	NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, r.add).Each(func(e *Field[string]) {
+	NewSliceFieldConfigurator[string](sampleField(t, "Texts"), pathHelper{}, sampleFields, r.add).Each(func(e *Field[string]) {
 		e.Check(func(string) bool { return true }, "a")
 		e.Check(func(string) bool { return true }, "b")
 	})

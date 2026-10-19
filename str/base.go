@@ -27,6 +27,7 @@ const (
 	prefixLocaleKey    = "validation:string:Should start with %s"
 	suffixLocaleKey    = "validation:string:Should end with %s"
 	containsLocaleKey  = "validation:string:Should contain %s"
+	equalFieldKey      = "validation:string:Should be equal to %s"
 )
 
 var emailRegexp = regexp.MustCompile(`^[^\s,@#$%^&*!()]+@([a-zA-Z0-9]+[.])+[a-zA-Z]{2,8}$`)
@@ -158,6 +159,13 @@ func (i *BaseConfigurator) UUID() *BaseConfigurator {
 // Alphanumeric checks if the string is not empty and has only ASCII letters and digits.
 func (i *BaseConfigurator) Alphanumeric() *BaseConfigurator {
 	i.f.Check(isAlphanumeric, alnumLocaleKey)
+	return i
+}
+
+// EqualField checks if the string is equal to the value of another string field of the object:
+// b.Field(&m.PasswordConfirmation).As(str.Of).EqualField(&m.Password).
+func (i *BaseConfigurator) EqualField(other *string) *BaseConfigurator {
+	i.f.CheckWith(other, func(v, o string) bool { return v == o }, equalFieldKey)
 	return i
 }
 

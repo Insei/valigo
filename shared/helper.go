@@ -10,6 +10,8 @@ import (
 type Helper interface {
 	// ErrorT method returns an error based on the provided context, field, value, locale key, and arguments.
 	ErrorT(ctx context.Context, field fmap.Field, value any, localeKey string, args ...any) Error
+	// FieldLocation returns the location of the field in errors, e.g. Address.City or the JSON path.
+	FieldLocation(field fmap.Field) string
 }
 
 // StructCustomHelper interface defines a contract for custom error handling in structs.
