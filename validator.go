@@ -18,8 +18,9 @@ type Validator struct {
 }
 
 // ValidateTyped validates obj using the rules configured for its type.
-// obj is a pointer to the configured struct, a struct value is validated by a copy,
-// so modifications like Trim are not visible to the caller.
+// obj is a pointer to the configured struct. A struct value is validated by a shallow copy:
+// modifications like Trim of its direct fields are not visible to the caller, but values
+// behind pointers and slice elements are shared with the caller and can be modified.
 // It returns nil if there are no errors, no rules for the obj type or obj is a nil pointer.
 func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
 	validators, ok := v.validators[reflect.TypeOf(obj)]
