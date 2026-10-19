@@ -37,6 +37,7 @@ import (
 
 	"github.com/insei/fmap/v3"
 	"github.com/insei/valigo"
+	"github.com/insei/valigo/str"
 )
 
 type Address struct {
@@ -54,9 +55,9 @@ func main() {
 		return field.GetTagPath("json", false)
 	}))
 	valigo.Configure[SignUp](v, func(b valigo.Configurator[SignUp], s *SignUp) {
-		b.String(&s.Email).Email()
-		b.String(&s.Address.City).Required()
-		b.StringSlice(&s.Tags).Email()
+		b.Field(&s.Email).As(str.Of).Email()
+		b.Field(&s.Address.City).As(str.Of).Required()
+		b.Slice(&s.Tags).As(str.Slice).Email()
 	})
 
 	for _, err := range v.ValidateTyped(context.Background(), &SignUp{Email: "a", Tags: []string{"b"}}) {

@@ -1,6 +1,6 @@
 # For AI agents
 
-AI agents often write the code that uses a library, and a model trained before the typed configurator doesn't know its API: it writes `Number(&u.Score)` for a `*int` field or `Max(int64(5))` with an `any` argument. Give the agent the current documentation.
+AI agents often write the code that uses a library, and a model trained before the typed configurator doesn't know its API: it writes `b.String(&u.Name)` of the old API instead of `b.Field(&u.Name).As(str.Of)`, or `Max(int64(5))` with an `any` argument. Give the agent the current documentation.
 
 ## The skill
 
