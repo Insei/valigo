@@ -6,10 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-## [Unreleased]
+## [0.1.0] - 2026-10-19
 
 ### Bug Fixes
 
+- **str:** URL rejects invalid userinfo and the zones of IPv6 hosts (c88822d)
 - **translator:** Report read errors of locale files and close them (c60b997)
 - Stop zero on recursive model types (d7e99e0)
 - Allow models with unexported struct fields (0578111)
@@ -24,6 +25,10 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 ### CI / Build
 
+- Fuzz every target for 30 seconds (cc67d6a)
+- Lint the nested modules by the config of the root (c3e6538)
+- Lint, test and cover the echo module (06c9c8f)
+- Lint, test and cover the separate modules by one list (0870959)
 - Lint, test and cover the huma module (1f18842)
 - **deps:** Bump the github-actions group with 3 updates (bbb0a79)
 - Group dependabot updates of all modules into one pull request (1a318f5)
@@ -50,7 +55,16 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 ### Documentation
 
-- Describe all features in Why valigo?, How it works and llms.txt (7bd8fdb)
+- List all tags of go-playground/validator: supported, different and in code (1d6cc8e)
+- Describe the new rules of strings, numbers and values (15c4169)
+- Describe the rules from tags (28cb144)
+- Describe JSON Schema of the rules and the OpenAPI document of huma (a96d717)
+- The gap to hand-written code is 1.4x in Why valigo? (a7612d7)
+- Group the pages into Configuration, Rules, Errors and Integrations (0216059)
+- Describe the echo module (bc5cfda)
+- Describe the gin module (4402219)
+- Update changelog (fd6877f)
+- Describe all features in Why valigo?, How it works and llms.txt (7c75837)
 - **readme:** Describe all features, errors, translations and performance (8069e2e)
 - Add zog, gookit/validate and hand-written code to the benchmarks (a0e6e7f)
 - Describe the new formats and the conditional requiredness (5a70038)
@@ -82,6 +96,16 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 ### Features
 
+- Complete the rules of the tags of go-playground/validator (2e5e987)
+- **shared:** Add Field.Or and Getter (b01a95c)
+- **num:** Add GreaterThan, LessThan, GreaterField and LessField (3589536)
+- **str:** Add Alpha, Digits, Numeric, Hexadecimal and the negative substring rules (058f81d)
+- Configure the rules of the tags of go-playground/validator (18eb06d)
+- **huma:** The rules of valigo in the OpenAPI document (c678ca2)
+- Describe the rules by the keywords of JSON Schema (d14ecaf)
+- **echo:** Validate the requests of echo (dd96961)
+- **gin:** Validate the requests of gin (b1250df)
+- **shared:** Add Errors, the errors of a validation as one error (9dba248)
 - **num:** Add Latitude and Longitude rules (0dde40f)
 - **str:** Add ISO country and currency codes, Luhn and credit card rules (3c741b0)
 - **str:** Add base64, JSON, semver, CIDR, MAC, E.164, hex color, case and datetime formats (b9d3045)
@@ -108,6 +132,7 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 ### Performance
 
+- Read the fields by the offsets of fmap without reflect (12f85cb)
 - **BREAKING:** Append the errors of rules to one pooled buffer (d3bf167)
 - **translator:** Translate messages with fewer allocations (590df50)
 - Pool the helper of struct Custom rules (cc40d10)
@@ -115,6 +140,9 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 ### Refactor
 
+- **BREAKING:** Move the modules of the integrations to integrations (01b634e)
+- **BREAKING:** Move the packages of the rules to rules (ab3041b)
+- Move the internals of the root package to internal (8ea9ff6)
 - **translator:** Load the locales of NewInMemStorage by a testable function (a1feba8)
 - Check the model type before allocating it in Configure (f510907)
 - **BREAKING:** Configure fields by Field, Slice and As conversions (879683f)
@@ -124,6 +152,9 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 
 ### Tests
 
+- Fuzz the formats, the reading of the fields and the tags (9a0ef39)
+- **bench:** Benchmark valigo by the tags of go-playground/validator (556d4d1)
+- **timex:** Test the package from outside (fcd0e77)
 - **str:** Skip the allocation checks of formats under the race detector (5a0ba3b)
 - **bench:** Compare with zog, gookit/validate and hand-written code (c53c00b)
 - **bench:** Compare with go-playground/validator and ozzo-validation (ce11449)
