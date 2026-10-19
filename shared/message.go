@@ -54,10 +54,21 @@ func (m Msg) with(name string, value any) Msg {
 }
 
 // Error builds the error of the field with the translated message, the code and the parameters of m.
+// The helper of the validator passes the named parameters to the translator, for the sources with named placeholders.
 func (m Msg) Error(ctx context.Context, h Helper, field fmap.Field, value any) Error {
-	err := h.ErrorT(ctx, field, value, m.Key, m.Args...)
+	var err Error
+	if ph, ok := h.(paramsHelper); ok {
+		err = ph.ErrorParams(ctx, field, value, m.Key, m.Args, m.Params)
+	} else {
+		err = h.ErrorT(ctx, field, value, m.Key, m.Args...)
+	}
 	err.Code, err.Params = m.Code, m.Params
 	return err
+}
+
+// paramsHelper is a Helper that passes the named parameters of the messages to the translator.
+type paramsHelper interface {
+	ErrorParams(ctx context.Context, field fmap.Field, value any, key string, args []any, params map[string]any) Error
 }
 
 // key returns the message of a rule configured by a locale key, its code is the key.

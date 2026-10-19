@@ -39,6 +39,14 @@ func (t *translator) T(ctx context.Context, format string, args ...any) string {
 	return t.storage.Get(t.getLanguages(ctx), format, args...)
 }
 
+// TParams returns the translated message, the named parameters are passed to the sources, see Source.
+func (t *translator) TParams(ctx context.Context, key string, args []any, params map[string]any) string {
+	if s, ok := t.storage.(paramsStorage); ok {
+		return s.getParams(t.getLanguages(ctx), key, args, params)
+	}
+	return t.storage.Get(t.getLanguages(ctx), key, args...)
+}
+
 // New returns a new Translator instance with default settings.
 func New(opts ...Option) Translator {
 	t := &translator{
