@@ -140,7 +140,7 @@ func TestValidatorValidateTyped(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			v := New()
-			v.validators[reflect.TypeOf(test.obj)] = []shared.ValidationFn{test.validator}
+			v.validators[reflect.TypeOf(test.obj)] = []shared.ValidationFn{appendTo(test.validator)}
 			errs := v.ValidateTyped(context.Background(), test.obj)
 			if len(errs) != test.expectedErrs {
 				t.Errorf("expected %d errors, got %d", test.expectedErrs, len(errs))
@@ -213,7 +213,7 @@ func TestValidatorValidate(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			v := New()
-			v.validators[reflect.TypeOf(test.obj)] = []shared.ValidationFn{test.validator}
+			v.validators[reflect.TypeOf(test.obj)] = []shared.ValidationFn{appendTo(test.validator)}
 			if test.transformError != nil {
 				v.transformError = test.transformError
 			}
@@ -309,5 +309,12 @@ func TestConfigure(t *testing.T) {
 				t.Errorf("expected no error, got %v", errs)
 			}
 		})
+	}
+}
+
+// appendTo adapts a validation function that returns its errors to shared.ValidationFn.
+func appendTo(fn func(ctx context.Context, h shared.Helper, obj any) []shared.Error) shared.ValidationFn {
+	return func(ctx context.Context, h shared.Helper, obj any, errs []shared.Error) []shared.Error {
+		return append(errs, fn(ctx, h, obj)...)
 	}
 }

@@ -94,14 +94,13 @@ func eachSource[E any](add func(fn ValidationFn), get func(obj any) (Elems[E], b
 		if len(checks) > 1 {
 			return
 		}
-		add(func(ctx context.Context, h Helper, obj any) []Error {
+		add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 			elems, _ := get(obj)
-			var errs []Error
 			for i := range elems.n {
 				v := elems.At(i)
 				n := len(errs)
 				for _, check := range checks {
-					errs = append(errs, check(ctx, h, obj, v)...)
+					errs = check(ctx, h, obj, v, errs)
 				}
 				for j := n; j < len(errs); j++ {
 					errs[j].Location += "[" + strconv.Itoa(i) + "]"
@@ -141,12 +140,12 @@ func (s *SliceFieldConfigurator[E]) EachField() *Field[E] {
 
 func (s *SliceFieldConfigurator[E]) check(ok func(n int) bool, msg Msg) {
 	field, get := s.field, s.get
-	s.add(func(ctx context.Context, h Helper, obj any) []Error {
+	s.add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 		elems, present := get(obj)
 		if !present || ok(elems.n) {
-			return nil
+			return errs
 		}
-		return []Error{msg.Error(ctx, h, field, elems.n)}
+		return append(errs, msg.Error(ctx, h, field, elems.n))
 	})
 }
 
@@ -165,11 +164,11 @@ func (s *SliceFieldConfigurator[E]) MinLen(minLen int) *SliceFieldConfigurator[E
 // Required checks that the slice is present and not empty.
 func (s *SliceFieldConfigurator[E]) Required() *SliceFieldConfigurator[E] {
 	field, get, msg := s.field, s.get, M("slice.required", sliceRequiredLocaleKey)
-	s.add(func(ctx context.Context, h Helper, obj any) []Error {
+	s.add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 		if elems, _ := get(obj); elems.n > 0 {
-			return nil
+			return errs
 		}
-		return []Error{msg.Error(ctx, h, field, nil)}
+		return append(errs, msg.Error(ctx, h, field, nil))
 	})
 	return s
 }
@@ -178,12 +177,12 @@ func (s *SliceFieldConfigurator[E]) Required() *SliceFieldConfigurator[E] {
 func (s *SliceFieldConfigurator[E]) Custom(f func(ctx context.Context, h *FieldCustomHelper, value Elems[E]) []Error) *SliceFieldConfigurator[E] {
 	customHelper := NewFieldCustomHelper(s.field, s.h)
 	get := s.get
-	s.add(func(ctx context.Context, _ Helper, obj any) []Error {
+	s.add(func(ctx context.Context, _ Helper, obj any, errs []Error) []Error {
 		elems, present := get(obj)
 		if !present {
-			return nil
+			return errs
 		}
-		return f(ctx, customHelper, elems)
+		return append(errs, f(ctx, customHelper, elems)...)
 	})
 	return s
 }
@@ -196,12 +195,12 @@ func (s *SliceFieldConfigurator[E]) When(whenFn func(ctx context.Context, value 
 	}
 	add, get := s.add, s.get
 	return &SliceFieldConfigurator[E]{field: s.field, h: s.h, fields: s.fields, get: get, add: func(fn ValidationFn) {
-		add(func(ctx context.Context, h Helper, obj any) []Error {
+		add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 			elems, _ := get(obj)
 			if !whenFn(ctx, elems) {
-				return nil
+				return errs
 			}
-			return fn(ctx, h, obj)
+			return fn(ctx, h, obj, errs)
 		})
 	}}
 }

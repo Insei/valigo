@@ -3,6 +3,8 @@ package valigo
 import (
 	"context"
 	"reflect"
+	"slices"
+	"sync"
 	"unsafe"
 
 	"github.com/insei/fmap/v3"
@@ -29,12 +31,23 @@ func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
 	} else if dataPtr(obj) == nil {
 		return nil
 	}
-	var errs []shared.Error
+	buf := errBuffers.Get().(*[]shared.Error)
+	errs := (*buf)[:0]
 	for _, validator := range validators {
-		errs = append(errs, validator(ctx, v.helper, obj)...)
+		errs = validator(ctx, v.helper, obj, errs)
 	}
-	return errs
+	var result []shared.Error
+	if len(errs) > 0 {
+		result = slices.Clone(errs)
+	}
+	clear(errs)
+	*buf = errs[:0]
+	errBuffers.Put(buf)
+	return result
 }
+
+// errBuffers reuses the buffers the rules append the errors to, so a validation allocates only the returned errors.
+var errBuffers = sync.Pool{New: func() any { return new([]shared.Error) }}
 
 // byValue returns validators and a pointer to the copy of obj if obj is a value of the configured struct.
 func (v *Validator) byValue(obj any) ([]shared.ValidationFn, any) {

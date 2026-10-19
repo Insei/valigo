@@ -10,11 +10,11 @@ import (
 )
 
 // ValidationFn validates an object, obj is a pointer to the configured struct.
-type ValidationFn func(ctx context.Context, h Helper, obj any) []Error
+type ValidationFn func(ctx context.Context, h Helper, obj any, errs []Error) []Error
 
 // checkFn checks a single value: a struct field or a slice element, obj is the validated object.
 // v is nil when the value is absent, i.e. a nil pointer field or a field of a nil nested struct.
-type checkFn[T any] func(ctx context.Context, h Helper, obj any, v *T) []Error
+type checkFn[T any] func(ctx context.Context, h Helper, obj any, v *T, errs []Error) []Error
 
 // Fields resolves a pointer to a field of the model of the configured struct to the field, it panics for other pointers.
 type Fields func(fieldPtr any) fmap.Field
@@ -47,11 +47,11 @@ func (f *Field[T]) Check(ok func(v T) bool, localeKey string, args ...any) *Fiel
 // CheckMsg adds a rule that fails with msg when ok returns false. Absent values are skipped.
 func (f *Field[T]) CheckMsg(ok func(v T) bool, msg Msg) *Field[T] {
 	field := f.field
-	f.add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
+	f.add(func(ctx context.Context, h Helper, obj any, v *T, errs []Error) []Error {
 		if v == nil || ok(*v) {
-			return nil
+			return errs
 		}
-		return []Error{msg.Error(ctx, h, field, *v)}
+		return append(errs, msg.Error(ctx, h, field, *v))
 	})
 	return f
 }
@@ -65,26 +65,26 @@ func (f *Field[T]) Required(ok func(v T) bool, localeKey string) *Field[T] {
 // RequiredMsg adds a rule that fails with msg when the value is absent or ok returns false.
 func (f *Field[T]) RequiredMsg(ok func(v T) bool, msg Msg) *Field[T] {
 	field := f.field
-	f.add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
+	f.add(func(ctx context.Context, h Helper, obj any, v *T, errs []Error) []Error {
 		if v != nil && ok(*v) {
-			return nil
+			return errs
 		}
 		var val any
 		if v != nil {
 			val = *v
 		}
-		return []Error{msg.Error(ctx, h, field, val)}
+		return append(errs, msg.Error(ctx, h, field, val))
 	})
 	return f
 }
 
 // Modify adds a step that changes the value in place, e.g. trims a string. Absent values are skipped.
 func (f *Field[T]) Modify(fn func(v *T)) *Field[T] {
-	f.add(func(_ context.Context, _ Helper, _ any, v *T) []Error {
+	f.add(func(_ context.Context, _ Helper, _ any, v *T, errs []Error) []Error {
 		if v != nil {
 			fn(v)
 		}
-		return nil
+		return errs
 	})
 	return f
 }
@@ -92,11 +92,11 @@ func (f *Field[T]) Modify(fn func(v *T)) *Field[T] {
 // Custom adds a user defined rule. Absent values are skipped.
 func (f *Field[T]) Custom(fn func(ctx context.Context, h *FieldCustomHelper, value T) []Error) *Field[T] {
 	customHelper := NewFieldCustomHelper(f.field, f.h)
-	f.add(func(ctx context.Context, _ Helper, _ any, v *T) []Error {
+	f.add(func(ctx context.Context, _ Helper, _ any, v *T, errs []Error) []Error {
 		if v == nil {
-			return nil
+			return errs
 		}
-		return fn(ctx, customHelper, *v)
+		return append(errs, fn(ctx, customHelper, *v)...)
 	})
 	return f
 }
@@ -115,14 +115,14 @@ func (f *Field[T]) CheckWith[U any](other *U, ok func(v T, other U) bool, locale
 func (f *Field[T]) CheckWithMsg[U any](other *U, ok func(v T, other U) bool, msg Msg) *Field[T] {
 	field, otherField := f.field, f.fields(other)
 	get := valueGetter[U](otherField)
-	f.add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
+	f.add(func(ctx context.Context, h Helper, obj any, v *T, errs []Error) []Error {
 		if v == nil {
-			return nil
+			return errs
 		}
 		if o := get(obj); o == nil || ok(*v, *o) {
-			return nil
+			return errs
 		}
-		return []Error{msg.with("field", h.FieldLocation(otherField)).Error(ctx, h, field, *v)}
+		return append(errs, msg.with("field", h.FieldLocation(otherField)).Error(ctx, h, field, *v))
 	})
 	return f
 }
@@ -135,11 +135,11 @@ func (f *Field[T]) When(cond func(ctx context.Context, value T) bool) *Field[T] 
 	}
 	add := f.add
 	return &Field[T]{field: f.field, h: f.h, fields: f.fields, add: func(fn checkFn[T]) {
-		add(func(ctx context.Context, h Helper, obj any, v *T) []Error {
+		add(func(ctx context.Context, h Helper, obj any, v *T, errs []Error) []Error {
 			if v == nil || !cond(ctx, *v) {
-				return nil
+				return errs
 			}
-			return fn(ctx, h, obj, v)
+			return fn(ctx, h, obj, v, errs)
 		})
 	}}
 }
@@ -153,11 +153,10 @@ func fieldSource[T any](add func(fn ValidationFn), get func(obj any) *T) func(fn
 		if len(checks) > 1 {
 			return
 		}
-		add(func(ctx context.Context, h Helper, obj any) []Error {
+		add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 			v := get(obj)
-			var errs []Error
 			for _, check := range checks {
-				errs = append(errs, check(ctx, h, obj, v)...)
+				errs = check(ctx, h, obj, v, errs)
 			}
 			return errs
 		})

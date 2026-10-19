@@ -80,7 +80,7 @@ func (r *rules) validate(obj any) []Error {
 func (r *rules) validateFull(obj any) []Error {
 	var errs []Error
 	for _, fn := range *r {
-		errs = append(errs, fn(context.Background(), pathHelper{}, obj)...)
+		errs = fn(context.Background(), pathHelper{}, obj, errs)
 	}
 	return errs
 }
