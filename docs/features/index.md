@@ -10,6 +10,7 @@ Reference of valigo capabilities grouped by area.
 | [Types and conversions](conversions.md) | `Field`, `Slice` and `As`, the built-in conversions, conversions of your types |
 | [Absent values](absent.md) | nil pointers, nil slices and nil nested structs: which rules skip them |
 | [Conditions](conditions.md) | `When` on the struct and on a field |
+| [Rules on other fields](fields.md) | `EqualField`, `MinField`, `MaxField`, `BeforeField`, `AfterField`: comparisons with another field by its pointer |
 | [Custom rules](custom.md) | `Custom` on a field, on a slice and on the struct |
 
 ## Rules

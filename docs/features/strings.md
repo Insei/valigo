@@ -32,6 +32,7 @@ b.Slice(&u.Emails).As(str.Slice).MaxLen(3).Email()
 | `MinRunes(n)` | the number of characters (runes) is less than `n` | Cannot be shorter than %d characters |
 | `MaxRunes(n)` | the number of characters (runes) is greater than `n` | Cannot be longer than %d characters |
 | `AnyOf(values...)` | the value isn't one of `values` | Only %s values is allowed |
+| `EqualField(&m.X)` | the value isn't equal to the value of the string field `X`, see [Rules on other fields](fields.md) | Should be equal to %s |
 | `Prefix(s)`, `Suffix(s)`, `Contains(s)` | the value doesn't start with, end with or contain `s` | Should start with %s, Should end with %s, Should contain %s |
 | `Regexp(re, opts...)` | the value doesn't match `re` | Doesn't match required regexp pattern |
 | `Email()` | the value isn't an email address | Should be email address |

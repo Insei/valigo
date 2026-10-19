@@ -22,6 +22,7 @@ b.Field(&u.Age).As(str.Of)
 |---|---|---|
 | `str.Of` | `string`, `*string`, named strings | [strings](strings.md) |
 | `num.Of` | numbers and named numbers | [numbers](numbers.md) |
+| `num.Slice` | `Slice` of numbers | [slices](slices.md) with the number rules of elements |
 | `num.Ptr` | pointers to numbers | [numbers](numbers.md), `Required` checks only that the pointer isn't nil |
 | `timex.Of` | `time.Time`, `*time.Time` | [time](time.md) |
 | `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](values.md) |
