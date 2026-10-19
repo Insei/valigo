@@ -31,6 +31,20 @@ func (h *Helper) ErrorT(ctx context.Context, field fmap.Field, value any, locale
 	}
 }
 
+// paramsTranslator is a translator that passes the named parameters to its sources, the translator of valigo is.
+type paramsTranslator interface {
+	TParams(ctx context.Context, key string, args []any, params map[string]any) string
+}
+
+// ErrorParams is ErrorT with the named parameters of the message for the sources of the translator.
+func (h *Helper) ErrorParams(ctx context.Context, field fmap.Field, value any, localeKey string, args []any, params map[string]any) shared.Error {
+	pt, ok := h.Translator.(paramsTranslator)
+	if !ok {
+		return h.ErrorT(ctx, field, value, localeKey, args...)
+	}
+	return shared.Error{Location: h.Location(field), Message: pt.TParams(ctx, localeKey, args, params), Value: value, Code: localeKey}
+}
+
 // FieldLocation returns the location of the field in errors.
 func (h *Helper) FieldLocation(field fmap.Field) string {
 	return h.Location(field)

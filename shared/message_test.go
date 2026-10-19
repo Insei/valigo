@@ -2,7 +2,10 @@ package shared
 
 import (
 	"context"
+	"fmt"
 	"testing"
+
+	"github.com/insei/fmap/v3"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -116,4 +119,16 @@ func TestMapMessages(t *testing.T) {
 	var required rules
 	newLabels(&required).Required()
 	assert.Equal(t, []Error{{Location: "Labels", Message: "validation:map:Should be fulfilled", Code: "map.required"}}, required.validateFull(&mapsSample{}))
+}
+
+// paramsPathHelper is pathHelper that builds the messages of the named parameters.
+type paramsPathHelper struct{ pathHelper }
+
+func (paramsPathHelper) ErrorParams(_ context.Context, field fmap.Field, value any, key string, _ []any, params map[string]any) Error {
+	return Error{Location: field.GetStructPath(), Message: fmt.Sprint(key, params), Value: value}
+}
+
+func TestMsgErrorParams(t *testing.T) {
+	err := M("string.max_len", "max", P("max", 3)).Error(context.Background(), paramsPathHelper{}, sampleField(t, "Text"), "abcd")
+	assert.Equal(t, Error{Location: "Text", Message: "maxmap[max:3]", Value: "abcd", Code: "string.max_len", Params: map[string]any{"max": 3}}, err)
 }

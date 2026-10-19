@@ -1,7 +1,6 @@
 package translator
 
 import (
-	"fmt"
 	"io/fs"
 	"strings"
 )
@@ -85,18 +84,27 @@ func (t *inMemTranslatorStorage) Merge(locales map[string]map[string]string) {
 // Get returns the translated value for a given format and language preferences.
 // A format with plural forms (format#one, format#few, format#many, format#other) is translated
 // by the plural category of the first integer argument in the language.
-func (t *inMemTranslatorStorage) Get(prefer []string, format string, args ...any) string {
-	translatedFormat := format
-	for _, preferLang := range prefer {
-		if langFormat, ok := t.translate(preferLang, format, args); ok {
-			translatedFormat = langFormat
-			break
+func (t *inMemTranslatorStorage) Get(prefer []string, key string, args ...any) string {
+	return t.getParams(prefer, key, args, nil)
+}
+
+// getParams is Get, the storage has no named placeholders.
+func (t *inMemTranslatorStorage) getParams(prefer []string, key string, args []any, _ map[string]any) string {
+	for _, lang := range prefer {
+		if msg, ok := t.Translate(lang, key, args, nil); ok {
+			return msg
 		}
 	}
-	if len(args) == 0 && strings.IndexByte(translatedFormat, '%') < 0 {
-		return translatedFormat
+	return format(key, args)
+}
+
+// Translate returns the translation of the key in the language, see Source.
+func (t *inMemTranslatorStorage) Translate(lang, key string, args []any, _ map[string]any) (string, bool) {
+	langFormat, ok := t.translate(lang, key, args)
+	if !ok {
+		return "", false
 	}
-	return fmt.Sprintf(translatedFormat, args...)
+	return format(langFormat, args), true
 }
 
 // translate returns the translation of format in lang, the plural form if the format has plural forms.
