@@ -134,6 +134,12 @@ func TestConfiguratorRules(t *testing.T) {
 		{"field when true", func(c Configurator[model], m *model) {
 			c.String(&m.Name).When(func(_ context.Context, v string) bool { return v != "skip" }).MaxLen(1)
 		}, &model{Name: "other"}, 1},
+		{"field when absent skips required", func(c Configurator[model], m *model) {
+			c.String(&m.NamePtr).When(func(_ context.Context, v string) bool { return true }).Required()
+		}, &model{}, 0},
+		{"number ptr when absent", func(c Configurator[model], m *model) {
+			c.NumberPtr(&m.AgePtr).When(func(_ context.Context, v int) bool { return v == 0 }).Max(-1)
+		}, &model{}, 0},
 		{"number when", func(c Configurator[model], m *model) {
 			c.Number(&m.Age).When(func(_ context.Context, v int) bool { return v > 100 }).Max(10)
 		}, &model{Age: 50}, 0},
