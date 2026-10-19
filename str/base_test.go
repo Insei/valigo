@@ -83,6 +83,18 @@ func TestRules(t *testing.T) {
 		{"min runes", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).MinRunes(3) }, &texts{Name: "яя"}, []string{"Name: Cannot be shorter than 3 characters"}},
 		{"equal field", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).EqualField(&m.Repeat) }, &texts{Name: "a", Repeat: "b"}, []string{"Name: Should be equal to Repeat"}},
 		{"equal field ok", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).EqualField(&m.Repeat) }, &texts{Name: "a", Repeat: "a"}, nil},
+		{"base64", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Base64() }, &texts{Name: "x"}, []string{"Name: Should be base64 encoded"}},
+		{"base64url", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Base64URL() }, &texts{Name: "+"}, []string{"Name: Should be base64url encoded"}},
+		{"json", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).JSON() }, &texts{Name: "{"}, []string{"Name: Should be JSON"}},
+		{"semver", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Semver() }, &texts{Name: "v1"}, []string{"Name: Should be semantic version"}},
+		{"cidr", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).CIDR() }, &texts{Name: "1.2.3.4"}, []string{"Name: Should be CIDR"}},
+		{"mac", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).MAC() }, &texts{Name: "00:11"}, []string{"Name: Should be MAC address"}},
+		{"e164", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).E164() }, &texts{Name: "8900"}, []string{"Name: Should be E.164 phone number"}},
+		{"hex color", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).HexColor() }, &texts{Name: "red"}, []string{"Name: Should be hex color"}},
+		{"ascii", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).ASCII() }, &texts{Name: "яя"}, []string{"Name: Should contain only ASCII characters"}},
+		{"lowercase", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Lowercase() }, &texts{Name: "Ab"}, []string{"Name: Should be lowercase"}},
+		{"uppercase", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Uppercase() }, &texts{Name: "Ab"}, []string{"Name: Should be uppercase"}},
+		{"datetime", func(c valigo.Configurator[texts], m *texts) { c.Field(&m.Name).As(str.Of).Datetime("2006-01-02") }, &texts{Name: "01.05.2026"}, []string{"Name: Should be date and time in 2006-01-02 format"}},
 		{"nil pointer skipped", func(c valigo.Configurator[texts], m *texts) {
 			c.Field(&m.NamePtr).As(str.Of).MinLen(1).MaxLen(0).AnyOf("x").Regexp(digits).Email()
 		}, &texts{}, nil},
@@ -171,7 +183,8 @@ func TestCodes(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[texts](v, func(c valigo.Configurator[texts], m *texts) {
 		c.Field(&m.Name).As(str.Of).Required().MinLen(5).MaxLen(1).MinRunes(5).MaxRunes(1).AnyOf("x").Regexp(re).Email().URL().
-			IP().IPv4().IPv6().Hostname().UUID().Alphanumeric().Prefix("x").Suffix("x").Contains("x").EqualField(&m.Repeat)
+			IP().IPv4().IPv6().Hostname().UUID().Alphanumeric().Prefix("x").Suffix("x").Contains("x").EqualField(&m.Repeat).
+			Base64().Base64URL().JSON().Semver().CIDR().MAC().E164().HexColor().ASCII().Lowercase().Uppercase().Datetime("2006")
 	})
 	var codes []string
 	params := map[string]map[string]any{}
@@ -183,7 +196,10 @@ func TestCodes(t *testing.T) {
 		"string.min_len", "string.max_len", "string.min_runes", "string.max_runes", "string.any_of", "string.regexp",
 		"string.email", "string.url", "string.ip", "string.ipv4", "string.ipv6", "string.hostname", "string.uuid",
 		"string.alphanumeric", "string.prefix", "string.suffix", "string.contains", "string.equal_field",
+		"string.base64", "string.base64url", "string.json", "string.semver", "string.cidr", "string.mac", "string.e164",
+		"string.hex_color", "string.uppercase", "string.datetime",
 	}, codes)
+	assert.Equal(t, map[string]any{"layout": "2006"}, params["string.datetime"])
 	assert.Equal(t, map[string]any{"min": 5}, params["string.min_len"])
 	assert.Equal(t, map[string]any{"values": []string{"x"}}, params["string.any_of"])
 	assert.Equal(t, map[string]any{"substring": "x"}, params["string.contains"])

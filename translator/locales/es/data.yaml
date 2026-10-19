@@ -22,6 +22,18 @@ validation:
     "Should start with %s": Debe empezar por %s
     "Should end with %s": Debe terminar en %s
     "Should contain %s": Debe contener %s
+    "Should be base64 encoded": Debe estar codificado en base64
+    "Should be base64url encoded": Debe estar codificado en base64url
+    "Should be JSON": Debe ser JSON
+    "Should be semantic version": Debe ser una versión semántica
+    "Should be CIDR": Debe ser un CIDR
+    "Should be MAC address": Debe ser una dirección MAC
+    "Should be E.164 phone number": Debe ser un número de teléfono E.164
+    "Should be hex color": Debe ser un color hexadecimal
+    "Should contain only ASCII characters": Solo puede contener caracteres ASCII
+    "Should be lowercase": Debe estar en minúsculas
+    "Should be uppercase": Debe estar en mayúsculas
+    "Should be date and time in %s format": Debe ser una fecha y hora con el formato %s
   num:
     "Cannot be less than %v": No puede ser menor que %v
     "Cannot be greater than %v": No puede ser mayor que %v

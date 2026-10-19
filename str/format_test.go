@@ -3,6 +3,7 @@ package str
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 func check(t *testing.T, name string, fn func(string) bool, valid, invalid []string) {
@@ -109,6 +110,39 @@ func TestFormatsDontAllocate(t *testing.T) {
 		"hostname": func() bool { return isHostname("api.example.com") },
 		"ip":       func() bool { return isIP("2001:db8::1") },
 		"uuid":     func() bool { return isUUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8") },
+	} {
+		if allocs := testing.AllocsPerRun(100, func() { fn() }); allocs != 0 {
+			t.Errorf("%s allocates %v times", name, allocs)
+		}
+	}
+}
+
+func TestMoreFormats(t *testing.T) {
+	check(t, "isBase64", isBase64, []string{"Zm9v", "Zm9vYg==", "Zm9vYmE=", "+/+/"}, []string{"", "Zm9vYg", "Zm9vY===", "Zm9v_-==", "Zm9vYg=a", "Z"})
+	check(t, "isBase64URL", isBase64URL, []string{"Zm9v", "Zm9vYg", "Zm9vYg==", "-_-_"}, []string{"", "Zm9v+/", "Zm9vY", "Zm9vYg="})
+	check(t, "isJSON", isJSON, []string{`{"a":1}`, `[1,2]`, `"x"`, `null`, `3.14`}, []string{"", `{"a":}`, `{a:1}`, `[1,2`})
+	check(t, "semver", semverRegexp.MatchString, []string{"1.2.3", "0.0.1", "1.2.3-rc.1", "1.2.3+build.5", "1.2.3-alpha.1+exp.sha.5114f85"},
+		[]string{"", "v1.2.3", "1.2", "01.2.3", "1.2.3-", "1.2.3-01"})
+	check(t, "isCIDR", isCIDR, []string{"10.0.0.0/8", "192.168.1.0/24", "2001:db8::/32"}, []string{"", "10.0.0.0", "10.0.0.0/33", "2001:db8::/129"})
+	check(t, "isMAC", isMAC, []string{"00:1a:2b:3c:4d:5e", "00-1A-2B-3C-4D-5E", "00:1a:2b:3c:4d:5e:6f:70", "001a.2b3c.4d5e", "001a.2b3c.4d5e.6f70"},
+		[]string{"", "00:1a:2b:3c:4d", "00:1a-2b:3c:4d:5e", "00;1a;2b;3c;4d;5e", "00:1a:2b:3c:4d:5g", "001a.2b3c-4d5e", "001a.2b3c.4d5g"})
+	check(t, "isE164", isE164, []string{"+14155550123", "+79001234567", "+12"}, []string{"", "14155550123", "+0123", "+1", "+1234567890123456", "+1-415"})
+	check(t, "isHexColor", isHexColor, []string{"#fff", "#FFFA", "#a1b2c3", "#a1b2c3d4"}, []string{"", "fff", "#ff", "#ggg", "#a1b2c3d"})
+	check(t, "isASCII", isASCII, []string{"abc", "a b!~"}, []string{"", "яя", "café"})
+	check(t, "isLowercase", isLowercase, []string{"abc", "a-1", "яя"}, []string{"", "aBc", "Яя"})
+	check(t, "isUppercase", isUppercase, []string{"ABC", "A-1", "ЯЯ"}, []string{"", "AbC", "яЯ"})
+	check(t, "isDatetime", isDatetime(time.DateOnly), []string{"2026-05-01"}, []string{"", "2026-13-01", "01.05.2026"})
+}
+
+func TestMoreFormatsDontAllocate(t *testing.T) {
+	for name, fn := range map[string]func() bool{
+		"base64":   func() bool { return isBase64("Zm9vYg==") },
+		"json":     func() bool { return isJSON(`{"a": [1, {"b": null}]}`) },
+		"semver":   func() bool { return semverRegexp.MatchString("1.2.3-rc.1") },
+		"cidr":     func() bool { return isCIDR("2001:db8::/32") },
+		"mac":      func() bool { return isMAC("00:1a:2b:3c:4d:5e") },
+		"datetime": func() bool { return isDatetime(time.RFC3339)("2026-05-01T10:00:00+03:00") },
+		"lower":    func() bool { return isLowercase("abc") },
 	} {
 		if allocs := testing.AllocsPerRun(100, func() { fn() }); allocs != 0 {
 			t.Errorf("%s allocates %v times", name, allocs)

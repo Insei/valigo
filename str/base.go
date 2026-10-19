@@ -28,6 +28,18 @@ const (
 	suffixLocaleKey    = "validation:string:Should end with %s"
 	containsLocaleKey  = "validation:string:Should contain %s"
 	equalFieldKey      = "validation:string:Should be equal to %s"
+	base64LocaleKey    = "validation:string:Should be base64 encoded"
+	base64URLLocaleKey = "validation:string:Should be base64url encoded"
+	jsonLocaleKey      = "validation:string:Should be JSON"
+	semverLocaleKey    = "validation:string:Should be semantic version"
+	cidrLocaleKey      = "validation:string:Should be CIDR"
+	macLocaleKey       = "validation:string:Should be MAC address"
+	e164LocaleKey      = "validation:string:Should be E.164 phone number"
+	hexColorLocaleKey  = "validation:string:Should be hex color"
+	asciiLocaleKey     = "validation:string:Should contain only ASCII characters"
+	lowercaseLocaleKey = "validation:string:Should be lowercase"
+	uppercaseLocaleKey = "validation:string:Should be uppercase"
+	datetimeLocaleKey  = "validation:string:Should be date and time in %s format"
 )
 
 var emailRegexp = regexp.MustCompile(`^[^\s,@#$%^&*!()]+@([a-zA-Z0-9]+[.])+[a-zA-Z]{2,8}$`)
@@ -184,6 +196,78 @@ func (i *BaseConfigurator) Suffix(suffix string) *BaseConfigurator {
 // Contains checks if the string contains substr.
 func (i *BaseConfigurator) Contains(substr string) *BaseConfigurator {
 	i.f.CheckMsg(func(v string) bool { return strings.Contains(v, substr) }, shared.M("string.contains", containsLocaleKey, shared.P("substring", substr)))
+	return i
+}
+
+// Base64 checks if the string is base64 of RFC 4648 with padding, the standard alphabet.
+func (i *BaseConfigurator) Base64() *BaseConfigurator {
+	i.f.CheckMsg(isBase64, shared.M("string.base64", base64LocaleKey))
+	return i
+}
+
+// Base64URL checks if the string is base64 of RFC 4648 with the URL and filename safe alphabet, padding is optional.
+func (i *BaseConfigurator) Base64URL() *BaseConfigurator {
+	i.f.CheckMsg(isBase64URL, shared.M("string.base64url", base64URLLocaleKey))
+	return i
+}
+
+// JSON checks if the string is a valid JSON value.
+func (i *BaseConfigurator) JSON() *BaseConfigurator {
+	i.f.CheckMsg(isJSON, shared.M("string.json", jsonLocaleKey))
+	return i
+}
+
+// Semver checks if the string is a semantic version of semver.org without the "v" prefix: 1.2.3-rc.1+build.5.
+func (i *BaseConfigurator) Semver() *BaseConfigurator {
+	i.f.CheckMsg(semverRegexp.MatchString, shared.M("string.semver", semverLocaleKey))
+	return i
+}
+
+// CIDR checks if the string is an IPv4 or IPv6 prefix in the CIDR notation: 10.0.0.0/8, 2001:db8::/32.
+func (i *BaseConfigurator) CIDR() *BaseConfigurator {
+	i.f.CheckMsg(isCIDR, shared.M("string.cidr", cidrLocaleKey))
+	return i
+}
+
+// MAC checks if the string is a MAC address of 6 or 8 bytes: 00:1a:2b:3c:4d:5e, 00-1a-2b-3c-4d-5e, 001a.2b3c.4d5e.
+func (i *BaseConfigurator) MAC() *BaseConfigurator {
+	i.f.CheckMsg(isMAC, shared.M("string.mac", macLocaleKey))
+	return i
+}
+
+// E164 checks if the string is a phone number of E.164: +14155550123.
+func (i *BaseConfigurator) E164() *BaseConfigurator {
+	i.f.CheckMsg(isE164, shared.M("string.e164", e164LocaleKey))
+	return i
+}
+
+// HexColor checks if the string is a hex color: #rgb, #rgba, #rrggbb or #rrggbbaa.
+func (i *BaseConfigurator) HexColor() *BaseConfigurator {
+	i.f.CheckMsg(isHexColor, shared.M("string.hex_color", hexColorLocaleKey))
+	return i
+}
+
+// ASCII checks if the string is not empty and has only ASCII characters.
+func (i *BaseConfigurator) ASCII() *BaseConfigurator {
+	i.f.CheckMsg(isASCII, shared.M("string.ascii", asciiLocaleKey))
+	return i
+}
+
+// Lowercase checks if the string is not empty and has no upper case letters.
+func (i *BaseConfigurator) Lowercase() *BaseConfigurator {
+	i.f.CheckMsg(isLowercase, shared.M("string.lowercase", lowercaseLocaleKey))
+	return i
+}
+
+// Uppercase checks if the string is not empty and has no lower case letters.
+func (i *BaseConfigurator) Uppercase() *BaseConfigurator {
+	i.f.CheckMsg(isUppercase, shared.M("string.uppercase", uppercaseLocaleKey))
+	return i
+}
+
+// Datetime checks if the string is a date or a time of the layout of time.Parse: Datetime(time.DateOnly).
+func (i *BaseConfigurator) Datetime(layout string) *BaseConfigurator {
+	i.f.CheckMsg(isDatetime(layout), shared.M("string.datetime", datetimeLocaleKey, shared.P("layout", layout)))
 	return i
 }
 

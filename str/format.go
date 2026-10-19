@@ -1,8 +1,14 @@
 package str
 
 import (
+	"encoding/json"
 	"net/netip"
+	"regexp"
 	"strings"
+	"time"
+	"unicode"
+	"unicode/utf8"
+	"unsafe"
 )
 
 // isURL reports whether s is an absolute URL: scheme://[userinfo@]host[:port][path][?query][#fragment].
@@ -173,4 +179,138 @@ func isASCIIDigit(c byte) bool {
 
 func isHex(c byte) bool {
 	return isASCIIDigit(c) || 'a' <= c && c <= 'f' || 'A' <= c && c <= 'F'
+}
+
+// isBase64 reports whether s is base64 of RFC 4648 with padding, the standard alphabet.
+func isBase64(s string) bool {
+	return isBase64Of(s, '+', '/', true)
+}
+
+// isBase64URL reports whether s is base64 of RFC 4648 with the URL and filename safe alphabet, padding is optional.
+func isBase64URL(s string) bool {
+	return isBase64Of(s, '-', '_', false)
+}
+
+func isBase64Of(s string, c62, c63 byte, padded bool) bool {
+	if s == "" {
+		return false
+	}
+	data := strings.TrimRight(s, "=")
+	padding := len(s) - len(data)
+	if padding > 2 || (padded || padding > 0) && len(s)%4 != 0 || len(data)%4 == 1 {
+		return false
+	}
+	for i := 0; i < len(data); i++ {
+		c := data[i]
+		if !isASCIILetter(c) && !isASCIIDigit(c) && c != c62 && c != c63 {
+			return false
+		}
+	}
+	return true
+}
+
+// isJSON reports whether s is a valid JSON value.
+func isJSON(s string) bool {
+	return s != "" && json.Valid(unsafe.Slice(unsafe.StringData(s), len(s)))
+}
+
+// semverRegexp is the regular expression of semver.org for the versions without the "v" prefix.
+var semverRegexp = regexp.MustCompile(`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)` +
+	`(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?` +
+	`(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`)
+
+// isCIDR reports whether s is an IPv4 or IPv6 prefix in the CIDR notation, 10.0.0.0/8.
+func isCIDR(s string) bool {
+	_, err := netip.ParsePrefix(s)
+	return err == nil
+}
+
+// isMAC reports whether s is a MAC address of 6 or 8 bytes: 00:1a:2b:3c:4d:5e, 00-1a-2b-3c-4d-5e or 001a.2b3c.4d5e.
+func isMAC(s string) bool {
+	switch len(s) {
+	case 17, 23:
+		sep := s[2]
+		if sep != ':' && sep != '-' {
+			return false
+		}
+		for i := 0; i < len(s); i++ {
+			if i%3 == 2 {
+				if s[i] != sep {
+					return false
+				}
+			} else if !isHex(s[i]) {
+				return false
+			}
+		}
+		return true
+	case 14, 19:
+		for i := 0; i < len(s); i++ {
+			if i%5 == 4 {
+				if s[i] != '.' {
+					return false
+				}
+			} else if !isHex(s[i]) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
+// isE164 reports whether s is a phone number of E.164: + and up to 15 digits, the first one isn't 0.
+func isE164(s string) bool {
+	if len(s) < 3 || len(s) > 16 || s[0] != '+' || s[1] == '0' {
+		return false
+	}
+	for i := 1; i < len(s); i++ {
+		if !isASCIIDigit(s[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// isHexColor reports whether s is a hex color: #rgb, #rgba, #rrggbb or #rrggbbaa.
+func isHexColor(s string) bool {
+	if len(s) != 4 && len(s) != 5 && len(s) != 7 && len(s) != 9 || s[0] != '#' {
+		return false
+	}
+	for i := 1; i < len(s); i++ {
+		if !isHex(s[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// isASCII reports whether s is not empty and has only ASCII characters.
+func isASCII(s string) bool {
+	if s == "" {
+		return false
+	}
+	for i := 0; i < len(s); i++ {
+		if s[i] >= utf8.RuneSelf {
+			return false
+		}
+	}
+	return true
+}
+
+// isLowercase reports whether s is not empty and has no upper case letters.
+func isLowercase(s string) bool {
+	return s != "" && !strings.ContainsFunc(s, unicode.IsUpper)
+}
+
+// isUppercase reports whether s is not empty and has no lower case letters.
+func isUppercase(s string) bool {
+	return s != "" && !strings.ContainsFunc(s, unicode.IsLower)
+}
+
+// isDatetime returns a function that reports whether s is a date or a time of the layout of time.Parse.
+func isDatetime(layout string) func(s string) bool {
+	return func(s string) bool {
+		_, err := time.Parse(layout, s)
+		return err == nil
+	}
 }
