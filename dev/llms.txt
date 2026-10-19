@@ -6,34 +6,43 @@ valigo validates Go structs by rules configured once with pointers to the fields
 
 ## Start
 
-- [Get started](https://insei.github.io/valigo/latest/index.md): installation and the first validator
+- [valigo](https://insei.github.io/valigo/latest/index.md): installation and the first validator
 - [Why valigo?](https://insei.github.io/valigo/latest/why-valigo/index.md): what it gives compared to tag based validators
 - [Performance](https://insei.github.io/valigo/latest/performance/index.md): benchmarks with go-playground/validator, ozzo-validation, zog, gookit/validate and hand-written code
 - [Upgrading from v0.0.x](https://insei.github.io/valigo/latest/upgrading/index.md): upgrading from v0.0.x
 - [For AI agents](https://insei.github.io/valigo/latest/ai-agents/index.md): the skill for AI agents
 
-## Features
+## Configuration
 
-- [Features](https://insei.github.io/valigo/latest/features/index.md)
-- [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md)
-- [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md)
-- [Validator and Configure](https://insei.github.io/valigo/latest/features/configure/index.md)
-- [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md)
-- [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)
-- [echo](https://insei.github.io/valigo/latest/features/echo/index.md)
-- [Errors](https://insei.github.io/valigo/latest/features/errors/index.md)
-- [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md)
-- [gin](https://insei.github.io/valigo/latest/features/gin/index.md)
-- [huma](https://insei.github.io/valigo/latest/features/huma/index.md)
-- [Maps](https://insei.github.io/valigo/latest/features/maps/index.md)
-- [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)
-- [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md)
-- [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)
-- [Strings](https://insei.github.io/valigo/latest/features/strings/index.md)
-- [Time](https://insei.github.io/valigo/latest/features/time/index.md)
-- [Translations](https://insei.github.io/valigo/latest/features/translations/index.md)
-- [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)
-- [Comparable values](https://insei.github.io/valigo/latest/features/values/index.md)
+- [Features](https://insei.github.io/valigo/latest/features/index.md): the map of the features
+- [Validator and Configure](https://insei.github.io/valigo/latest/features/configure/index.md): the validator, Configure, the model, field pointers
+- [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md): Field, Slice, Map and As, the built-in conversions, conversions of your types
+- [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md): nil pointers and nil nested structs
+- [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md): When on the struct and on fields, conditional requiredness
+- [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md): Custom rules, rules from data
+- [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md): rules on other fields
+
+## Rules
+
+- [Strings](https://insei.github.io/valigo/latest/features/strings/index.md): the rules and formats of strings
+- [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md): the rules of numbers
+- [Time](https://insei.github.io/valigo/latest/features/time/index.md): the rules of time.Time
+- [Comparable values](https://insei.github.io/valigo/latest/features/values/index.md): the rules of comparable values, enums, bools
+- [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md): the rules of uuids, the separate module
+- [Slices](https://insei.github.io/valigo/latest/features/slices/index.md): the rules of slices and their elements
+- [Maps](https://insei.github.io/valigo/latest/features/maps/index.md): the rules of maps, their keys and values
+
+## Errors
+
+- [Errors](https://insei.github.io/valigo/latest/features/errors/index.md): Validate, shared.Error, locations, codes for clients
+- [Translations](https://insei.github.io/valigo/latest/features/translations/index.md): locales, plural forms, languages from the context
+- [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md): problem details of RFC 9457
+
+## Integrations
+
+- [huma](https://insei.github.io/valigo/latest/features/huma/index.md): huma inputs
+- [gin](https://insei.github.io/valigo/latest/features/gin/index.md): gin binding
+- [echo](https://insei.github.io/valigo/latest/features/echo/index.md): echo validator
 
 ## Architecture
 
