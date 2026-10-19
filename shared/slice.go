@@ -119,13 +119,23 @@ type SliceFieldConfigurator[E any] struct {
 	fields Fields
 	get    func(obj any) (Elems[E], bool)
 	add    func(fn ValidationFn)
+	schema constraints
 }
 
 // NewSliceFieldConfigurator creates a SliceFieldConfigurator for the field of type []E, *[]E, []*E or *[]*E,
 // named types with the same underlying layout are allowed.
-// fields resolves the pointers to other fields of the model, add registers a validation function of the configured struct.
-func NewSliceFieldConfigurator[E any](field fmap.Field, h Helper, fields Fields, add func(fn ValidationFn)) *SliceFieldConfigurator[E] {
-	return &SliceFieldConfigurator[E]{field: field, h: h, fields: fields, get: elemsGetter[E](field), add: add}
+// fields resolves the pointers to other fields of the model, add registers a validation function of the configured struct,
+// describe registers the constraints of its rules, it can be nil.
+func NewSliceFieldConfigurator[E any](field fmap.Field, h Helper, fields Fields, add func(fn ValidationFn), describe Describe) *SliceFieldConfigurator[E] {
+	return &SliceFieldConfigurator[E]{field: field, h: h, fields: fields, get: elemsGetter[E](field), add: add,
+		schema: newConstraints(describe, field)}
+}
+
+// Schema describes the rules of the slice by the keyword of JSON Schema with the value, e.g. Schema("uniqueItems", true),
+// see Constraint.
+func (s *SliceFieldConfigurator[E]) Schema(keyword string, value any) *SliceFieldConfigurator[E] {
+	s.schema.add(keyword, value)
+	return s
 }
 
 // Each configures rules applied to every element of the slice.
@@ -136,7 +146,7 @@ func (s *SliceFieldConfigurator[E]) Each(fn func(elem *Field[E])) *SliceFieldCon
 
 // EachField returns a Field that applies rules to every element of the slice.
 func (s *SliceFieldConfigurator[E]) EachField() *Field[E] {
-	return &Field[E]{field: s.field, h: s.h, fields: s.fields, add: eachSource(s.add, s.get)}
+	return &Field[E]{field: s.field, h: s.h, fields: s.fields, add: eachSource(s.add, s.get), schema: s.schema.child(PathItems)}
 }
 
 func (s *SliceFieldConfigurator[E]) check(ok func(n int) bool, msg Msg) {
@@ -152,18 +162,22 @@ func (s *SliceFieldConfigurator[E]) check(ok func(n int) bool, msg Msg) {
 
 // MaxLen checks that the slice contains no more than maxLen elements. Absent slice is skipped.
 func (s *SliceFieldConfigurator[E]) MaxLen(maxLen int) *SliceFieldConfigurator[E] {
+	s.schema.add("maxItems", maxLen)
 	s.check(func(n int) bool { return n <= maxLen }, M("slice.max_len", sliceMaxLenLocaleKey, P("max", maxLen)))
 	return s
 }
 
 // MinLen checks that the slice contains at least minLen elements. Absent slice is skipped.
 func (s *SliceFieldConfigurator[E]) MinLen(minLen int) *SliceFieldConfigurator[E] {
+	s.schema.add("minItems", minLen)
 	s.check(func(n int) bool { return n >= minLen }, M("slice.min_len", sliceMinLenLocaleKey, P("min", minLen)))
 	return s
 }
 
 // Required checks that the slice is present and not empty.
 func (s *SliceFieldConfigurator[E]) Required() *SliceFieldConfigurator[E] {
+	s.schema.add(KeywordRequired, true)
+	s.schema.add("minItems", 1)
 	field, get, msg := s.field, s.get, M("slice.required", sliceRequiredLocaleKey)
 	s.add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 		if elems, _ := get(obj); elems.n > 0 {

@@ -23,12 +23,15 @@ type MapFieldConfigurator[K comparable, V any] struct {
 	fields Fields
 	get    func(obj any) *map[K]V
 	add    func(fn ValidationFn)
+	schema constraints
 }
 
 // NewMapFieldConfigurator creates a MapFieldConfigurator for the field of type map[K]V,
-// fields resolves the pointers to other fields of the model, add registers a validation function of the configured struct.
-func NewMapFieldConfigurator[K comparable, V any](field fmap.Field, h Helper, fields Fields, add func(fn ValidationFn)) *MapFieldConfigurator[K, V] {
-	return &MapFieldConfigurator[K, V]{field: field, h: h, fields: fields, get: valueGetter[map[K]V](field), add: add}
+// fields resolves the pointers to other fields of the model, add registers a validation function of the configured struct,
+// describe registers the constraints of its rules, it can be nil.
+func NewMapFieldConfigurator[K comparable, V any](field fmap.Field, h Helper, fields Fields, add func(fn ValidationFn), describe Describe) *MapFieldConfigurator[K, V] {
+	return &MapFieldConfigurator[K, V]{field: field, h: h, fields: fields, get: valueGetter[map[K]V](field), add: add,
+		schema: newConstraints(describe, field)}
 }
 
 // As converts the map configurator to a typed one by conv.
@@ -49,18 +52,22 @@ func (m *MapFieldConfigurator[K, V]) check(ok func(n int) bool, msg Msg) {
 
 // MaxLen checks that the map contains no more than maxLen elements. Absent map is skipped.
 func (m *MapFieldConfigurator[K, V]) MaxLen(maxLen int) *MapFieldConfigurator[K, V] {
+	m.schema.add("maxProperties", maxLen)
 	m.check(func(n int) bool { return n <= maxLen }, M("map.max_len", mapMaxLenLocaleKey, P("max", maxLen)))
 	return m
 }
 
 // MinLen checks that the map contains at least minLen elements. Absent map is skipped.
 func (m *MapFieldConfigurator[K, V]) MinLen(minLen int) *MapFieldConfigurator[K, V] {
+	m.schema.add("minProperties", minLen)
 	m.check(func(n int) bool { return n >= minLen }, M("map.min_len", mapMinLenLocaleKey, P("min", minLen)))
 	return m
 }
 
 // Required checks that the map is present and not empty.
 func (m *MapFieldConfigurator[K, V]) Required() *MapFieldConfigurator[K, V] {
+	m.schema.add(KeywordRequired, true)
+	m.schema.add("minProperties", 1)
 	field, get, msg := m.field, m.get, M("map.required", mapRequiredLocaleKey)
 	m.add(func(ctx context.Context, h Helper, obj any, errs []Error) []Error {
 		if v := get(obj); v != nil && len(*v) > 0 {
@@ -108,7 +115,8 @@ func (m *MapFieldConfigurator[K, V]) When(whenFn func(ctx context.Context, value
 
 // EachKey configures rules applied to every key of the map, the location of an error is Labels[key].
 func (m *MapFieldConfigurator[K, V]) EachKey(fn func(key *Field[K])) *MapFieldConfigurator[K, V] {
-	fn(&Field[K]{field: m.field, h: m.h, fields: m.fields, add: mapSource(m.add, m.get, func(k K, _ V) K { return k })})
+	fn(&Field[K]{field: m.field, h: m.h, fields: m.fields, add: mapSource(m.add, m.get, func(k K, _ V) K { return k }),
+		schema: m.schema.child(PathPropertyNames)})
 	return m
 }
 
@@ -116,7 +124,8 @@ func (m *MapFieldConfigurator[K, V]) EachKey(fn func(key *Field[K])) *MapFieldCo
 // The values of a map aren't addressable: Modify rules, e.g. Trim, change a copy that is checked by the next rules,
 // the map keeps the original value.
 func (m *MapFieldConfigurator[K, V]) EachValue(fn func(value *Field[V])) *MapFieldConfigurator[K, V] {
-	fn(&Field[V]{field: m.field, h: m.h, fields: m.fields, add: mapSource(m.add, m.get, func(_ K, v V) V { return v })})
+	fn(&Field[V]{field: m.field, h: m.h, fields: m.fields, add: mapSource(m.add, m.get, func(_ K, v V) V { return v }),
+		schema: m.schema.child(PathAdditionalProperties)})
 	return m
 }
 

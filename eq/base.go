@@ -44,6 +44,7 @@ func Ptr[T comparable](f *shared.Field[*T]) *BaseConfigurator[T] {
 
 // Required checks if the value is not zero, for pointer fields checks if the pointer is not nil.
 func (i *BaseConfigurator[T]) Required() *BaseConfigurator[T] {
+	i.f.Schema(shared.KeywordRequired, true)
 	optional := i.optional
 	var zero T
 	i.f.RequiredMsg(func(v T) bool { return optional || v != zero }, shared.M("value.required", requiredLocaleKey))
@@ -52,6 +53,7 @@ func (i *BaseConfigurator[T]) Required() *BaseConfigurator[T] {
 
 // OneOf checks if the value is one of the allowed values.
 func (i *BaseConfigurator[T]) OneOf(allowed ...T) *BaseConfigurator[T] {
+	i.f.Schema("enum", shared.Values(allowed))
 	i.f.CheckMsg(func(v T) bool { return slices.Contains(allowed, v) }, shared.M("value.one_of", oneOfLocaleKey, shared.P("values", allowed)))
 	return i
 }
@@ -64,6 +66,7 @@ func (i *BaseConfigurator[T]) NotOneOf(forbidden ...T) *BaseConfigurator[T] {
 
 // Equal checks if the value is equal to expected, e.g. Equal(true) for an accepted agreement.
 func (i *BaseConfigurator[T]) Equal(expected T) *BaseConfigurator[T] {
+	i.f.Schema("const", expected)
 	i.f.CheckMsg(func(v T) bool { return v == expected }, shared.M("value.equal", equalLocaleKey, shared.P("value", expected)))
 	return i
 }

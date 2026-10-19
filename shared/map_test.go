@@ -33,11 +33,11 @@ func mapsFields(fieldPtr any) fmap.Field {
 }
 
 func newLabels(r *rules) *MapFieldConfigurator[string, string] {
-	return NewMapFieldConfigurator[string, string](mapsFields(&mapsModel.Labels), pathHelper{}, mapsFields, r.add)
+	return NewMapFieldConfigurator[string, string](mapsFields(&mapsModel.Labels), pathHelper{}, mapsFields, r.add, nil)
 }
 
 func newCounts(r *rules) *MapFieldConfigurator[string, int] {
-	return NewMapFieldConfigurator[string, int](mapsFields(&mapsModel.Counts), pathHelper{}, mapsFields, r.add)
+	return NewMapFieldConfigurator[string, int](mapsFields(&mapsModel.Counts), pathHelper{}, mapsFields, r.add, nil)
 }
 
 func TestMapFieldConfigurator(t *testing.T) {
@@ -76,7 +76,7 @@ func TestMapFieldConfigurator(t *testing.T) {
 			})
 		}, &mapsSample{Labels: map[string]string{"a": "x"}}, []Error{{Location: "Labels[a]", Message: "sees the modified copy", Value: "changed"}}},
 		{"rules of absent map are skipped", func(r *rules) {
-			NewMapFieldConfigurator[string, bool](mapsFields(&mapsModel.Inner.Tags), pathHelper{}, mapsFields, r.add).
+			NewMapFieldConfigurator[string, bool](mapsFields(&mapsModel.Inner.Tags), pathHelper{}, mapsFields, r.add, nil).
 				MaxLen(0).EachKey(func(k *Field[string]) { k.Check(func(string) bool { return false }, "bad") })
 		}, &mapsSample{}, nil},
 		{"custom", func(r *rules) {
@@ -92,7 +92,7 @@ func TestMapFieldConfigurator(t *testing.T) {
 			})
 		}, &mapsSample{Counts: map[string]int{"a": 6, "b": 6}}, []Error{{Location: "Counts", Message: "Sum is too big", Value: 12}}},
 		{"custom skips absent", func(r *rules) {
-			NewMapFieldConfigurator[string, bool](mapsFields(&mapsModel.Inner.Tags), pathHelper{}, mapsFields, r.add).
+			NewMapFieldConfigurator[string, bool](mapsFields(&mapsModel.Inner.Tags), pathHelper{}, mapsFields, r.add, nil).
 				Custom(func(context.Context, *FieldCustomHelper, map[string]bool) []Error { panic("must not be called") })
 		}, &mapsSample{}, nil},
 		{"when false", func(r *rules) {

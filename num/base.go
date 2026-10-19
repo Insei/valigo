@@ -49,6 +49,7 @@ func Ptr[N Number](f *shared.Field[*N]) *BaseConfigurator[N] {
 
 // Required checks if the number is not zero, for pointer fields checks if the pointer is not nil.
 func (i *BaseConfigurator[N]) Required() *BaseConfigurator[N] {
+	i.f.Schema(shared.KeywordRequired, true)
 	optional := i.optional
 	i.f.RequiredMsg(func(v N) bool { return optional || v != 0 }, shared.M("number.required", requiredLocaleKey))
 	return i
@@ -56,12 +57,14 @@ func (i *BaseConfigurator[N]) Required() *BaseConfigurator[N] {
 
 // Max checks if the number is not greater than maxNum.
 func (i *BaseConfigurator[N]) Max(maxNum N) *BaseConfigurator[N] {
+	i.f.Schema("maximum", maxNum)
 	i.f.CheckMsg(func(v N) bool { return v <= maxNum }, shared.M("number.max", maxLocaleKey, shared.P("max", maxNum)))
 	return i
 }
 
 // Min checks if the number is not less than minNum.
 func (i *BaseConfigurator[N]) Min(minNum N) *BaseConfigurator[N] {
+	i.f.Schema("minimum", minNum)
 	i.f.CheckMsg(func(v N) bool { return v >= minNum }, shared.M("number.min", minLocaleKey, shared.P("min", minNum)))
 	return i
 }
@@ -82,24 +85,28 @@ func (i *BaseConfigurator[N]) MaxField(other *N) *BaseConfigurator[N] {
 
 // AnyOf checks if the number is one of the allowed values.
 func (i *BaseConfigurator[N]) AnyOf(allowed ...N) *BaseConfigurator[N] {
+	i.f.Schema("enum", shared.Values(allowed))
 	i.f.CheckMsg(func(v N) bool { return slices.Contains(allowed, v) }, shared.M("number.any_of", anyOfLocaleKey, shared.P("values", allowed)))
 	return i
 }
 
 // AnyOfInterval checks if the number is within [begin, end] interval, both ends inclusive.
 func (i *BaseConfigurator[N]) AnyOfInterval(begin, end N) *BaseConfigurator[N] {
+	i.f.Schema("minimum", begin).Schema("maximum", end)
 	i.f.CheckMsg(func(v N) bool { return v >= begin && v <= end }, shared.M("number.interval", anyOfIntervalLocalKey, shared.P("min", begin), shared.P("max", end)))
 	return i
 }
 
 // Latitude checks if the number is a latitude in degrees, within [-90, 90].
 func (i *BaseConfigurator[N]) Latitude() *BaseConfigurator[N] {
+	i.f.Schema("minimum", -90).Schema("maximum", 90)
 	i.f.CheckMsg(func(v N) bool { return float64(v) >= -90 && float64(v) <= 90 }, shared.M("number.latitude", latitudeLocaleKey))
 	return i
 }
 
 // Longitude checks if the number is a longitude in degrees, within [-180, 180].
 func (i *BaseConfigurator[N]) Longitude() *BaseConfigurator[N] {
+	i.f.Schema("minimum", -180).Schema("maximum", 180)
 	i.f.CheckMsg(func(v N) bool { return float64(v) >= -180 && float64(v) <= 180 }, shared.M("number.longitude", longitudeLocaleKey))
 	return i
 }

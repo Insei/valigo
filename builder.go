@@ -49,6 +49,19 @@ func (c Configurator[T]) add(fn shared.ValidationFn) {
 	c.b.v.validators[t] = append(c.b.v.validators[t], fn)
 }
 
+// describe returns the registration of the constraints of the rules of T, nil under the struct level When:
+// the conditional rules aren't described.
+func (c Configurator[T]) describe() shared.Describe {
+	if c.b.when != nil {
+		return nil
+	}
+	v, t := c.b.v, reflect.TypeFor[T]()
+	return func(constraint shared.Constraint) {
+		constraint.Struct = t
+		v.constraints[t] = append(v.constraints[t], constraint)
+	}
+}
+
 // When returns a Configurator whose rules are applied only if fn returns true.
 // Conditions of chained When calls are combined with AND.
 func (c Configurator[T]) When(fn func(ctx context.Context, obj *T) bool) Configurator[T] {
@@ -103,7 +116,7 @@ func (c Configurator[T]) Custom(fn func(ctx context.Context, h shared.StructCust
 // b.Field(&m.Name).As(str.Of), b.Field(&m.Discount).As(num.Ptr).
 func (c Configurator[T]) Field[F any](fieldPtr *F) *shared.Field[F] {
 	field := c.field(fieldPtr)
-	return shared.NewValueField[F](field, c.b.v.helper, c.field, c.add)
+	return shared.NewValueField[F](field, c.b.v.helper, c.field, c.add, c.describe())
 }
 
 // Slice returns the configurator of the slice field with the rules of the slice itself,
@@ -111,12 +124,12 @@ func (c Configurator[T]) Field[F any](fieldPtr *F) *shared.Field[F] {
 // A pointer to a slice field is converted from its field: b.Field(&m.Tags).As(shared.SlicePtr).
 func (c Configurator[T]) Slice[E any](sliceFieldPtr *[]E) *shared.SliceFieldConfigurator[E] {
 	field := c.field(sliceFieldPtr)
-	return shared.NewSliceFieldConfigurator[E](field, c.b.v.helper, c.field, c.add)
+	return shared.NewSliceFieldConfigurator[E](field, c.b.v.helper, c.field, c.add, c.describe())
 }
 
 // Map returns the configurator of the map field with the rules of the map itself, EachKey and EachValue:
 // b.Map(&m.Labels).MaxLen(10).EachKey(func(k *shared.Field[string]) { k.As(str.Of).Hostname() }).
 func (c Configurator[T]) Map[K comparable, V any](mapFieldPtr *map[K]V) *shared.MapFieldConfigurator[K, V] {
 	field := c.field(mapFieldPtr)
-	return shared.NewMapFieldConfigurator[K, V](field, c.b.v.helper, c.field, c.add)
+	return shared.NewMapFieldConfigurator[K, V](field, c.b.v.helper, c.field, c.add, c.describe())
 }
