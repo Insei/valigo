@@ -7,6 +7,16 @@ validation:
     "Doesn't match required regexp pattern": Не соответствует regexp шаблону
     "Only %s values is allowed": Только %s значения разрешены
     "Should be email address": Должно быть электронным адресом
+    "Should be URL": Должно быть URL
+    "Should be IP address": Должно быть IP-адресом
+    "Should be IPv4 address": Должно быть IPv4-адресом
+    "Should be IPv6 address": Должно быть IPv6-адресом
+    "Should be hostname": Должно быть именем хоста
+    "Should be UUID": Должно быть UUID
+    "Should contain only letters and digits": Должно содержать только латинские буквы и цифры
+    "Should start with %s": Должно начинаться с %s
+    "Should end with %s": Должно заканчиваться на %s
+    "Should contain %s": Должно содержать %s
   num:
     "Cannot be less than %v": Не может быть меньше %v
     "Cannot be greater than %v": Не может быть больше %v
