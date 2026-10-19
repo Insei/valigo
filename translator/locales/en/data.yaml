@@ -7,6 +7,16 @@ validation:
     "Doesn't match required regexp pattern": Doesn't match required regexp pattern
     "Only %s values is allowed": Only %s values is allowed
     "Should be email address": Should be email address
+    "Should be URL": Should be URL
+    "Should be IP address": Should be IP address
+    "Should be IPv4 address": Should be IPv4 address
+    "Should be IPv6 address": Should be IPv6 address
+    "Should be hostname": Should be hostname
+    "Should be UUID": Should be UUID
+    "Should contain only letters and digits": Should contain only letters and digits
+    "Should start with %s": Should start with %s
+    "Should end with %s": Should end with %s
+    "Should contain %s": Should contain %s
   num:
     "Cannot be less than %v": Cannot be less than %v
     "Cannot be greater than %v": Cannot be greater than %v
