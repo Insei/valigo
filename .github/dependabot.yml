@@ -11,6 +11,10 @@ updates:
     commit-message:
       prefix: build
       include: scope
+    # the uuid and examples modules use the core by replace, so a dependency is bumped in all modules at once
+    groups:
+      go-modules:
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
@@ -18,3 +22,6 @@ updates:
     commit-message:
       prefix: ci
       include: scope
+    groups:
+      github-actions:
+        patterns: ["*"]
