@@ -306,7 +306,7 @@ func TestStructCustomForeignPointerPanics(t *testing.T) {
 }
 
 func TestConfigureNonStructPanics(t *testing.T) {
-	assert.Panics(t, func() {
+	assert.PanicsWithError(t, "not supported type: *int, only struct and ptr to struct is supported", func() {
 		Configure[int](New(), func(Configurator[int], *int) {})
 	})
 }
