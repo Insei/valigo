@@ -34,6 +34,14 @@ func TestGetPriorityLanguages(t *testing.T) {
 			acceptLanguage: "",
 			expected:       nil,
 		},
+		{
+			acceptLanguage: "*",
+			expected:       nil,
+		},
+		{
+			acceptLanguage: "en;q=abc,fr;q,de;level=1,es;q=0.5",
+			expected:       []string{"de", "es"},
+		},
 	}
 
 	for _, test := range tests {
@@ -70,8 +78,8 @@ func TestParseQuotient(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := parseQuotient(strings.Split(test.input, ";"))
-		if result != test.expected {
+		result, ok := parseQuotient(strings.Split(test.input, ";"))
+		if !ok || result != test.expected {
 			t.Errorf("expected %f, got %f", test.expected, result)
 		}
 	}

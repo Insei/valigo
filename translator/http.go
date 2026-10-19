@@ -48,8 +48,14 @@ func getPriorityLanguages(acceptLanguage string) []string {
 			continue
 		}
 		langWithQ := strings.Split(notParsedLang, ";")
-		lang := parseLang(langWithQ[0])
-		q := parseQuotient(langWithQ)
+		lang, ok := parseLang(langWithQ[0])
+		if !ok {
+			continue
+		}
+		q, ok := parseQuotient(langWithQ)
+		if !ok {
+			continue
+		}
 
 		languages = append(languages, language{name: lang, quotient: q})
 	}
@@ -66,29 +72,31 @@ func getPriorityLanguages(acceptLanguage string) []string {
 	return priorityLanguages
 }
 
-// parseLang takes a language string and returns the parsed language.
-// If the language has a length of 2, it is converted to lowercase.
-// Otherwise, the first two characters of the language are returned.
-func parseLang(lang string) string {
-	if len(lang) == 2 {
-		return strings.ToLower(lang)
+// parseLang takes a language string and returns the parsed language, i.e. its first two characters in lowercase.
+// It reports false for the wildcard and malformed languages.
+func parseLang(lang string) (string, bool) {
+	if len(lang) < 2 {
+		return "", false
 	}
-	return lang[0:2]
+	return strings.ToLower(lang[0:2]), true
 }
 
 // parseQuotient takes a slice of strings and returns the parsed quotient.
 // If the slice has a length of 1, the quotient is set to 1.
-// Otherwise, the quotient is parsed from the second element of the slice.
-func parseQuotient(parts []string) float32 {
-	var err error
-	q := float64(1)
-	if len(parts) > 1 {
-		q, err = strconv.ParseFloat(strings.Split(parts[1], "=")[1], 32)
-		if err != nil {
-			panic(err.Error())
+// Otherwise, the quotient is parsed from the q parameter, false is reported if it is malformed.
+func parseQuotient(parts []string) (float32, bool) {
+	for _, param := range parts[1:] {
+		key, value, _ := strings.Cut(param, "=")
+		if key != "q" {
+			continue
 		}
+		q, err := strconv.ParseFloat(value, 32)
+		if err != nil {
+			return 0, false
+		}
+		return float32(q), true
 	}
-	return float32(q)
+	return 1, true
 }
 
 // NewAcceptLanguageMiddleware accepts the request, retrieves the list of languages from Accept-Language header
