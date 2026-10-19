@@ -30,6 +30,10 @@ jobs:
       working-directory: uuid
       run: golangci-lint run --config ../.golangci.yml ./...
 
+    - name: Lint the huma module
+      working-directory: huma
+      run: golangci-lint run --config ../.golangci.yml ./...
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -42,6 +46,7 @@ jobs:
         cache-dependency-path: |
           go.sum
           uuid/go.sum
+          huma/go.sum
 
     - name: Build
       run: |
@@ -55,13 +60,17 @@ jobs:
       working-directory: uuid
       run: go test -v -race -coverprofile=../coverage-uuid.txt -covermode=atomic ./...
 
+    - name: Test the huma module
+      working-directory: huma
+      run: go test -v -race -coverprofile=../coverage-huma.txt -covermode=atomic ./...
+
     - name: Check 100% coverage of every package
       run: scripts/check-coverage.sh
 
     - uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./coverage.txt,./coverage-uuid.txt
+        files: ./coverage.txt,./coverage-uuid.txt,./coverage-huma.txt
 
   examples:
     runs-on: ubuntu-latest
@@ -75,6 +84,7 @@ jobs:
         cache-dependency-path: |
           go.sum
           uuid/go.sum
+          huma/go.sum
           examples/*/go.sum
 
     - name: Build and run the programs of the documentation and the skill

@@ -60,15 +60,17 @@ go 1.27
 
 require (
 	github.com/insei/valigo v0.1.0
+	github.com/insei/valigo/huma v0.1.0
 	github.com/insei/valigo/uuid v0.1.0
 )
 
 replace (
 	github.com/insei/valigo => $root
+	github.com/insei/valigo/huma => $root/huma
 	github.com/insei/valigo/uuid => $root/uuid
 )
 MOD
-cat "$root/go.sum" "$root/uuid/go.sum" | sort -u > "$work/go.sum"
+cat "$root/go.sum" "$root/uuid/go.sum" "$root/huma/go.sum" | sort -u > "$work/go.sum"
 cd "$work"
 go mod tidy >/dev/null
 go vet ./...
