@@ -83,13 +83,13 @@ What happens here:
 
 ## Where to go next
 
-- [Why valigo?](https://insei.github.io/valigo/latest/why-valigo/index.md) — what it gives compared to tag based validators.
-- [Features](https://insei.github.io/valigo/latest/features/index.md) — the rules of every type, conditions, custom rules, errors, translations.
-- [How it works](https://insei.github.io/valigo/latest/architecture/index.md) — the model, the field pointers and why valid objects don't allocate.
-- [Performance](https://insei.github.io/valigo/latest/performance/index.md) — benchmarks with go-playground/validator, ozzo-validation, zog, gookit/validate and hand-written code.
-- [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) and [huma](https://insei.github.io/valigo/latest/features/huma/index.md) — valigo in HTTP APIs.
-- [Upgrading from v0.0.x](https://insei.github.io/valigo/latest/upgrading/index.md) — the configurator API has changed.
-- [For AI agents](https://insei.github.io/valigo/latest/ai-agents/index.md) — the skill and the documentation in one file.
+- [Why valigo?](https://insei.github.io/valigo/dev/why-valigo/index.md) — what it gives compared to tag based validators.
+- [Features](https://insei.github.io/valigo/dev/features/index.md) — the rules of every type, conditions, custom rules, errors, translations.
+- [How it works](https://insei.github.io/valigo/dev/architecture/index.md) — the model, the field pointers and why valid objects don't allocate.
+- [Performance](https://insei.github.io/valigo/dev/performance/index.md) — benchmarks with go-playground/validator, ozzo-validation, zog, gookit/validate and hand-written code.
+- [HTTP problem details](https://insei.github.io/valigo/dev/features/problem/index.md) and [huma](https://insei.github.io/valigo/dev/features/huma/index.md) — valigo in HTTP APIs.
+- [Upgrading from v0.0.x](https://insei.github.io/valigo/dev/upgrading/index.md) — the configurator API has changed.
+- [For AI agents](https://insei.github.io/valigo/dev/ai-agents/index.md) — the skill and the documentation in one file.
 
 # Why valigo?
 
@@ -112,11 +112,11 @@ A renamed field is renamed in the rules by the IDE, a removed field breaks the b
 
 ### Any type, without changes of the library
 
-The configurator knows nothing about strings, numbers or uuids: they are conversions in their packages. A type of your domain, `time.Time` or a uuid of another package gets its rules by a conversion function of a few lines, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md).
+The configurator knows nothing about strings, numbers or uuids: they are conversions in their packages. A type of your domain, `time.Time` or a uuid of another package gets its rules by a conversion function of a few lines, see [Types and conversions](https://insei.github.io/valigo/dev/features/conversions/index.md).
 
 ### Validation of valid objects doesn't allocate
 
-The rules are built once by `Configure`. `Validate` reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it. On the same rules a valid object is validated about 4 times faster than by go-playground/validator and 1.4 times slower than by the same rules written by hand, an invalid one with translated messages — about 2 times faster than go-playground/validator builds its messages, see [Performance](https://insei.github.io/valigo/latest/performance/index.md).
+The rules are built once by `Configure`. `Validate` reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it. On the same rules a valid object is validated about 4 times faster than by go-playground/validator and 1.4 times slower than by the same rules written by hand, an invalid one with translated messages — about 2 times faster than go-playground/validator builds its messages, see [Performance](https://insei.github.io/valigo/dev/performance/index.md).
 
 ### Absent values are handled, not panicked on
 
@@ -138,11 +138,11 @@ smtp.Field(&s.Host).As(str.Of).Required()
 smtp.Field(&s.Port).As(num.Of).AnyOfInterval(1, 65535)
 ```
 
-See [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) and [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md).
+See [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md) and [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md).
 
 ### Messages in the language of the user, or codes for the client
 
-One validator serves all languages: the language of every request comes from the context, `NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there. The messages of the built-in rules are translated to English, German, Spanish, French and Russian with plural forms, your own messages are added to the same storage and work untranslated until you add translations. A client with its own locales gets a stable `Code` and named `Params` of every error instead. See [Translations](https://insei.github.io/valigo/latest/features/translations/index.md) and [Codes for clients](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients).
+One validator serves all languages: the language of every request comes from the context, `NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there. The messages of the built-in rules are translated to English, German, Spanish, French and Russian with plural forms, your own messages are added to the same storage and work untranslated until you add translations. A client with its own locales gets a stable `Code` and named `Params` of every error instead. See [Translations](https://insei.github.io/valigo/dev/features/translations/index.md) and [Codes for clients](https://insei.github.io/valigo/dev/features/errors/#codes-for-clients).
 
 How the libraries compare, by their documentation:
 
@@ -157,19 +157,19 @@ How the libraries compare, by their documentation:
 
 ### Slices, maps and other fields
 
-The rules of a slice check the slice itself and, by `Each`, every element with the rules of its type; maps have `EachKey` and `EachValue`; a rule can compare a field with another one by its pointer — `b.Field(&o.EndsAt).As(timex.Of).AfterField(&o.StartsAt)` — with the type of the other field checked by the compiler. See [Slices](https://insei.github.io/valigo/latest/features/slices/index.md), [Maps](https://insei.github.io/valigo/latest/features/maps/index.md) and [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md).
+The rules of a slice check the slice itself and, by `Each`, every element with the rules of its type; maps have `EachKey` and `EachValue`; a rule can compare a field with another one by its pointer — `b.Field(&o.EndsAt).As(timex.Of).AfterField(&o.StartsAt)` — with the type of the other field checked by the compiler. See [Slices](https://insei.github.io/valigo/dev/features/slices/index.md), [Maps](https://insei.github.io/valigo/dev/features/maps/index.md) and [Rules on other fields](https://insei.github.io/valigo/dev/features/fields/index.md).
 
 ### Ready for HTTP APIs
 
-The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/integrations/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) and [huma](https://insei.github.io/valigo/latest/features/huma/index.md).
+The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/integrations/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](https://insei.github.io/valigo/dev/features/problem/index.md) and [huma](https://insei.github.io/valigo/dev/features/huma/index.md).
 
 ### Errors that point to the field
 
-Every error has the message, the location and the value: `Tags[1]` for an element of a slice, `Address.City` for a nested field, or the JSON path of the field with a custom location function. See [Errors](https://insei.github.io/valigo/latest/features/errors/index.md).
+Every error has the message, the location and the value: `Tags[1]` for an element of a slice, `Address.City` for a nested field, or the JSON path of the field with a custom location function. See [Errors](https://insei.github.io/valigo/dev/features/errors/index.md).
 
 ## When valigo is not the right tool
 
-- **The fields aren't known at compile time**, e.g. a form builder with fields defined by users: valigo validates the fields of Go structs. The limits and the conditions of the rules can come from the data — a database, a cache, the settings of a tenant — see [Rules from data](https://insei.github.io/valigo/latest/features/custom/#rules-from-data).
+- **The fields aren't known at compile time**, e.g. a form builder with fields defined by users: valigo validates the fields of Go structs. The limits and the conditions of the rules can come from the data — a database, a cache, the settings of a tenant — see [Rules from data](https://insei.github.io/valigo/dev/features/custom/#rules-from-data).
 - **The input is not a struct**: valigo validates structs, decode maps and JSON into a struct first.
 - **Go older than 1.27**: the configurator uses generic methods.
 
@@ -214,7 +214,7 @@ An invalid object with 6 errors:
 
 valigo is about 1.4 times slower than the same rules written by hand on a valid object, it pays for the closures of the rules; it doesn't allocate either. The fields are read by the offsets of fmap without reflect, following the pointers of nested structs. Code generators of validators produce code like the hand-written one, so they are expected to be about as fast as it.
 
-- The [rules from tags](https://insei.github.io/valigo/latest/features/tags/index.md) are the same rules: in one run a valid object took 392 ns by the tags of go-playground/validator and 373 ns by the rules in code, 0 allocations both; `max=64` is `MaxRunes`, `gte` and `lte` are two rules instead of one `AnyOfInterval`.
+- The [rules from tags](https://insei.github.io/valigo/dev/features/tags/index.md) are the same rules: in one run a valid object took 392 ns by the tags of go-playground/validator and 373 ns by the rules in code, 0 allocations both; `max=64` is `MaxRunes`, `gte` and `lte` are two rules instead of one `AnyOfInterval`.
 - valigo builds the rules once in `Configure` and reads the fields by precomputed accessors, so valid objects cost no allocations; go-playground/validator parses the tags once too, but works through `reflect` on every call, ozzo-validation builds its rules on every call of `Validate`.
 - gookit/validate creates a validation per call, it is its API, and reports the errors of the elements of a slice under one key `Tags.*`; zog builds the messages of its issues.
 - valigo builds the translated messages of the errors at once, go-playground/validator returns the errors without messages and builds them by `Error` or `Translate`: compare valigo with the row "with `Error()`".
@@ -302,50 +302,50 @@ The map of valigo, in the order of the menu.
 
 How the rules are configured and composed.
 
-| Page                                                                                         | What's inside                                                                                       |
-| -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [Validator and Configure](https://insei.github.io/valigo/latest/features/configure/index.md) | `New` and its options, `Configure`, the model, field pointers, nested and recursive structs         |
-| [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md) | `Field`, `Slice`, `Map` and `As`, the built-in conversions, conversions of your types               |
-| [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md)              | nil pointers, nil slices and nil nested structs: which rules skip them                              |
-| [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md)             | `When` on the struct and on a field, conditional requiredness                                       |
-| [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)               | `Custom` on a field, on a slice and on the struct, rules with limits from data                      |
-| [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md)      | `EqualField`, `MinField`, `MaxField`, `BeforeField`, `AfterField` by the pointer of the other field |
-| [Rules from tags](https://insei.github.io/valigo/latest/features/tags/index.md)              | `Tags`: the tags of go-playground/validator, `validate:"required,max=64"`, for a migration          |
+| Page                                                                                      | What's inside                                                                                       |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [Validator and Configure](https://insei.github.io/valigo/dev/features/configure/index.md) | `New` and its options, `Configure`, the model, field pointers, nested and recursive structs         |
+| [Types and conversions](https://insei.github.io/valigo/dev/features/conversions/index.md) | `Field`, `Slice`, `Map` and `As`, the built-in conversions, conversions of your types               |
+| [Absent values](https://insei.github.io/valigo/dev/features/absent/index.md)              | nil pointers, nil slices and nil nested structs: which rules skip them                              |
+| [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md)             | `When` on the struct and on a field, conditional requiredness                                       |
+| [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md)               | `Custom` on a field, on a slice and on the struct, rules with limits from data                      |
+| [Rules on other fields](https://insei.github.io/valigo/dev/features/fields/index.md)      | `EqualField`, `MinField`, `MaxField`, `BeforeField`, `AfterField` by the pointer of the other field |
+| [Rules from tags](https://insei.github.io/valigo/dev/features/tags/index.md)              | `Tags`: the tags of go-playground/validator, `validate:"required,max=64"`, for a migration          |
 
 ## Rules
 
 The built-in rules of every type.
 
-| Page                                                                                | What's inside                                                                                                                                                                              |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Strings](https://insei.github.io/valigo/latest/features/strings/index.md)          | `str.Of`: lengths, `AnyOf`, substrings, `Regexp`, `Email`, `URL`, `IP`, `CIDR`, `MAC`, `Hostname`, `UUID`, `E164`, `Base64`, `JSON`, `Semver`, `Datetime`, ISO codes, `CreditCard`, `Trim` |
-| [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)          | `num.Of`, `num.Ptr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval`, `Latitude`, `Longitude`                                                                                           |
-| [Time](https://insei.github.io/valigo/latest/features/time/index.md)                | `timex.Of`: `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture`                                                                                                                 |
-| [Comparable values](https://insei.github.io/valigo/latest/features/values/index.md) | `eq.Of`, `eq.Ptr`, `eq.Slice`: enums, bools — `OneOf`, `NotOneOf`, `Equal`, `NotEqual`, `Unique`                                                                                           |
-| [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)                | `uuid.Of` of the separate module: `Required`, `AnyOf`                                                                                                                                      |
-| [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)            | `Slice` and the slice conversions: length rules, `Each` for the elements                                                                                                                   |
-| [Maps](https://insei.github.io/valigo/latest/features/maps/index.md)                | `Map`: length rules, `EachKey` and `EachValue` with conversions                                                                                                                            |
+| Page                                                                             | What's inside                                                                                                                                                                              |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Strings](https://insei.github.io/valigo/dev/features/strings/index.md)          | `str.Of`: lengths, `AnyOf`, substrings, `Regexp`, `Email`, `URL`, `IP`, `CIDR`, `MAC`, `Hostname`, `UUID`, `E164`, `Base64`, `JSON`, `Semver`, `Datetime`, ISO codes, `CreditCard`, `Trim` |
+| [Numbers](https://insei.github.io/valigo/dev/features/numbers/index.md)          | `num.Of`, `num.Ptr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval`, `Latitude`, `Longitude`                                                                                           |
+| [Time](https://insei.github.io/valigo/dev/features/time/index.md)                | `timex.Of`: `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture`                                                                                                                 |
+| [Comparable values](https://insei.github.io/valigo/dev/features/values/index.md) | `eq.Of`, `eq.Ptr`, `eq.Slice`: enums, bools — `OneOf`, `NotOneOf`, `Equal`, `NotEqual`, `Unique`                                                                                           |
+| [UUID](https://insei.github.io/valigo/dev/features/uuid/index.md)                | `uuid.Of` of the separate module: `Required`, `AnyOf`                                                                                                                                      |
+| [Slices](https://insei.github.io/valigo/dev/features/slices/index.md)            | `Slice` and the slice conversions: length rules, `Each` for the elements                                                                                                                   |
+| [Maps](https://insei.github.io/valigo/dev/features/maps/index.md)                | `Map`: length rules, `EachKey` and `EachValue` with conversions                                                                                                                            |
 
 ## Errors
 
 What a validation returns.
 
-| Page                                                                                    | What's inside                                                                                          |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [Errors](https://insei.github.io/valigo/latest/features/errors/index.md)                | `Validate` and `ValidateTyped`, `shared.Error`, locations, codes for clients, errors transformer       |
-| [Translations](https://insei.github.io/valigo/latest/features/translations/index.md)    | built-in locales, plural forms, own messages, languages from the context, `Accept-Language` middleware |
-| [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) | `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers and codes           |
+| Page                                                                                 | What's inside                                                                                          |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| [Errors](https://insei.github.io/valigo/dev/features/errors/index.md)                | `Validate` and `ValidateTyped`, `shared.Error`, locations, codes for clients, errors transformer       |
+| [Translations](https://insei.github.io/valigo/dev/features/translations/index.md)    | built-in locales, plural forms, own messages, languages from the context, `Accept-Language` middleware |
+| [HTTP problem details](https://insei.github.io/valigo/dev/features/problem/index.md) | `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers and codes           |
 
 ## Integrations
 
 The separate modules for the frameworks.
 
-| Page                                                                          | What's inside                                                                                                                                 |
-| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md) | the rules as the keywords of JSON Schema for the generators of API schemas, `Constraints`                                                     |
-| [huma](https://insei.github.io/valigo/latest/features/huma/index.md)          | `github.com/insei/valigo/integrations/huma`: the rules in the `Resolve` of huma inputs with the locations of huma and in its OpenAPI document |
-| [gin](https://insei.github.io/valigo/latest/features/gin/index.md)            | `github.com/insei/valigo/integrations/gin`: the `binding.StructValidator` of gin and validation with the language of the request              |
-| [echo](https://insei.github.io/valigo/latest/features/echo/index.md)          | `github.com/insei/valigo/integrations/echo`: the `echo.Validator` and validation with the language of the request                             |
+| Page                                                                       | What's inside                                                                                                                                 |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [JSON Schema](https://insei.github.io/valigo/dev/features/schema/index.md) | the rules as the keywords of JSON Schema for the generators of API schemas, `Constraints`                                                     |
+| [huma](https://insei.github.io/valigo/dev/features/huma/index.md)          | `github.com/insei/valigo/integrations/huma`: the rules in the `Resolve` of huma inputs with the locations of huma and in its OpenAPI document |
+| [gin](https://insei.github.io/valigo/dev/features/gin/index.md)            | `github.com/insei/valigo/integrations/gin`: the `binding.StructValidator` of gin and validation with the language of the request              |
+| [echo](https://insei.github.io/valigo/dev/features/echo/index.md)          | `github.com/insei/valigo/integrations/echo`: the `echo.Validator` and validation with the language of the request                             |
 
 # Validator and Configure
 
@@ -375,10 +375,10 @@ valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
 
 The function is called once, with:
 
-- `b` — the configurator of `T`: `Field`, `Slice` and `Map` return the base configurators of fields, converted to the configurators of their types by `As`, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md); [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md) and [`Custom`](https://insei.github.io/valigo/latest/features/custom/index.md) are the rules of the struct;
+- `b` — the configurator of `T`: `Field`, `Slice` and `Map` return the base configurators of fields, converted to the configurators of their types by `As`, see [Types and conversions](https://insei.github.io/valigo/dev/features/conversions/index.md); [`When`](https://insei.github.io/valigo/dev/features/conditions/index.md) and [`Custom`](https://insei.github.io/valigo/dev/features/custom/index.md) are the rules of the struct;
 - `u` — the *model*, a `*User` created by `Configure`. Rules are bound to the fields of the model by their pointers.
 
-The rules are applied to objects of type `*T`: `v.Validate(ctx, &user)`. A struct value is validated too, by a copy, see [Errors](https://insei.github.io/valigo/latest/features/errors/#validate-and-validatetyped).
+The rules are applied to objects of type `*T`: `v.Validate(ctx, &user)`. A struct value is validated too, by a copy, see [Errors](https://insei.github.io/valigo/dev/features/errors/#validate-and-validatetyped).
 
 `Configure` is called on the application start. It isn't safe to call concurrently with `Validate`, and it **panics** on invalid configuration: a configuration error is a bug of the code, not a state of the running service. A repeated `Configure` of the same type replaces its rules.
 
@@ -443,7 +443,7 @@ Output:
 [Should be fulfilled (Work.City: <nil>)]
 ```
 
-When the validated object has a nil `Work`, the field `Work.City` is absent: rules skip it and `Required` fails, see [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md).
+When the validated object has a nil `Work`, the field `Work.City` is absent: rules skip it and `Required` fails, see [Absent values](https://insei.github.io/valigo/dev/features/absent/index.md).
 
 Embedded structs work the same way, `&u.ID` for a field of an embedded `Base`. Unexported fields are allowed in the model, and unexported fields of the model itself can be configured too.
 
@@ -468,7 +468,7 @@ The configurator knows nothing about the types of the values. It has two methods
 
 - `b.Field(&m.X)` returns `*shared.Field[T]`, the base configurator of a field of type `T`;
 - `b.Slice(&m.X)` returns `*shared.SliceFieldConfigurator[E]` of a `[]E` field, with the rules of the slice itself: `Required`, `MinLen`, `MaxLen`, `Custom`, `When` and `Each`;
-- `b.Map(&m.X)` returns `*shared.MapFieldConfigurator[K, V]` of a `map[K]V` field, with the rules of the map itself, `EachKey` and `EachValue`, see [Maps](https://insei.github.io/valigo/latest/features/maps/index.md).
+- `b.Map(&m.X)` returns `*shared.MapFieldConfigurator[K, V]` of a `map[K]V` field, with the rules of the map itself, `EachKey` and `EachValue`, see [Maps](https://insei.github.io/valigo/dev/features/maps/index.md).
 
 `As` converts a base configurator to the configurator of its type. A conversion is a function with a type constraint, so a conversion that doesn't fit the field doesn't compile:
 
@@ -483,20 +483,20 @@ b.Field(&u.Age).As(str.Of)
 
 ## Built-in conversions
 
-| Conversion        | Fields                                                  | Configurator                                                                                                                   |
-| ----------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `str.Of`          | `string`, `*string`, named strings                      | [strings](https://insei.github.io/valigo/latest/features/strings/index.md)                                                     |
-| `num.Of`          | numbers and named numbers                               | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                     |
-| `num.Slice`       | `Slice` of numbers                                      | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the number rules of elements                     |
-| `num.Ptr`         | pointers to numbers                                     | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md), `Required` checks only that the pointer isn't nil  |
-| `timex.Of`        | `time.Time`, `*time.Time`                               | [time](https://insei.github.io/valigo/latest/features/time/index.md)                                                           |
-| `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](https://insei.github.io/valigo/latest/features/values/index.md)                                            |
-| `vuuid.Of`        | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid`   | [uuid](https://insei.github.io/valigo/latest/features/uuid/index.md), the separate module `github.com/insei/valigo/rules/uuid` |
-| `str.Slice`       | `Slice` of strings, `*string` or named strings          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the string rules of elements                     |
-| `timex.Slice`     | `Slice` of `time.Time`, `*time.Time`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the time rules of elements                       |
-| `eq.Slice`        | `Slice` of a `comparable` type                          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with `Unique` and the equality rules of elements      |
-| `vuuid.Slice`     | `Slice` of `uuid.UUID`, `*uuid.UUID`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the uuid rules of elements                       |
-| `shared.SlicePtr` | `Field` of `*[]E`                                       | the slice configurator, a nil pointer is absent                                                                                |
+| Conversion        | Fields                                                  | Configurator                                                                                                                |
+| ----------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `str.Of`          | `string`, `*string`, named strings                      | [strings](https://insei.github.io/valigo/dev/features/strings/index.md)                                                     |
+| `num.Of`          | numbers and named numbers                               | [numbers](https://insei.github.io/valigo/dev/features/numbers/index.md)                                                     |
+| `num.Slice`       | `Slice` of numbers                                      | [slices](https://insei.github.io/valigo/dev/features/slices/index.md) with the number rules of elements                     |
+| `num.Ptr`         | pointers to numbers                                     | [numbers](https://insei.github.io/valigo/dev/features/numbers/index.md), `Required` checks only that the pointer isn't nil  |
+| `timex.Of`        | `time.Time`, `*time.Time`                               | [time](https://insei.github.io/valigo/dev/features/time/index.md)                                                           |
+| `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](https://insei.github.io/valigo/dev/features/values/index.md)                                            |
+| `vuuid.Of`        | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid`   | [uuid](https://insei.github.io/valigo/dev/features/uuid/index.md), the separate module `github.com/insei/valigo/rules/uuid` |
+| `str.Slice`       | `Slice` of strings, `*string` or named strings          | [slices](https://insei.github.io/valigo/dev/features/slices/index.md) with the string rules of elements                     |
+| `timex.Slice`     | `Slice` of `time.Time`, `*time.Time`                    | [slices](https://insei.github.io/valigo/dev/features/slices/index.md) with the time rules of elements                       |
+| `eq.Slice`        | `Slice` of a `comparable` type                          | [slices](https://insei.github.io/valigo/dev/features/slices/index.md) with `Unique` and the equality rules of elements      |
+| `vuuid.Slice`     | `Slice` of `uuid.UUID`, `*uuid.UUID`                    | [slices](https://insei.github.io/valigo/dev/features/slices/index.md) with the uuid rules of elements                       |
+| `shared.SlicePtr` | `Field` of `*[]E`                                       | the slice configurator, a nil pointer is absent                                                                             |
 
 The elements of a slice are converted in `Each`: `b.Slice(&m.Sizes).Each(func(e *shared.Field[int]) { e.As(num.Of).Min(1) })`.
 
@@ -504,13 +504,13 @@ The elements of a slice are converted in `Each`: `b.Slice(&m.Sizes).Each(func(e 
 
 `shared.Field[T]` has the primitives all configurators are built of. They are enough for a one-off rule without a conversion:
 
-| Rule                      | Behavior                                                                                                                                       |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Check(ok, key, args...)` | an error with the message `key` when `ok(value)` is false, absent values are skipped                                                           |
-| `Required(ok, key)`       | an error when the value is absent or `ok(value)` is false                                                                                      |
-| `Modify(fn)`              | changes the value in place, e.g. trims it                                                                                                      |
-| `Custom(fn)`              | your function with the typed value, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                         |
-| `When(cond)`              | the next rules are applied only if `cond(value)` is true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+| Rule                      | Behavior                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Check(ok, key, args...)` | an error with the message `key` when `ok(value)` is false, absent values are skipped                                                        |
+| `Required(ok, key)`       | an error when the value is absent or `ok(value)` is false                                                                                   |
+| `Modify(fn)`              | changes the value in place, e.g. trims it                                                                                                   |
+| `Custom(fn)`              | your function with the typed value, see [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md)                         |
+| `When(cond)`              | the next rules are applied only if `cond(value)` is true, see [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md) |
 
 ```go
 b.Field(&o.Paid).Check(func(paid bool) bool { return paid }, "Should be paid")
@@ -524,9 +524,9 @@ A conversion of your type is a function that takes the base configurator and ret
 - `shared.Retype` converts the rules of `T` to the rules of `U` with the same memory layout, e.g. of a named type;
 - `shared.RetypeSlice` does the same for a slice configurator, also for the elements stored by pointer;
 - `shared.SliceRules` gives `Required`, `MinLen`, `MaxLen`, `Custom` and `When` of the slice to your slice configurator, see the source of `str.Slice`;
-- `CheckMsg` and `RequiredMsg` take a message of `shared.M` with a stable [code](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients) and named parameters: `c.f.CheckMsg(ok, shared.M("time.after", key, shared.P("time", t)))`.
+- `CheckMsg` and `RequiredMsg` take a message of `shared.M` with a stable [code](https://insei.github.io/valigo/dev/features/errors/#codes-for-clients) and named parameters: `c.f.CheckMsg(ok, shared.M("time.after", key, shared.P("time", t)))`.
 
-A configurator of `time.Time` (the built-in one is [`timex`](https://insei.github.io/valigo/latest/features/time/index.md), this one shows how it's made):
+A configurator of `time.Time` (the built-in one is [`timex`](https://insei.github.io/valigo/dev/features/time/index.md), this one shows how it's made):
 
 ```go
 package main
@@ -667,7 +667,7 @@ Nil slices of value fields (`[]string(nil)`) are present and empty: length rules
 
 ## Conditions
 
-A field `When` doesn't call its condition for an absent value and skips its rules, including `Required`: the condition is about the value, and there is no value. Put `Required` before `When`, or use `When` of the struct, if the field is required under a condition. See [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md).
+A field `When` doesn't call its condition for an absent value and skips its rules, including `Required`: the condition is about the value, and there is no value. Put `Required` before `When`, or use `When` of the struct, if the field is required under a condition. See [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md).
 
 # Conditions
 
@@ -734,9 +734,9 @@ b.Field(&u.Website).As(str.Of).
     Regexp(urlRe)                                                            // only for a non-empty value
 ```
 
-The value is typed: `string` for `str.Of`, the number type for `num.Of` and `num.Ptr`, `uuid.UUID` for `uuid.Of`, and `shared.Elems[E]` for slices, see [Slices](https://insei.github.io/valigo/latest/features/slices/#custom-and-when).
+The value is typed: `string` for `str.Of`, the number type for `num.Of` and `num.Ptr`, `uuid.UUID` for `uuid.Of`, and `shared.Elems[E]` for slices, see [Slices](https://insei.github.io/valigo/dev/features/slices/#custom-and-when).
 
-For an [absent value](https://insei.github.io/valigo/latest/features/absent/index.md) the condition isn't called and the rules after it are skipped, including `Required`.
+For an [absent value](https://insei.github.io/valigo/dev/features/absent/index.md) the condition isn't called and the rules after it are skipped, including `Required`.
 
 ## Conditional requiredness
 
@@ -796,7 +796,7 @@ Output:
 
 ## Conditions and custom rules
 
-A condition on several fields can also be written as a [struct custom rule](https://insei.github.io/valigo/latest/features/custom/#struct-rules), which reports errors itself. Prefer `When`: the rules after it are the regular ones, with their messages and translations.
+A condition on several fields can also be written as a [struct custom rule](https://insei.github.io/valigo/dev/features/custom/#struct-rules), which reports errors itself. Prefer `When`: the rules after it are the regular ones, with their messages and translations.
 
 # Custom rules
 
@@ -850,7 +850,7 @@ Output:
 [Login "Admin" is reserved (Login: Admin) Should be even (Age: 3)]
 ```
 
-`h.ErrorT(ctx, value, localeKey, args...)` translates the message: `localeKey` is looked up in the [translations](https://insei.github.io/valigo/latest/features/translations/index.md), a key without a translation is used as is, as a format for `args`. The [code](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients) of the error is the key. For a stable code and named parameters build the message by `shared.M` and return `h.ErrorMsg(ctx, value, msg)`:
+`h.ErrorT(ctx, value, localeKey, args...)` translates the message: `localeKey` is looked up in the [translations](https://insei.github.io/valigo/dev/features/translations/index.md), a key without a translation is used as is, as a format for `args`. The [code](https://insei.github.io/valigo/dev/features/errors/#codes-for-clients) of the error is the key. For a stable code and named parameters build the message by `shared.M` and return `h.ErrorMsg(ctx, value, msg)`:
 
 ```go
 return []shared.Error{h.ErrorMsg(ctx, login, shared.M("login.reserved", "Login %q is reserved", shared.P("login", login)))}
@@ -858,7 +858,7 @@ return []shared.Error{h.ErrorMsg(ctx, login, shared.M("login.reserved", "Login %
 
 The values of `shared.P` are the format arguments of the message in their order. A message without the checked value can be created once on the configuration, its parameters are shared by the errors.
 
-The function isn't called for an [absent value](https://insei.github.io/valigo/latest/features/absent/index.md).
+The function isn't called for an [absent value](https://insei.github.io/valigo/dev/features/absent/index.md).
 
 ## Rules on slice elements
 
@@ -870,7 +870,7 @@ b.Slice(&o.Quantities).Each(func(q *shared.Field[int]) {
 })
 ```
 
-`Required(ok, localeKey)` fails for absent elements and the elements that don't match `ok`, `Modify(fn)` changes the elements in place. See [Slices](https://insei.github.io/valigo/latest/features/slices/index.md).
+`Required(ok, localeKey)` fails for absent elements and the elements that don't match `ok`, `Modify(fn)` changes the elements in place. See [Slices](https://insei.github.io/valigo/dev/features/slices/index.md).
 
 ## Struct rules
 
@@ -915,7 +915,7 @@ Output:
 [Should be after 2026-05-10 (To: 2026-05-09)]
 ```
 
-- Struct `Custom` can be combined with [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md): `b.When(cond).Custom(fn)`.
+- Struct `Custom` can be combined with [`When`](https://insei.github.io/valigo/dev/features/conditions/index.md): `b.When(cond).Custom(fn)`.
 - The helper is valid only during the call of the function, don't keep it.
 - A pointer that doesn't point to a field of the validated object panics.
 
@@ -994,18 +994,18 @@ b.Field(&u.Confirmation).As(str.Of).EqualField(&u.Password)
 b.Field(&u.Plan).As(eq.Of).EqualField(&u.CurrentPlan)
 ```
 
-| Configurator                                                                        | Rule                | Fails when                    | Message                   |
-| ----------------------------------------------------------------------------------- | ------------------- | ----------------------------- | ------------------------- |
-| [strings](https://insei.github.io/valigo/latest/features/strings/index.md)          | `EqualField(&m.X)`  | the value isn't equal to `X`  | Should be equal to %s     |
-| [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)          | `MinField(&m.X)`    | the value is less than `X`    | Cannot be less than %v    |
-| [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)          | `MaxField(&m.X)`    | the value is greater than `X` | Cannot be greater than %v |
-| [time](https://insei.github.io/valigo/latest/features/time/index.md)                | `BeforeField(&m.X)` | the value isn't before `X`    | Should be before %s       |
-| [time](https://insei.github.io/valigo/latest/features/time/index.md)                | `AfterField(&m.X)`  | the value isn't after `X`     | Should be after %s        |
-| [comparable values](https://insei.github.io/valigo/latest/features/values/index.md) | `EqualField(&m.X)`  | the value isn't equal to `X`  | Should be equal to %s     |
+| Configurator                                                                     | Rule                | Fails when                    | Message                   |
+| -------------------------------------------------------------------------------- | ------------------- | ----------------------------- | ------------------------- |
+| [strings](https://insei.github.io/valigo/dev/features/strings/index.md)          | `EqualField(&m.X)`  | the value isn't equal to `X`  | Should be equal to %s     |
+| [numbers](https://insei.github.io/valigo/dev/features/numbers/index.md)          | `MinField(&m.X)`    | the value is less than `X`    | Cannot be less than %v    |
+| [numbers](https://insei.github.io/valigo/dev/features/numbers/index.md)          | `MaxField(&m.X)`    | the value is greater than `X` | Cannot be greater than %v |
+| [time](https://insei.github.io/valigo/dev/features/time/index.md)                | `BeforeField(&m.X)` | the value isn't before `X`    | Should be before %s       |
+| [time](https://insei.github.io/valigo/dev/features/time/index.md)                | `AfterField(&m.X)`  | the value isn't after `X`     | Should be after %s        |
+| [comparable values](https://insei.github.io/valigo/dev/features/values/index.md) | `EqualField(&m.X)`  | the value isn't equal to `X`  | Should be equal to %s     |
 
 - The other field has the type of the configurator: `string` for `str.Of`, the number type for `num.Of`, `time.Time` for `timex.Of`.
-- The message has the location of the other field, by the [location function](https://insei.github.io/valigo/latest/features/errors/#location-of-fields) of the validator: `Should be after StartsAt`, or `Should be after starts_at` with JSON paths.
-- The rule is skipped when the value or the value of the other field is [absent](https://insei.github.io/valigo/latest/features/absent/index.md), e.g. a field of a nil nested struct.
+- The message has the location of the other field, by the [location function](https://insei.github.io/valigo/dev/features/errors/#location-of-fields) of the validator: `Should be after StartsAt`, or `Should be after starts_at` with JSON paths.
+- The rule is skipped when the value or the value of the other field is [absent](https://insei.github.io/valigo/dev/features/absent/index.md), e.g. a field of a nil nested struct.
 - In `Each` the elements are compared with a field of the object: `e.As(timex.Of).AfterField(&m.StartsAt)`.
 
 ## Example
@@ -1064,13 +1064,13 @@ Cannot be less than MinBid (Bids[1]: 90)
 Should be equal to Password (Repeat: Secret)
 ```
 
-For a comparison of several fields that doesn't fit one rule, use a [struct custom rule](https://insei.github.io/valigo/latest/features/custom/#struct-rules).
+For a comparison of several fields that doesn't fit one rule, use a [struct custom rule](https://insei.github.io/valigo/dev/features/custom/#struct-rules).
 
 # Rules from tags
 
 `b.Tags("validate")` configures the rules of the tags of the fields of the struct and of its nested structs in the syntax of [go-playground/validator](https://github.com/go-playground/validator): `validate:"required,max=64"`. It is for a migration: the structs keep their tags, and the rules move to code one by one — the tags and the rules in code are mixed in one `Configure`.
 
-The rules of the tags are the rules of valigo: the same messages in the languages of the users, the [codes](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients), the [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md) and the speed — a valid object is validated without allocations, see [Performance](https://insei.github.io/valigo/latest/performance/index.md).
+The rules of the tags are the rules of valigo: the same messages in the languages of the users, the [codes](https://insei.github.io/valigo/dev/features/errors/#codes-for-clients), the [JSON Schema](https://insei.github.io/valigo/dev/features/schema/index.md) and the speed — a valid object is validated without allocations, see [Performance](https://insei.github.io/valigo/dev/performance/index.md).
 
 ## Example
 
@@ -1159,27 +1159,27 @@ Pointers to the values have the rules of the values, a nil pointer is absent. Th
 
 These tags panic in `Configure`: a typo or an unsupported rule doesn't turn into a missing check. Write their rules in code.
 
-| Tags                                                                                                                                                                                                                                                                                                            | In code                                                                                                                 |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `excluded_if`, `excluded_unless`, `excluded_with`, `excluded_with_all`, `excluded_without`, `excluded_without_all`                                                                                                                                                                                              | `b.When(cond).Field(&m.X).Custom(...)` that fails on a present value                                                    |
-| `eqcsfield`, `necsfield`, `gtcsfield`, `gtecsfield`, `ltcsfield`, `ltecsfield`, `fieldcontains`, `fieldexcludes`                                                                                                                                                                                                | the rules on other fields with the pointers to any field of the model, `EqualField(&m.Other.Field)`, or `b.Custom`      |
-| `alphaunicode`, `alphanumunicode`, `boolean`, `containsrune`, `excludesrune`, `multibyte`, `printascii`, `ne_ignore_case`, `oneofci`                                                                                                                                                                            | `Custom` or `Regexp`                                                                                                    |
-| `uuid3`, `uuid4`, `uuid5`, `uuid_rfc4122`... , `ulid`, `cve`                                                                                                                                                                                                                                                    | `UUID` with `Custom` of the version, `Regexp`                                                                           |
-| `uri`, `urn_rfc2141`, `url_encoded`, `datauri`, `fqdn`, `hostname_port`, `tcp_addr`, `udp_addr`, `unix_addr`, `ip_addr`... , `cidrv4`, `cidrv6`                                                                                                                                                                 | `URL`, `Hostname`, `IP`, `CIDR` with `Custom`, or `Custom` with the parsers of the standard library                     |
-| `isbn`, `issn`, `bic`, `ssn`, `jwt`, `html`, `html_encoded`, `rgb`, `rgba`, `hsl`, `hsla`, `iscolor`, `md5`, `sha256`..., `btc_addr`, `eth_addr`, `mongodb`, `cron`, `timezone`, `bcp47_language_tag`, `iso3166_1_alpha3`, `iso3166_1_alpha_numeric`, `iso3166_2`, `iso4217_numeric`, `postcode_iso3166_alpha2` | `Custom` or `Regexp`                                                                                                    |
-| `dir`, `dirpath`, `file`, `filepath`, `image`                                                                                                                                                                                                                                                                   | `Custom`: valigo doesn't touch the file system                                                                          |
-| `isdefault`, `omitzero`, `structonly`, `nostructlevel`, `skip_unless`                                                                                                                                                                                                                                           | `When` and `Custom`                                                                                                     |
-| `dive` into the elements of slices of slices, of maps with other keys than strings, of maps of pointers and structs; `unique` of the slices of pointers and structs, `unique=Field`                                                                                                                             | `Each`, `EachKey`, `EachValue` and `Custom` in code                                                                     |
-| the custom tags of `RegisterValidation`, the aliases of `RegisterAlias`                                                                                                                                                                                                                                         | the rules of the type in code, see [Your types](https://insei.github.io/valigo/latest/features/conversions/#your-types) |
+| Tags                                                                                                                                                                                                                                                                                                            | In code                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `excluded_if`, `excluded_unless`, `excluded_with`, `excluded_with_all`, `excluded_without`, `excluded_without_all`                                                                                                                                                                                              | `b.When(cond).Field(&m.X).Custom(...)` that fails on a present value                                                 |
+| `eqcsfield`, `necsfield`, `gtcsfield`, `gtecsfield`, `ltcsfield`, `ltecsfield`, `fieldcontains`, `fieldexcludes`                                                                                                                                                                                                | the rules on other fields with the pointers to any field of the model, `EqualField(&m.Other.Field)`, or `b.Custom`   |
+| `alphaunicode`, `alphanumunicode`, `boolean`, `containsrune`, `excludesrune`, `multibyte`, `printascii`, `ne_ignore_case`, `oneofci`                                                                                                                                                                            | `Custom` or `Regexp`                                                                                                 |
+| `uuid3`, `uuid4`, `uuid5`, `uuid_rfc4122`... , `ulid`, `cve`                                                                                                                                                                                                                                                    | `UUID` with `Custom` of the version, `Regexp`                                                                        |
+| `uri`, `urn_rfc2141`, `url_encoded`, `datauri`, `fqdn`, `hostname_port`, `tcp_addr`, `udp_addr`, `unix_addr`, `ip_addr`... , `cidrv4`, `cidrv6`                                                                                                                                                                 | `URL`, `Hostname`, `IP`, `CIDR` with `Custom`, or `Custom` with the parsers of the standard library                  |
+| `isbn`, `issn`, `bic`, `ssn`, `jwt`, `html`, `html_encoded`, `rgb`, `rgba`, `hsl`, `hsla`, `iscolor`, `md5`, `sha256`..., `btc_addr`, `eth_addr`, `mongodb`, `cron`, `timezone`, `bcp47_language_tag`, `iso3166_1_alpha3`, `iso3166_1_alpha_numeric`, `iso3166_2`, `iso4217_numeric`, `postcode_iso3166_alpha2` | `Custom` or `Regexp`                                                                                                 |
+| `dir`, `dirpath`, `file`, `filepath`, `image`                                                                                                                                                                                                                                                                   | `Custom`: valigo doesn't touch the file system                                                                       |
+| `isdefault`, `omitzero`, `structonly`, `nostructlevel`, `skip_unless`                                                                                                                                                                                                                                           | `When` and `Custom`                                                                                                  |
+| `dive` into the elements of slices of slices, of maps with other keys than strings, of maps of pointers and structs; `unique` of the slices of pointers and structs, `unique=Field`                                                                                                                             | `Each`, `EachKey`, `EachValue` and `Custom` in code                                                                  |
+| the custom tags of `RegisterValidation`, the aliases of `RegisterAlias`                                                                                                                                                                                                                                         | the rules of the type in code, see [Your types](https://insei.github.io/valigo/dev/features/conversions/#your-types) |
 
 ## Differences from go-playground/validator
 
 - `required` is `Required` of valigo: a string is not empty, a number is not zero, a slice and a map have elements — go-playground/validator accepts an empty non-nil slice and map, and a pointer to an empty string.
-- The fields of a nil nested struct are skipped, like by go-playground/validator. The rules in code check `Required` of these fields, see [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md).
-- The messages are the messages of valigo in the languages of the users, the errors have the [codes](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients) of valigo; the alternatives `a|b` report the errors of the first one.
-- The formats are the formats of valigo, see [Strings](https://insei.github.io/valigo/latest/features/strings/index.md): `email`, `url` and `hostname` can differ from go-playground/validator in details.
+- The fields of a nil nested struct are skipped, like by go-playground/validator. The rules in code check `Required` of these fields, see [Absent values](https://insei.github.io/valigo/dev/features/absent/index.md).
+- The messages are the messages of valigo in the languages of the users, the errors have the [codes](https://insei.github.io/valigo/dev/features/errors/#codes-for-clients) of valigo; the alternatives `a|b` report the errors of the first one.
+- The formats are the formats of valigo, see [Strings](https://insei.github.io/valigo/dev/features/strings/index.md): `email`, `url` and `hostname` can differ from go-playground/validator in details.
 - `gt`, `lt` of `time.Time` compare with the current time without a parameter, like go-playground/validator, and fail on a parameter.
-- The rules of the tags after `omitempty` and the conditional ones aren't in the [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md): they don't apply to every value.
+- The rules of the tags after `omitempty` and the conditional ones aren't in the [JSON Schema](https://insei.github.io/valigo/dev/features/schema/index.md): they don't apply to every value.
 - A valid object is validated without allocations, also with `dive` into the elements of structs; the alternatives allocate the errors of the failed ones.
 # Rules
 
@@ -1201,7 +1201,7 @@ b.Field(&u.Nickname).As(str.Of).MinLen(3) // a nil Nickname is skipped
 b.Field(&u.Status).As(str.Of).AnyOf("active", "blocked")
 ```
 
-Slices of strings are converted by `str.Slice`, see [Slices](https://insei.github.io/valigo/latest/features/slices/index.md).
+Slices of strings are converted by `str.Slice`, see [Slices](https://insei.github.io/valigo/dev/features/slices/index.md).
 
 ```go
 b.Slice(&u.Emails).As(str.Slice).MaxLen(3).Email()
@@ -1209,53 +1209,53 @@ b.Slice(&u.Emails).As(str.Slice).MaxLen(3).Email()
 
 ## Rules
 
-| Rule                                          | Fails when                                                                                                                                              | Message                                                                                                                                    |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Required()`                                  | the value is absent or empty                                                                                                                            | Should be fulfilled                                                                                                                        |
-| `MinLen(n)`                                   | the length in bytes is less than `n`                                                                                                                    | Cannot be shorter than %d characters                                                                                                       |
-| `MaxLen(n)`                                   | the length in bytes is greater than `n`                                                                                                                 | Cannot be longer than %d characters                                                                                                        |
-| `MinRunes(n)`                                 | the number of characters (runes) is less than `n`                                                                                                       | Cannot be shorter than %d characters                                                                                                       |
-| `MaxRunes(n)`                                 | the number of characters (runes) is greater than `n`                                                                                                    | Cannot be longer than %d characters                                                                                                        |
-| `AnyOf(values...)`                            | the value isn't one of `values`                                                                                                                         | Only %s values is allowed                                                                                                                  |
-| `EqualField(&m.X)`                            | the value isn't equal to the value of the string field `X`, see [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md) | Should be equal to %s                                                                                                                      |
-| `NotEqualField(&m.X)`                         | the value is equal to the value of the string field `X`                                                                                                 | Cannot be equal to %s                                                                                                                      |
-| `EqualFold(s)`                                | the value isn't equal to `s` ignoring case, by Unicode case folding                                                                                     | Should be equal to %s ignoring case                                                                                                        |
-| `Prefix(s)`, `Suffix(s)`, `Contains(s)`       | the value doesn't start with, end with or contain `s`                                                                                                   | Should start with %s, Should end with %s, Should contain %s                                                                                |
-| `NotPrefix(s)`, `NotSuffix(s)`, `Excludes(s)` | the value starts with, ends with or contains `s`                                                                                                        | Cannot start with %s, Cannot end with %s, Cannot contain %s                                                                                |
-| `ContainsAny(chars)`, `ExcludesAny(chars)`    | the value has none / one of the characters of `chars`                                                                                                   | Should contain any of the characters %s, Cannot contain the characters %s                                                                  |
-| `Regexp(re, opts...)`                         | the value doesn't match `re`                                                                                                                            | Doesn't match required regexp pattern                                                                                                      |
-| `Email()`                                     | the value isn't an email address                                                                                                                        | Should be email address                                                                                                                    |
-| `URL()`                                       | the value isn't an absolute URL with a scheme and a host                                                                                                | Should be URL                                                                                                                              |
-| `IP()`, `IPv4()`, `IPv6()`                    | the value isn't an IP address of the version                                                                                                            | Should be IP address, Should be IPv4 address, Should be IPv6 address                                                                       |
-| `Hostname()`                                  | the value isn't a hostname by RFC 1123                                                                                                                  | Should be hostname                                                                                                                         |
-| `UUID()`                                      | the value isn't a UUID in the canonical form, any case                                                                                                  | Should be UUID                                                                                                                             |
-| `Alphanumeric()`                              | the value is empty or has characters other than ASCII letters and digits                                                                                | Should contain only letters and digits                                                                                                     |
-| `Alpha()`                                     | the value is empty or has characters other than ASCII letters                                                                                           | Should contain only letters                                                                                                                |
-| `Digits()`                                    | the value is empty or has characters other than ASCII digits, `0042`                                                                                    | Should contain only digits                                                                                                                 |
-| `Numeric()`                                   | the value isn't a decimal number with an optional sign and fraction, `-12`, `+3.5`                                                                      | Should be a number                                                                                                                         |
-| `Hexadecimal()`                               | the value isn't a hexadecimal number with an optional `0x`, `ff`, `0x1A`                                                                                | Should be hexadecimal                                                                                                                      |
-| `ASCII()`                                     | the value is empty or has non-ASCII characters                                                                                                          | Should contain only ASCII characters                                                                                                       |
-| `Lowercase()`, `Uppercase()`                  | the value is empty or has upper / lower case letters                                                                                                    | Should be lowercase, Should be uppercase                                                                                                   |
-| `Base64()`, `Base64URL()`                     | the value isn't base64 of RFC 4648 with the standard alphabet and padding / with the URL alphabet, padding optional                                     | Should be base64 encoded, Should be base64url encoded                                                                                      |
-| `JSON()`                                      | the value isn't a valid JSON value                                                                                                                      | Should be JSON                                                                                                                             |
-| `Semver()`                                    | the value isn't a semantic version of semver.org, `1.2.3-rc.1+build.5`, without `v`                                                                     | Should be semantic version                                                                                                                 |
-| `CIDR()`                                      | the value isn't an IPv4 or IPv6 prefix, `10.0.0.0/8`                                                                                                    | Should be CIDR                                                                                                                             |
-| `MAC()`                                       | the value isn't a MAC address of 6 or 8 bytes, `00:1a:2b:3c:4d:5e`, `00-1a-...`, `001a.2b3c.4d5e`                                                       | Should be MAC address                                                                                                                      |
-| `E164()`                                      | the value isn't a phone number of E.164, `+14155550123`                                                                                                 | Should be E.164 phone number                                                                                                               |
-| `HexColor()`                                  | the value isn't `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa`                                                                                               | Should be hex color                                                                                                                        |
-| `Datetime(layout)`                            | the value isn't parsed by `time.Parse(layout, value)`                                                                                                   | Should be date and time in %s format                                                                                                       |
-| `CountryCode()`                               | the value isn't an upper case code of ISO 3166-1 alpha-2, `US`                                                                                          | Should be ISO 3166-1 alpha-2 country code                                                                                                  |
-| `CurrencyCode()`                              | the value isn't an upper case active code of ISO 4217, `EUR`                                                                                            | Should be ISO 4217 currency code                                                                                                           |
-| `Luhn()`                                      | the value isn't 2 or more digits with a valid Luhn checksum                                                                                             | Should have valid Luhn checksum                                                                                                            |
-| `CreditCard()`                                | the value isn't 12-19 digits, grouped by spaces or hyphens, with a valid Luhn checksum                                                                  | Should be credit card number                                                                                                               |
-| `Custom(fn)`                                  | `fn` returns errors                                                                                                                                     | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
-| `When(fn)`                                    | —                                                                                                                                                       | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+| Rule                                          | Fails when                                                                                                                                           | Message                                                                                                                                 |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `Required()`                                  | the value is absent or empty                                                                                                                         | Should be fulfilled                                                                                                                     |
+| `MinLen(n)`                                   | the length in bytes is less than `n`                                                                                                                 | Cannot be shorter than %d characters                                                                                                    |
+| `MaxLen(n)`                                   | the length in bytes is greater than `n`                                                                                                              | Cannot be longer than %d characters                                                                                                     |
+| `MinRunes(n)`                                 | the number of characters (runes) is less than `n`                                                                                                    | Cannot be shorter than %d characters                                                                                                    |
+| `MaxRunes(n)`                                 | the number of characters (runes) is greater than `n`                                                                                                 | Cannot be longer than %d characters                                                                                                     |
+| `AnyOf(values...)`                            | the value isn't one of `values`                                                                                                                      | Only %s values is allowed                                                                                                               |
+| `EqualField(&m.X)`                            | the value isn't equal to the value of the string field `X`, see [Rules on other fields](https://insei.github.io/valigo/dev/features/fields/index.md) | Should be equal to %s                                                                                                                   |
+| `NotEqualField(&m.X)`                         | the value is equal to the value of the string field `X`                                                                                              | Cannot be equal to %s                                                                                                                   |
+| `EqualFold(s)`                                | the value isn't equal to `s` ignoring case, by Unicode case folding                                                                                  | Should be equal to %s ignoring case                                                                                                     |
+| `Prefix(s)`, `Suffix(s)`, `Contains(s)`       | the value doesn't start with, end with or contain `s`                                                                                                | Should start with %s, Should end with %s, Should contain %s                                                                             |
+| `NotPrefix(s)`, `NotSuffix(s)`, `Excludes(s)` | the value starts with, ends with or contains `s`                                                                                                     | Cannot start with %s, Cannot end with %s, Cannot contain %s                                                                             |
+| `ContainsAny(chars)`, `ExcludesAny(chars)`    | the value has none / one of the characters of `chars`                                                                                                | Should contain any of the characters %s, Cannot contain the characters %s                                                               |
+| `Regexp(re, opts...)`                         | the value doesn't match `re`                                                                                                                         | Doesn't match required regexp pattern                                                                                                   |
+| `Email()`                                     | the value isn't an email address                                                                                                                     | Should be email address                                                                                                                 |
+| `URL()`                                       | the value isn't an absolute URL with a scheme and a host                                                                                             | Should be URL                                                                                                                           |
+| `IP()`, `IPv4()`, `IPv6()`                    | the value isn't an IP address of the version                                                                                                         | Should be IP address, Should be IPv4 address, Should be IPv6 address                                                                    |
+| `Hostname()`                                  | the value isn't a hostname by RFC 1123                                                                                                               | Should be hostname                                                                                                                      |
+| `UUID()`                                      | the value isn't a UUID in the canonical form, any case                                                                                               | Should be UUID                                                                                                                          |
+| `Alphanumeric()`                              | the value is empty or has characters other than ASCII letters and digits                                                                             | Should contain only letters and digits                                                                                                  |
+| `Alpha()`                                     | the value is empty or has characters other than ASCII letters                                                                                        | Should contain only letters                                                                                                             |
+| `Digits()`                                    | the value is empty or has characters other than ASCII digits, `0042`                                                                                 | Should contain only digits                                                                                                              |
+| `Numeric()`                                   | the value isn't a decimal number with an optional sign and fraction, `-12`, `+3.5`                                                                   | Should be a number                                                                                                                      |
+| `Hexadecimal()`                               | the value isn't a hexadecimal number with an optional `0x`, `ff`, `0x1A`                                                                             | Should be hexadecimal                                                                                                                   |
+| `ASCII()`                                     | the value is empty or has non-ASCII characters                                                                                                       | Should contain only ASCII characters                                                                                                    |
+| `Lowercase()`, `Uppercase()`                  | the value is empty or has upper / lower case letters                                                                                                 | Should be lowercase, Should be uppercase                                                                                                |
+| `Base64()`, `Base64URL()`                     | the value isn't base64 of RFC 4648 with the standard alphabet and padding / with the URL alphabet, padding optional                                  | Should be base64 encoded, Should be base64url encoded                                                                                   |
+| `JSON()`                                      | the value isn't a valid JSON value                                                                                                                   | Should be JSON                                                                                                                          |
+| `Semver()`                                    | the value isn't a semantic version of semver.org, `1.2.3-rc.1+build.5`, without `v`                                                                  | Should be semantic version                                                                                                              |
+| `CIDR()`                                      | the value isn't an IPv4 or IPv6 prefix, `10.0.0.0/8`                                                                                                 | Should be CIDR                                                                                                                          |
+| `MAC()`                                       | the value isn't a MAC address of 6 or 8 bytes, `00:1a:2b:3c:4d:5e`, `00-1a-...`, `001a.2b3c.4d5e`                                                    | Should be MAC address                                                                                                                   |
+| `E164()`                                      | the value isn't a phone number of E.164, `+14155550123`                                                                                              | Should be E.164 phone number                                                                                                            |
+| `HexColor()`                                  | the value isn't `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa`                                                                                            | Should be hex color                                                                                                                     |
+| `Datetime(layout)`                            | the value isn't parsed by `time.Parse(layout, value)`                                                                                                | Should be date and time in %s format                                                                                                    |
+| `CountryCode()`                               | the value isn't an upper case code of ISO 3166-1 alpha-2, `US`                                                                                       | Should be ISO 3166-1 alpha-2 country code                                                                                               |
+| `CurrencyCode()`                              | the value isn't an upper case active code of ISO 4217, `EUR`                                                                                         | Should be ISO 4217 currency code                                                                                                        |
+| `Luhn()`                                      | the value isn't 2 or more digits with a valid Luhn checksum                                                                                          | Should have valid Luhn checksum                                                                                                         |
+| `CreditCard()`                                | the value isn't 12-19 digits, grouped by spaces or hyphens, with a valid Luhn checksum                                                               | Should be credit card number                                                                                                            |
+| `Custom(fn)`                                  | `fn` returns errors                                                                                                                                  | your messages, see [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md)                                          |
+| `When(fn)`                                    | —                                                                                                                                                    | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md) |
 
 `MinLen` and `MaxLen` count bytes, like `len`: `"яя"` has the length 4. `MinRunes` and `MaxRunes` count characters: `"яя"` has 2.
 
 ## Formats
 
-The format rules don't allocate on valid values, like the other rules, and fail on empty strings: use [`When`](https://insei.github.io/valigo/latest/features/conditions/#when-on-a-field) for optional ones.
+The format rules don't allocate on valid values, like the other rules, and fail on empty strings: use [`When`](https://insei.github.io/valigo/dev/features/conditions/#when-on-a-field) for optional ones.
 
 | Rule         | Valid                                                                                                      | Invalid                                                                         |
 | ------------ | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
@@ -1314,11 +1314,11 @@ Cannot be shorter than 16 characters (Secret: s3cr3t!)
 b.Field(&u.Name).As(str.Of).Trim().Required() // "   " fails, "  Ann " becomes "Ann"
 ```
 
-The struct is validated in place, `Validate(ctx, &user)` trims `user.Name`. See the copy semantics of the values passed by value in [Errors](https://insei.github.io/valigo/latest/features/errors/#validate-and-validatetyped).
+The struct is validated in place, `Validate(ctx, &user)` trims `user.Name`. See the copy semantics of the values passed by value in [Errors](https://insei.github.io/valigo/dev/features/errors/#validate-and-validatetyped).
 
 ## Regexp message
 
-`str.WithRegexpLocaleKey` replaces the message of a `Regexp` rule, the key can have its own [translations](https://insei.github.io/valigo/latest/features/translations/index.md):
+`str.WithRegexpLocaleKey` replaces the message of a `Regexp` rule, the key can have its own [translations](https://insei.github.io/valigo/dev/features/translations/index.md):
 
 ```go
 package main
@@ -1377,23 +1377,23 @@ b.Field(&p.Stock).As(num.Of).Max(limit) // doesn't compile: int32 isn't int
 b.Field(&p.Discount).As(num.Of)         // doesn't compile: *uint8 isn't a number, use num.Ptr
 ```
 
-Slices of numbers are converted by `num.Slice`: `b.Slice(&p.Sizes).As(num.Slice).Each(func(e *num.BaseConfigurator[int]) { e.Min(1) })`, see [Slices](https://insei.github.io/valigo/latest/features/slices/index.md).
+Slices of numbers are converted by `num.Slice`: `b.Slice(&p.Sizes).As(num.Slice).Each(func(e *num.BaseConfigurator[int]) { e.Min(1) })`, see [Slices](https://insei.github.io/valigo/dev/features/slices/index.md).
 
 ## Rules
 
-| Rule                                    | Fails when                                                                                                                                                | Message                                                                                                                                    |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Required()`                            | `num.Of`: the value is zero; `num.Ptr`: the value is absent                                                                                               | Should be fulfilled                                                                                                                        |
-| `Min(n)`                                | the value is less than `n`                                                                                                                                | Cannot be less than %v                                                                                                                     |
-| `Max(n)`                                | the value is greater than `n`                                                                                                                             | Cannot be greater than %v                                                                                                                  |
-| `GreaterThan(n)`, `LessThan(n)`         | the value isn't greater / less than `n`                                                                                                                   | Should be greater than %v, Should be less than %v                                                                                          |
-| `GreaterField(&m.X)`, `LessField(&m.X)` | the value isn't greater / less than the value of the field `X`                                                                                            | Should be greater than %v, Should be less than %v                                                                                          |
-| `MinField(&m.X)`, `MaxField(&m.X)`      | the value is less or greater than the value of the field `X`, see [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md) | Cannot be less than %v, Cannot be greater than %v                                                                                          |
-| `AnyOf(values...)`                      | the value isn't one of `values`                                                                                                                           | Only %v values is allowed                                                                                                                  |
-| `AnyOfInterval(begin, end)`             | the value is outside `[begin, end]`, both ends are included                                                                                               | Only interval[%v - %v] is allowed                                                                                                          |
-| `Latitude()`, `Longitude()`             | the value is outside `[-90, 90]` / `[-180, 180]`                                                                                                          | Should be latitude, Should be longitude                                                                                                    |
-| `Custom(fn)`                            | `fn` returns errors                                                                                                                                       | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
-| `When(fn)`                              | —                                                                                                                                                         | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+| Rule                                    | Fails when                                                                                                                                             | Message                                                                                                                                 |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `Required()`                            | `num.Of`: the value is zero; `num.Ptr`: the value is absent                                                                                            | Should be fulfilled                                                                                                                     |
+| `Min(n)`                                | the value is less than `n`                                                                                                                             | Cannot be less than %v                                                                                                                  |
+| `Max(n)`                                | the value is greater than `n`                                                                                                                          | Cannot be greater than %v                                                                                                               |
+| `GreaterThan(n)`, `LessThan(n)`         | the value isn't greater / less than `n`                                                                                                                | Should be greater than %v, Should be less than %v                                                                                       |
+| `GreaterField(&m.X)`, `LessField(&m.X)` | the value isn't greater / less than the value of the field `X`                                                                                         | Should be greater than %v, Should be less than %v                                                                                       |
+| `MinField(&m.X)`, `MaxField(&m.X)`      | the value is less or greater than the value of the field `X`, see [Rules on other fields](https://insei.github.io/valigo/dev/features/fields/index.md) | Cannot be less than %v, Cannot be greater than %v                                                                                       |
+| `AnyOf(values...)`                      | the value isn't one of `values`                                                                                                                        | Only %v values is allowed                                                                                                               |
+| `AnyOfInterval(begin, end)`             | the value is outside `[begin, end]`, both ends are included                                                                                            | Only interval[%v - %v] is allowed                                                                                                       |
+| `Latitude()`, `Longitude()`             | the value is outside `[-90, 90]` / `[-180, 180]`                                                                                                       | Should be latitude, Should be longitude                                                                                                 |
+| `Custom(fn)`                            | `fn` returns errors                                                                                                                                    | your messages, see [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md)                                          |
+| `When(fn)`                              | —                                                                                                                                                      | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md) |
 
 ## Zero and absent
 
@@ -1455,17 +1455,17 @@ The package is named `timex` to not shadow the standard `time`.
 
 ## Rules
 
-| Rule                                    | Fails when                                                                                                                                             | Message                                                                                                                                    |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Required()`                            | the value is absent or zero                                                                                                                            | Should be fulfilled                                                                                                                        |
-| `Before(t)`                             | the value isn't before `t`                                                                                                                             | Should be before %s                                                                                                                        |
-| `After(t)`                              | the value isn't after `t`                                                                                                                              | Should be after %s                                                                                                                         |
-| `Between(from, to)`                     | the value is outside `[from, to]`, both ends are included                                                                                              | Should be between %s and %s                                                                                                                |
-| `BeforeField(&m.X)`, `AfterField(&m.X)` | the value isn't before or after the time of the field `X`, see [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md) | Should be before %s, Should be after %s                                                                                                    |
-| `InPast()`                              | the value isn't before the moment of the validation                                                                                                    | Should be in the past                                                                                                                      |
-| `InFuture()`                            | the value isn't after the moment of the validation                                                                                                     | Should be in the future                                                                                                                    |
-| `Custom(fn)`                            | `fn` returns errors                                                                                                                                    | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
-| `When(fn)`                              | —                                                                                                                                                      | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+| Rule                                    | Fails when                                                                                                                                          | Message                                                                                                                                 |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `Required()`                            | the value is absent or zero                                                                                                                         | Should be fulfilled                                                                                                                     |
+| `Before(t)`                             | the value isn't before `t`                                                                                                                          | Should be before %s                                                                                                                     |
+| `After(t)`                              | the value isn't after `t`                                                                                                                           | Should be after %s                                                                                                                      |
+| `Between(from, to)`                     | the value is outside `[from, to]`, both ends are included                                                                                           | Should be between %s and %s                                                                                                             |
+| `BeforeField(&m.X)`, `AfterField(&m.X)` | the value isn't before or after the time of the field `X`, see [Rules on other fields](https://insei.github.io/valigo/dev/features/fields/index.md) | Should be before %s, Should be after %s                                                                                                 |
+| `InPast()`                              | the value isn't before the moment of the validation                                                                                                 | Should be in the past                                                                                                                   |
+| `InFuture()`                            | the value isn't after the moment of the validation                                                                                                  | Should be in the future                                                                                                                 |
+| `Custom(fn)`                            | `fn` returns errors                                                                                                                                 | your messages, see [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md)                                          |
+| `When(fn)`                              | —                                                                                                                                                   | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md) |
 
 The times in the messages are formatted by RFC 3339. `Before`, `After` and `Between` take the bounds of the configuration, `BeforeField` and `AfterField` — of another field of the object.
 
@@ -1529,23 +1529,23 @@ b.Field(&u.Role).As(eq.Ptr).OneOf(Admin, Editor)                // a nil Role is
 b.Slice(&u.Roles).As(eq.Slice).Unique()
 ```
 
-For strings and numbers [`str.Of`](https://insei.github.io/valigo/latest/features/strings/index.md) and [`num.Of`](https://insei.github.io/valigo/latest/features/numbers/index.md) have more rules, `eq.Of` is for the types without their own configurator. `eq.Of` of a pointer field compares the pointers, use `eq.Ptr` to compare the values.
+For strings and numbers [`str.Of`](https://insei.github.io/valigo/dev/features/strings/index.md) and [`num.Of`](https://insei.github.io/valigo/dev/features/numbers/index.md) have more rules, `eq.Of` is for the types without their own configurator. `eq.Of` of a pointer field compares the pointers, use `eq.Ptr` to compare the values.
 
 ## Rules
 
-| Rule                  | Fails when                                                                                                                                       | Message                                                                                                                                    |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Required()`          | `eq.Of`: the value is zero; `eq.Ptr`: the value is absent                                                                                        | Should be fulfilled                                                                                                                        |
-| `OneOf(values...)`    | the value isn't one of `values`                                                                                                                  | Only %v values is allowed                                                                                                                  |
-| `NotOneOf(values...)` | the value is one of `values`                                                                                                                     | Values %v are not allowed                                                                                                                  |
-| `Equal(v)`            | the value isn't `v`                                                                                                                              | Should be %v                                                                                                                               |
-| `NotEqual(v)`         | the value is `v`                                                                                                                                 | Cannot be %v                                                                                                                               |
-| `EqualField(&m.X)`    | the value isn't equal to the value of the field `X`, see [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md) | Should be equal to %s                                                                                                                      |
-| `NotEqualField(&m.X)` | the value is equal to the value of the field `X`                                                                                                 | Cannot be equal to %s                                                                                                                      |
-| `Custom(fn)`          | `fn` returns errors                                                                                                                              | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
-| `When(fn)`            | —                                                                                                                                                | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+| Rule                  | Fails when                                                                                                                                    | Message                                                                                                                                 |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `Required()`          | `eq.Of`: the value is zero; `eq.Ptr`: the value is absent                                                                                     | Should be fulfilled                                                                                                                     |
+| `OneOf(values...)`    | the value isn't one of `values`                                                                                                               | Only %v values is allowed                                                                                                               |
+| `NotOneOf(values...)` | the value is one of `values`                                                                                                                  | Values %v are not allowed                                                                                                               |
+| `Equal(v)`            | the value isn't `v`                                                                                                                           | Should be %v                                                                                                                            |
+| `NotEqual(v)`         | the value is `v`                                                                                                                              | Cannot be %v                                                                                                                            |
+| `EqualField(&m.X)`    | the value isn't equal to the value of the field `X`, see [Rules on other fields](https://insei.github.io/valigo/dev/features/fields/index.md) | Should be equal to %s                                                                                                                   |
+| `NotEqualField(&m.X)` | the value is equal to the value of the field `X`                                                                                              | Cannot be equal to %s                                                                                                                   |
+| `Custom(fn)`          | `fn` returns errors                                                                                                                           | your messages, see [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md)                                          |
+| `When(fn)`            | —                                                                                                                                             | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md) |
 
-`eq.Slice` has the rules of the [slice itself](https://insei.github.io/valigo/latest/features/slices/index.md), `Each` with the rules above for the elements, `OneOf` for every element and `Unique`:
+`eq.Slice` has the rules of the [slice itself](https://insei.github.io/valigo/dev/features/slices/index.md), `Each` with the rules above for the elements, `OneOf` for every element and `Unique`:
 
 | Rule       | Fails when                                                               | Message                      |
 | ---------- | ------------------------------------------------------------------------ | ---------------------------- |
@@ -1629,14 +1629,14 @@ b.Slice(&c.Mentions).As(vuuid.Slice).MaxLen(10).AnyOf(allowed...)
 
 ## Rules
 
-| Rule               | Fails when                        | Message                                                                                                                                    |
-| ------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Required()`       | the value is absent or `uuid.Nil` | Should be fulfilled                                                                                                                        |
-| `AnyOf(values...)` | the value isn't one of `values`   | Only %s values is allowed                                                                                                                  |
-| `Custom(fn)`       | `fn` returns errors               | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
-| `When(fn)`         | —                                 | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+| Rule               | Fails when                        | Message                                                                                                                                 |
+| ------------------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `Required()`       | the value is absent or `uuid.Nil` | Should be fulfilled                                                                                                                     |
+| `AnyOf(values...)` | the value isn't one of `values`   | Only %s values is allowed                                                                                                               |
+| `Custom(fn)`       | `fn` returns errors               | your messages, see [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md)                                          |
+| `When(fn)`         | —                                 | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md) |
 
-Another uuid package gets its rules by a conversion of the same kind, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/#your-types).
+Another uuid package gets its rules by a conversion of the same kind, see [Types and conversions](https://insei.github.io/valigo/dev/features/conversions/#your-types).
 
 ## Example
 
@@ -1685,15 +1685,15 @@ Output:
 
 `b.Slice(&m.X)` returns the configurator of a `[]E` field with the rules of the slice itself. `As` converts it to a typed slice configurator, the rules of the slice stay available after the conversion:
 
-| Configurator                        | Elements                           | Rules on elements                                                                                                                                                                                             |
-| ----------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `b.Slice(&m.X)`                     | any `E`                            | `Each` with `*shared.Field[E]`: `Check`, `Required`, `Modify`, `Custom`, `When`, and `As` to convert the element                                                                                              |
-| `.As(str.Slice)`                    | `string`, `*string`, named strings | `Each` with the [string configurator](https://insei.github.io/valigo/latest/features/strings/index.md), `Trim`, `Regexp`, `Email`                                                                             |
-| `.As(num.Slice)`                    | numbers and named numbers          | `Each` with the [number configurator](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                                                                        |
-| `.As(timex.Slice)`, `.As(eq.Slice)` | times, comparable values           | `Each` with the [time](https://insei.github.io/valigo/latest/features/time/index.md) and the [equality](https://insei.github.io/valigo/latest/features/values/index.md) configurators, `Unique` of `eq.Slice` |
-| `.As(vuuid.Slice)`                  | `uuid.UUID`, `*uuid.UUID`          | `Each` with the [uuid configurator](https://insei.github.io/valigo/latest/features/uuid/index.md), `AnyOf`                                                                                                    |
+| Configurator                        | Elements                           | Rules on elements                                                                                                                                                                                       |
+| ----------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `b.Slice(&m.X)`                     | any `E`                            | `Each` with `*shared.Field[E]`: `Check`, `Required`, `Modify`, `Custom`, `When`, and `As` to convert the element                                                                                        |
+| `.As(str.Slice)`                    | `string`, `*string`, named strings | `Each` with the [string configurator](https://insei.github.io/valigo/dev/features/strings/index.md), `Trim`, `Regexp`, `Email`                                                                          |
+| `.As(num.Slice)`                    | numbers and named numbers          | `Each` with the [number configurator](https://insei.github.io/valigo/dev/features/numbers/index.md)                                                                                                     |
+| `.As(timex.Slice)`, `.As(eq.Slice)` | times, comparable values           | `Each` with the [time](https://insei.github.io/valigo/dev/features/time/index.md) and the [equality](https://insei.github.io/valigo/dev/features/values/index.md) configurators, `Unique` of `eq.Slice` |
+| `.As(vuuid.Slice)`                  | `uuid.UUID`, `*uuid.UUID`          | `Each` with the [uuid configurator](https://insei.github.io/valigo/dev/features/uuid/index.md), `AnyOf`                                                                                                 |
 
-A pointer to a slice, `*[]E`, is converted from its field: `b.Field(&m.Tags).As(shared.SlicePtr).As(str.Slice)`, a nil pointer is [absent](https://insei.github.io/valigo/latest/features/absent/index.md).
+A pointer to a slice, `*[]E`, is converted from its field: `b.Field(&m.Tags).As(shared.SlicePtr).As(str.Slice)`, a nil pointer is [absent](https://insei.github.io/valigo/dev/features/absent/index.md).
 
 ## The slice and its elements
 
@@ -1763,7 +1763,7 @@ Should be fulfilled (Editors[1]: <nil>)
 Should be positive (Quantities[1]: 0)
 ```
 
-The location of an element error has the index of the element, the errors of the slice itself have the location of the field. Nil elements of slices of pointers are [absent](https://insei.github.io/valigo/latest/features/absent/index.md): only `Required` fails on them.
+The location of an element error has the index of the element, the errors of the slice itself have the location of the field. Nil elements of slices of pointers are [absent](https://insei.github.io/valigo/dev/features/absent/index.md): only `Required` fails on them.
 
 ## Custom and When
 
@@ -1798,7 +1798,7 @@ b.Slice(&p.Limits).Each(func(limit *shared.Field[*int]) {
 
 # Maps
 
-`b.Map(&m.X)` returns the configurator of a `map[K]V` field: the rules of the map itself, of its keys and of its values. The keys and the values are converted to the configurators of their types by `As`, like the elements of [slices](https://insei.github.io/valigo/latest/features/slices/index.md):
+`b.Map(&m.X)` returns the configurator of a `map[K]V` field: the rules of the map itself, of its keys and of its values. The keys and the values are converted to the configurators of their types by `As`, like the elements of [slices](https://insei.github.io/valigo/dev/features/slices/index.md):
 
 ```go
 b.Map(&s.Labels).Required().MaxLen(10).
@@ -1809,20 +1809,20 @@ b.Map(&s.Ports).EachValue(func(p *shared.Field[int]) { p.As(num.Of).AnyOfInterva
 
 ## Rules
 
-| Rule            | Fails when                                 | Message                                                                                           |
-| --------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| `Required()`    | the map is absent or empty                 | Should be fulfilled                                                                               |
-| `MinLen(n)`     | the map has less than `n` elements         | Cannot contain less than %d elements                                                              |
-| `MaxLen(n)`     | the map has more than `n` elements         | Cannot contain more than %d elements                                                              |
-| `EachKey(fn)`   | —                                          | `fn` configures the rules of the keys                                                             |
-| `EachValue(fn)` | —                                          | `fn` configures the rules of the values                                                           |
-| `Custom(fn)`    | `fn` returns errors, it gets the whole map | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md) |
-| `When(fn)`      | —                                          | the next rules are applied only if `fn` returns true for the map, a nil map for an absent one     |
+| Rule            | Fails when                                 | Message                                                                                        |
+| --------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `Required()`    | the map is absent or empty                 | Should be fulfilled                                                                            |
+| `MinLen(n)`     | the map has less than `n` elements         | Cannot contain less than %d elements                                                           |
+| `MaxLen(n)`     | the map has more than `n` elements         | Cannot contain more than %d elements                                                           |
+| `EachKey(fn)`   | —                                          | `fn` configures the rules of the keys                                                          |
+| `EachValue(fn)` | —                                          | `fn` configures the rules of the values                                                        |
+| `Custom(fn)`    | `fn` returns errors, it gets the whole map | your messages, see [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md) |
+| `When(fn)`      | —                                          | the next rules are applied only if `fn` returns true for the map, a nil map for an absent one  |
 
 - The location of an error of a key or a value is `Labels[key]`, the error value is the key or the value.
 - The order of a map is random, so the errors of the keys and the errors of the values are sorted by location.
-- The values of a map aren't addressable: [`Trim`](https://insei.github.io/valigo/latest/features/strings/#trim) and other modifying rules change a copy, which is checked by the next rules, the map keeps the original value.
-- A nil map of a value field is present and empty, the map of a nil nested struct is [absent](https://insei.github.io/valigo/latest/features/absent/index.md).
+- The values of a map aren't addressable: [`Trim`](https://insei.github.io/valigo/dev/features/strings/#trim) and other modifying rules change a copy, which is checked by the next rules, the map keeps the original value.
+- A nil map of a value field is present and empty, the map of a nil nested struct is [absent](https://insei.github.io/valigo/dev/features/absent/index.md).
 - Valid maps are validated without allocations, the copy of the checked key or value is pooled.
 
 ## Example
@@ -1884,7 +1884,7 @@ func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error
 
 - `ValidateTyped` returns the errors as `shared.Error` values, `Validate` passes them through the [errors transformer](#errors-transformer), by default every `shared.Error` becomes an `error`.
 - Both return `nil` when the object is valid, when the type of the object has no rules, and for a nil pointer.
-- `obj` is a pointer to the configured struct. A struct value is validated too, by a shallow copy: [`Trim`](https://insei.github.io/valigo/latest/features/strings/#trim) of its fields isn't visible to the caller, but the values behind its pointers and the elements of its slices are shared with the caller and can be changed.
+- `obj` is a pointer to the configured struct. A struct value is validated too, by a shallow copy: [`Trim`](https://insei.github.io/valigo/dev/features/strings/#trim) of its fields isn't visible to the caller, but the values behind its pointers and the elements of its slices are shared with the caller and can be changed.
 - The errors go in the order of the configuration: the rules of a field in the order of the chain, the fields in the order of their first rule.
 
 ## shared.Error
@@ -1903,7 +1903,7 @@ type Error struct {
 
 ## Codes for clients
 
-The message is translated on the backend, see [Translations](https://insei.github.io/valigo/latest/features/translations/index.md). A client that translates the messages itself — a web or a mobile application with its own locales — uses `Code` and `Params` instead: the code is stable, the parameters are named.
+The message is translated on the backend, see [Translations](https://insei.github.io/valigo/dev/features/translations/index.md). A client that translates the messages itself — a web or a mobile application with its own locales — uses `Code` and `Params` instead: the code is stable, the parameters are named.
 
 ```go
 package main
@@ -1986,7 +1986,7 @@ Output:
 | `slice.min_len`, `map.min_len`                                                                                                                                                                                                                                                  | `min`                           |
 | `slice.max_len`, `map.max_len`                                                                                                                                                                                                                                                  | `max`                           |
 
-The `field` parameter is the location of the other field by the location function of the validator. The errors of [custom rules](https://insei.github.io/valigo/latest/features/custom/index.md) have the locale key as the code, or the code of `shared.M` with `ErrorMsg`.
+The `field` parameter is the location of the other field by the location function of the validator. The errors of [custom rules](https://insei.github.io/valigo/dev/features/custom/index.md) have the locale key as the code, or the code of `shared.M` with `ErrorMsg`.
 
 ## Location of fields
 
@@ -2067,7 +2067,7 @@ v := valigo.New(valigo.WithErrorsTransformer(func(errs []shared.Error) []error {
 
 `shared.Errors` is a `[]shared.Error` as one error, its `Error()` joins the errors by `;`; the adapters of the frameworks return it, get it back by `errors.As(err, &errs)`.
 
-The transformer is called only when there are errors. For an HTTP API the [`problem`](https://insei.github.io/valigo/latest/features/problem/index.md) package has the transformer of the problem details of RFC 9457.
+The transformer is called only when there are errors. For an HTTP API the [`problem`](https://insei.github.io/valigo/dev/features/problem/index.md) package has the transformer of the problem details of RFC 9457.
 
 # Translations
 
@@ -2075,7 +2075,7 @@ Messages are translated by a `translator.Translator`. The default one of `valigo
 
 ## Locale keys
 
-The rules build messages by *locale keys*: `validation:string:Cannot be longer than %d characters`. The translator looks the key up in the languages of the context, then in the default language, and formats the found message with the arguments of the rule. A key without a translation is used as is: so the messages of [custom rules](https://insei.github.io/valigo/latest/features/custom/index.md) work without translations.
+The rules build messages by *locale keys*: `validation:string:Cannot be longer than %d characters`. The translator looks the key up in the languages of the context, then in the default language, and formats the found message with the arguments of the rule. A key without a translation is used as is: so the messages of [custom rules](https://insei.github.io/valigo/dev/features/custom/index.md) work without translations.
 
 The keys of the built-in rules are in [`translator/locales`](https://github.com/Insei/valigo/tree/main/translator/locales):
 
@@ -2228,7 +2228,7 @@ Output:
 
 - `storage.Merge(locales)` adds the translations of several languages at once, e.g. from your own YAML files read by `translator.LocalesFromFS(fsys)`: `locales/<lang>/data.yaml` with the same nested format as the built-in locales.
 - `translator.NewInMemStorage(translator.WithInMemData(data))` replaces the built-in locales with yours.
-- [`str.WithRegexpLocaleKey`](https://insei.github.io/valigo/latest/features/strings/#regexp-message) sets the key of a `Regexp` rule.
+- [`str.WithRegexpLocaleKey`](https://insei.github.io/valigo/dev/features/strings/#regexp-message) sets the key of a `Regexp` rule.
 
 # HTTP problem details
 
@@ -2245,10 +2245,10 @@ if errs := v.Validate(r.Context(), &req); errs != nil {
 
 - `problem.Transformer(opts...)` makes `Validate` return one error, the `*problem.Details` of all errors; `problem.From(errs)` gets it back, `problem.New(errs)` builds it from the errors of `ValidateTyped`.
 - `Details.Write(w)` writes the status and the JSON with the `application/problem+json` content type.
-- Every error of a field has the translated message `detail`, the JSON Pointer `pointer` of RFC 6901 (built from the location: `tags[1]` is `#/tags/1`), the `location`, and the [`code` and `params`](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients) for the clients that translate the messages themselves.
+- Every error of a field has the translated message `detail`, the JSON Pointer `pointer` of RFC 6901 (built from the location: `tags[1]` is `#/tags/1`), the `location`, and the [`code` and `params`](https://insei.github.io/valigo/dev/features/errors/#codes-for-clients) for the clients that translate the messages themselves.
 - Options: `WithType` (the URI of the problem type, `about:blank` when it is empty), `WithTitle` ("Validation failed" by default), `WithStatus` (422 by default), `WithDetail`.
 
-Use JSON locations, so the pointers point to the fields of the request, see [Errors](https://insei.github.io/valigo/latest/features/errors/#location-of-fields).
+Use JSON locations, so the pointers point to the fields of the request, see [Errors](https://insei.github.io/valigo/dev/features/errors/#location-of-fields).
 
 ## Example
 
@@ -2349,7 +2349,7 @@ The title isn't translated: set it by `WithTitle`, e.g. with a translator of you
 
 # JSON Schema
 
-The rules that JSON Schema can express are described by its keywords, so the generators of the schemas of an API can show them to the clients: [huma](https://insei.github.io/valigo/latest/features/huma/#the-rules-in-the-openapi-document) puts them into its OpenAPI document. `v.Constraints()` returns them for other generators.
+The rules that JSON Schema can express are described by its keywords, so the generators of the schemas of an API can show them to the clients: [huma](https://insei.github.io/valigo/dev/features/huma/#the-rules-in-the-openapi-document) puts them into its OpenAPI document. `v.Constraints()` returns them for other generators.
 
 ```go
 for _, c := range v.Constraints() {
@@ -2383,7 +2383,7 @@ The schema describes the rules, valigo validates the values: the descriptions ar
 
 ## Your conversions
 
-A [conversion](https://insei.github.io/valigo/latest/features/conversions/#your-types) describes its rules by `Schema` of the field, `Schema` of a slice configurator describes the rules of the slice:
+A [conversion](https://insei.github.io/valigo/dev/features/conversions/#your-types) describes its rules by `Schema` of the field, `Schema` of a slice configurator describes the rules of the slice:
 
 ```go
 // Percent checks that the number is in [0, 100].
@@ -2414,7 +2414,7 @@ func (i *CreateUserInput) Resolve(ctx huma.Context) []error {
 
 - `vhuma.Location` is the location function of the input structs of huma: the fields of `Body` are `body` and their JSON path, the parameters are their kind and name from the `path`, `query`, `header`, `cookie` and `form` tags.
 - `vhuma.Resolve` validates the input with the languages of the `Accept-Language` header and returns the error details of huma, huma calls `Resolve` of the input after it has parsed the request.
-- `vhuma.Errors` converts the errors of `ValidateTyped` to the error details of huma. The error details of huma have no codes, use [`problem`](https://insei.github.io/valigo/latest/features/problem/index.md) when the clients need them.
+- `vhuma.Errors` converts the errors of `ValidateTyped` to the error details of huma. The error details of huma have no codes, use [`problem`](https://insei.github.io/valigo/dev/features/problem/index.md) when the clients need them.
 
 huma validates the input by its JSON schema first, so the rules of valigo extend the schema: formats, rules on other fields, rules from data, translated messages.
 
@@ -2498,7 +2498,7 @@ body.tags[1] - Должно содержать только латинские �
 
 ## The rules in the OpenAPI document
 
-`vhuma.OpenAPI(api, v)` returns the OpenAPI document of the api with the rules of valigo in the schemas of the request bodies and their nested structs, by [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md): `maxLength` of `MaxRunes`, `format: email` of `Email`, `items` of `Each`, the required properties of `Required`. Serve it, so the clients and the generators of SDKs see the rules:
+`vhuma.OpenAPI(api, v)` returns the OpenAPI document of the api with the rules of valigo in the schemas of the request bodies and their nested structs, by [JSON Schema](https://insei.github.io/valigo/dev/features/schema/index.md): `maxLength` of `MaxRunes`, `format: email` of `Email`, `items` of `Each`, the required properties of `Required`. Serve it, so the clients and the generators of SDKs see the rules:
 
 ```go
 mux.HandleFunc("GET /openapi.json", func(w http.ResponseWriter, r *http.Request) {
@@ -2611,7 +2611,7 @@ go get github.com/insei/valigo/integrations/gin@latest
 
 - `vgin.New(v)` is the `binding.StructValidator` of gin: set `binding.Validator = vgin.New(v)`, and `c.ShouldBindJSON` and the other binding methods validate the requests by the rules of valigo. Slices are validated element by element, the location of an error has the index: `[1].email`.
 - gin doesn't pass the request to its validator, so these messages are in the default language. `vgin.Validate(c, v, &req)` validates with the languages of the `Accept-Language` header of the request.
-- The error is [`shared.Errors`](https://insei.github.io/valigo/latest/features/errors/#errors-transformer), get the errors by `errors.As` and write them, e.g. as [problem details](https://insei.github.io/valigo/latest/features/problem/index.md).
+- The error is [`shared.Errors`](https://insei.github.io/valigo/dev/features/errors/#errors-transformer), get the errors by `errors.As` and write them, e.g. as [problem details](https://insei.github.io/valigo/dev/features/problem/index.md).
 
 ## Example
 
@@ -2696,7 +2696,7 @@ go get github.com/insei/valigo/integrations/echo@latest
 
 - `vecho.New(v)` is the `echo.Validator`: set `e.Validator = vecho.New(v)`, and `c.Validate(&req)` validates by the rules of valigo.
 - echo doesn't pass the request to its validator, so these messages are in the default language. `vecho.Validate(c, v, &req)` validates with the languages of the `Accept-Language` header of the request.
-- The error is [`shared.Errors`](https://insei.github.io/valigo/latest/features/errors/#errors-transformer), get the errors by `errors.As` and write them, e.g. as [problem details](https://insei.github.io/valigo/latest/features/problem/index.md).
+- The error is [`shared.Errors`](https://insei.github.io/valigo/dev/features/errors/#errors-transformer), get the errors by `errors.As` and write them, e.g. as [problem details](https://insei.github.io/valigo/dev/features/problem/index.md).
 
 ## Example
 
@@ -2769,7 +2769,7 @@ This page is for the contributors and for those who want to know the cost of a r
 
 `Configure[T]` creates the *model*, a `*T` with all exported nested structs stored by pointer allocated (pointers to the types being allocated are left nil, so recursive types stop). The model gives every field a unique address, so a pointer `&u.Address.City` identifies the field: [fmap](https://github.com/Insei/fmap) finds the field descriptor by the address relative to the model.
 
-The descriptor knows the offset of the field and the chain of the nested pointer structs, so it reads the field of any object of the type: `Address.City` of a `*User` follows the `Address` pointer and returns a typed nil pointer when it is nil. That's how [absent values](https://insei.github.io/valigo/latest/features/absent/index.md) appear.
+The descriptor knows the offset of the field and the chain of the nested pointer structs, so it reads the field of any object of the type: `Address.City` of a `*User` follows the `Address` pointer and returns a typed nil pointer when it is nil. That's how [absent values](https://insei.github.io/valigo/dev/features/absent/index.md) appear.
 
 ## Typed rules
 

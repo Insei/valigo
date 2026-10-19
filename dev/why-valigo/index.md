@@ -19,11 +19,11 @@ A renamed field is renamed in the rules by the IDE, a removed field breaks the b
 
 ### Any type, without changes of the library
 
-The configurator knows nothing about strings, numbers or uuids: they are conversions in their packages. A type of your domain, `time.Time` or a uuid of another package gets its rules by a conversion function of a few lines, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md).
+The configurator knows nothing about strings, numbers or uuids: they are conversions in their packages. A type of your domain, `time.Time` or a uuid of another package gets its rules by a conversion function of a few lines, see [Types and conversions](https://insei.github.io/valigo/dev/features/conversions/index.md).
 
 ### Validation of valid objects doesn't allocate
 
-The rules are built once by `Configure`. `Validate` reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it. On the same rules a valid object is validated about 4 times faster than by go-playground/validator and 1.4 times slower than by the same rules written by hand, an invalid one with translated messages — about 2 times faster than go-playground/validator builds its messages, see [Performance](https://insei.github.io/valigo/latest/performance/index.md).
+The rules are built once by `Configure`. `Validate` reads the fields through precomputed accessors and calls the rules of every field, allocations happen only to build errors. A struct with string, number, uuid and slice rules, conditions and a struct level custom rule is validated with 0 allocations — the tests check it. On the same rules a valid object is validated about 4 times faster than by go-playground/validator and 1.4 times slower than by the same rules written by hand, an invalid one with translated messages — about 2 times faster than go-playground/validator builds its messages, see [Performance](https://insei.github.io/valigo/dev/performance/index.md).
 
 ### Absent values are handled, not panicked on
 
@@ -45,11 +45,11 @@ smtp.Field(&s.Host).As(str.Of).Required()
 smtp.Field(&s.Port).As(num.Of).AnyOfInterval(1, 65535)
 ```
 
-See [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) and [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md).
+See [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md) and [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md).
 
 ### Messages in the language of the user, or codes for the client
 
-One validator serves all languages: the language of every request comes from the context, `NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there. The messages of the built-in rules are translated to English, German, Spanish, French and Russian with plural forms, your own messages are added to the same storage and work untranslated until you add translations. A client with its own locales gets a stable `Code` and named `Params` of every error instead. See [Translations](https://insei.github.io/valigo/latest/features/translations/index.md) and [Codes for clients](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients).
+One validator serves all languages: the language of every request comes from the context, `NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there. The messages of the built-in rules are translated to English, German, Spanish, French and Russian with plural forms, your own messages are added to the same storage and work untranslated until you add translations. A client with its own locales gets a stable `Code` and named `Params` of every error instead. See [Translations](https://insei.github.io/valigo/dev/features/translations/index.md) and [Codes for clients](https://insei.github.io/valigo/dev/features/errors/#codes-for-clients).
 
 How the libraries compare, by their documentation:
 
@@ -64,18 +64,18 @@ How the libraries compare, by their documentation:
 
 ### Slices, maps and other fields
 
-The rules of a slice check the slice itself and, by `Each`, every element with the rules of its type; maps have `EachKey` and `EachValue`; a rule can compare a field with another one by its pointer — `b.Field(&o.EndsAt).As(timex.Of).AfterField(&o.StartsAt)` — with the type of the other field checked by the compiler. See [Slices](https://insei.github.io/valigo/latest/features/slices/index.md), [Maps](https://insei.github.io/valigo/latest/features/maps/index.md) and [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md).
+The rules of a slice check the slice itself and, by `Each`, every element with the rules of its type; maps have `EachKey` and `EachValue`; a rule can compare a field with another one by its pointer — `b.Field(&o.EndsAt).As(timex.Of).AfterField(&o.StartsAt)` — with the type of the other field checked by the compiler. See [Slices](https://insei.github.io/valigo/dev/features/slices/index.md), [Maps](https://insei.github.io/valigo/dev/features/maps/index.md) and [Rules on other fields](https://insei.github.io/valigo/dev/features/fields/index.md).
 
 ### Ready for HTTP APIs
 
-The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/integrations/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) and [huma](https://insei.github.io/valigo/latest/features/huma/index.md).
+The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/integrations/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](https://insei.github.io/valigo/dev/features/problem/index.md) and [huma](https://insei.github.io/valigo/dev/features/huma/index.md).
 
 ### Errors that point to the field
 
-Every error has the message, the location and the value: `Tags[1]` for an element of a slice, `Address.City` for a nested field, or the JSON path of the field with a custom location function. See [Errors](https://insei.github.io/valigo/latest/features/errors/index.md).
+Every error has the message, the location and the value: `Tags[1]` for an element of a slice, `Address.City` for a nested field, or the JSON path of the field with a custom location function. See [Errors](https://insei.github.io/valigo/dev/features/errors/index.md).
 
 ## When valigo is not the right tool
 
-- **The fields aren't known at compile time**, e.g. a form builder with fields defined by users: valigo validates the fields of Go structs. The limits and the conditions of the rules can come from the data — a database, a cache, the settings of a tenant — see [Rules from data](https://insei.github.io/valigo/latest/features/custom/#rules-from-data).
+- **The fields aren't known at compile time**, e.g. a form builder with fields defined by users: valigo validates the fields of Go structs. The limits and the conditions of the rules can come from the data — a database, a cache, the settings of a tenant — see [Rules from data](https://insei.github.io/valigo/dev/features/custom/#rules-from-data).
 - **The input is not a struct**: valigo validates structs, decode maps and JSON into a struct first.
 - **Go older than 1.27**: the configurator uses generic methods.

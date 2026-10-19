@@ -9,7 +9,7 @@ func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error
 
 - `ValidateTyped` returns the errors as `shared.Error` values, `Validate` passes them through the [errors transformer](#errors-transformer), by default every `shared.Error` becomes an `error`.
 - Both return `nil` when the object is valid, when the type of the object has no rules, and for a nil pointer.
-- `obj` is a pointer to the configured struct. A struct value is validated too, by a shallow copy: [`Trim`](https://insei.github.io/valigo/latest/features/strings/#trim) of its fields isn't visible to the caller, but the values behind its pointers and the elements of its slices are shared with the caller and can be changed.
+- `obj` is a pointer to the configured struct. A struct value is validated too, by a shallow copy: [`Trim`](https://insei.github.io/valigo/dev/features/strings/#trim) of its fields isn't visible to the caller, but the values behind its pointers and the elements of its slices are shared with the caller and can be changed.
 - The errors go in the order of the configuration: the rules of a field in the order of the chain, the fields in the order of their first rule.
 
 ## shared.Error
@@ -28,7 +28,7 @@ type Error struct {
 
 ## Codes for clients
 
-The message is translated on the backend, see [Translations](https://insei.github.io/valigo/latest/features/translations/index.md). A client that translates the messages itself — a web or a mobile application with its own locales — uses `Code` and `Params` instead: the code is stable, the parameters are named.
+The message is translated on the backend, see [Translations](https://insei.github.io/valigo/dev/features/translations/index.md). A client that translates the messages itself — a web or a mobile application with its own locales — uses `Code` and `Params` instead: the code is stable, the parameters are named.
 
 ```go
 package main
@@ -111,7 +111,7 @@ Output:
 | `slice.min_len`, `map.min_len`                                                                                                                                                                                                                                                  | `min`                           |
 | `slice.max_len`, `map.max_len`                                                                                                                                                                                                                                                  | `max`                           |
 
-The `field` parameter is the location of the other field by the location function of the validator. The errors of [custom rules](https://insei.github.io/valigo/latest/features/custom/index.md) have the locale key as the code, or the code of `shared.M` with `ErrorMsg`.
+The `field` parameter is the location of the other field by the location function of the validator. The errors of [custom rules](https://insei.github.io/valigo/dev/features/custom/index.md) have the locale key as the code, or the code of `shared.M` with `ErrorMsg`.
 
 ## Location of fields
 
@@ -192,4 +192,4 @@ v := valigo.New(valigo.WithErrorsTransformer(func(errs []shared.Error) []error {
 
 `shared.Errors` is a `[]shared.Error` as one error, its `Error()` joins the errors by `;`; the adapters of the frameworks return it, get it back by `errors.As(err, &errs)`.
 
-The transformer is called only when there are errors. For an HTTP API the [`problem`](https://insei.github.io/valigo/latest/features/problem/index.md) package has the transformer of the problem details of RFC 9457.
+The transformer is called only when there are errors. For an HTTP API the [`problem`](https://insei.github.io/valigo/dev/features/problem/index.md) package has the transformer of the problem details of RFC 9457.

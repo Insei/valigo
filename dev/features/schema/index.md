@@ -1,6 +1,6 @@
 # JSON Schema
 
-The rules that JSON Schema can express are described by its keywords, so the generators of the schemas of an API can show them to the clients: [huma](https://insei.github.io/valigo/latest/features/huma/#the-rules-in-the-openapi-document) puts them into its OpenAPI document. `v.Constraints()` returns them for other generators.
+The rules that JSON Schema can express are described by its keywords, so the generators of the schemas of an API can show them to the clients: [huma](https://insei.github.io/valigo/dev/features/huma/#the-rules-in-the-openapi-document) puts them into its OpenAPI document. `v.Constraints()` returns them for other generators.
 
 ```go
 for _, c := range v.Constraints() {
@@ -34,7 +34,7 @@ The schema describes the rules, valigo validates the values: the descriptions ar
 
 ## Your conversions
 
-A [conversion](https://insei.github.io/valigo/latest/features/conversions/#your-types) describes its rules by `Schema` of the field, `Schema` of a slice configurator describes the rules of the slice:
+A [conversion](https://insei.github.io/valigo/dev/features/conversions/#your-types) describes its rules by `Schema` of the field, `Schema` of a slice configurator describes the rules of the slice:
 
 ```go
 // Percent checks that the number is in [0, 100].

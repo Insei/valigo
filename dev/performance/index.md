@@ -39,7 +39,7 @@ An invalid object with 6 errors:
 
 valigo is about 1.4 times slower than the same rules written by hand on a valid object, it pays for the closures of the rules; it doesn't allocate either. The fields are read by the offsets of fmap without reflect, following the pointers of nested structs. Code generators of validators produce code like the hand-written one, so they are expected to be about as fast as it.
 
-- The [rules from tags](https://insei.github.io/valigo/latest/features/tags/index.md) are the same rules: in one run a valid object took 392 ns by the tags of go-playground/validator and 373 ns by the rules in code, 0 allocations both; `max=64` is `MaxRunes`, `gte` and `lte` are two rules instead of one `AnyOfInterval`.
+- The [rules from tags](https://insei.github.io/valigo/dev/features/tags/index.md) are the same rules: in one run a valid object took 392 ns by the tags of go-playground/validator and 373 ns by the rules in code, 0 allocations both; `max=64` is `MaxRunes`, `gte` and `lte` are two rules instead of one `AnyOfInterval`.
 - valigo builds the rules once in `Configure` and reads the fields by precomputed accessors, so valid objects cost no allocations; go-playground/validator parses the tags once too, but works through `reflect` on every call, ozzo-validation builds its rules on every call of `Validate`.
 - gookit/validate creates a validation per call, it is its API, and reports the errors of the elements of a slice under one key `Tags.*`; zog builds the messages of its issues.
 - valigo builds the translated messages of the errors at once, go-playground/validator returns the errors without messages and builds them by `Error` or `Translate`: compare valigo with the row "with `Error()`".

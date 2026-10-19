@@ -73,4 +73,4 @@ Nil slices of value fields (`[]string(nil)`) are present and empty: length rules
 
 ## Conditions
 
-A field `When` doesn't call its condition for an absent value and skips its rules, including `Required`: the condition is about the value, and there is no value. Put `Required` before `When`, or use `When` of the struct, if the field is required under a condition. See [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md).
+A field `When` doesn't call its condition for an absent value and skips its rules, including `Required`: the condition is about the value, and there is no value. Put `Required` before `When`, or use `When` of the struct, if the field is required under a condition. See [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md).

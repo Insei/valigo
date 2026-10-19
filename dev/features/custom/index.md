@@ -50,7 +50,7 @@ Output:
 [Login "Admin" is reserved (Login: Admin) Should be even (Age: 3)]
 ```
 
-`h.ErrorT(ctx, value, localeKey, args...)` translates the message: `localeKey` is looked up in the [translations](https://insei.github.io/valigo/latest/features/translations/index.md), a key without a translation is used as is, as a format for `args`. The [code](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients) of the error is the key. For a stable code and named parameters build the message by `shared.M` and return `h.ErrorMsg(ctx, value, msg)`:
+`h.ErrorT(ctx, value, localeKey, args...)` translates the message: `localeKey` is looked up in the [translations](https://insei.github.io/valigo/dev/features/translations/index.md), a key without a translation is used as is, as a format for `args`. The [code](https://insei.github.io/valigo/dev/features/errors/#codes-for-clients) of the error is the key. For a stable code and named parameters build the message by `shared.M` and return `h.ErrorMsg(ctx, value, msg)`:
 
 ```go
 return []shared.Error{h.ErrorMsg(ctx, login, shared.M("login.reserved", "Login %q is reserved", shared.P("login", login)))}
@@ -58,7 +58,7 @@ return []shared.Error{h.ErrorMsg(ctx, login, shared.M("login.reserved", "Login %
 
 The values of `shared.P` are the format arguments of the message in their order. A message without the checked value can be created once on the configuration, its parameters are shared by the errors.
 
-The function isn't called for an [absent value](https://insei.github.io/valigo/latest/features/absent/index.md).
+The function isn't called for an [absent value](https://insei.github.io/valigo/dev/features/absent/index.md).
 
 ## Rules on slice elements
 
@@ -70,7 +70,7 @@ b.Slice(&o.Quantities).Each(func(q *shared.Field[int]) {
 })
 ```
 
-`Required(ok, localeKey)` fails for absent elements and the elements that don't match `ok`, `Modify(fn)` changes the elements in place. See [Slices](https://insei.github.io/valigo/latest/features/slices/index.md).
+`Required(ok, localeKey)` fails for absent elements and the elements that don't match `ok`, `Modify(fn)` changes the elements in place. See [Slices](https://insei.github.io/valigo/dev/features/slices/index.md).
 
 ## Struct rules
 
@@ -115,7 +115,7 @@ Output:
 [Should be after 2026-05-10 (To: 2026-05-09)]
 ```
 
-- Struct `Custom` can be combined with [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md): `b.When(cond).Custom(fn)`.
+- Struct `Custom` can be combined with [`When`](https://insei.github.io/valigo/dev/features/conditions/index.md): `b.When(cond).Custom(fn)`.
 - The helper is valid only during the call of the function, don't keep it.
 - A pointer that doesn't point to a field of the validated object panics.
 

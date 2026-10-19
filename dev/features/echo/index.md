@@ -8,7 +8,7 @@ go get github.com/insei/valigo/integrations/echo@latest
 
 - `vecho.New(v)` is the `echo.Validator`: set `e.Validator = vecho.New(v)`, and `c.Validate(&req)` validates by the rules of valigo.
 - echo doesn't pass the request to its validator, so these messages are in the default language. `vecho.Validate(c, v, &req)` validates with the languages of the `Accept-Language` header of the request.
-- The error is [`shared.Errors`](https://insei.github.io/valigo/latest/features/errors/#errors-transformer), get the errors by `errors.As` and write them, e.g. as [problem details](https://insei.github.io/valigo/latest/features/problem/index.md).
+- The error is [`shared.Errors`](https://insei.github.io/valigo/dev/features/errors/#errors-transformer), get the errors by `errors.As` and write them, e.g. as [problem details](https://insei.github.io/valigo/dev/features/problem/index.md).
 
 ## Example
 

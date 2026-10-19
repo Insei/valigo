@@ -26,14 +26,14 @@ b.Slice(&c.Mentions).As(vuuid.Slice).MaxLen(10).AnyOf(allowed...)
 
 ## Rules
 
-| Rule               | Fails when                        | Message                                                                                                                                    |
-| ------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Required()`       | the value is absent or `uuid.Nil` | Should be fulfilled                                                                                                                        |
-| `AnyOf(values...)` | the value isn't one of `values`   | Only %s values is allowed                                                                                                                  |
-| `Custom(fn)`       | `fn` returns errors               | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
-| `When(fn)`         | —                                 | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+| Rule               | Fails when                        | Message                                                                                                                                 |
+| ------------------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `Required()`       | the value is absent or `uuid.Nil` | Should be fulfilled                                                                                                                     |
+| `AnyOf(values...)` | the value isn't one of `values`   | Only %s values is allowed                                                                                                               |
+| `Custom(fn)`       | `fn` returns errors               | your messages, see [Custom rules](https://insei.github.io/valigo/dev/features/custom/index.md)                                          |
+| `When(fn)`         | —                                 | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/dev/features/conditions/index.md) |
 
-Another uuid package gets its rules by a conversion of the same kind, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/#your-types).
+Another uuid package gets its rules by a conversion of the same kind, see [Types and conversions](https://insei.github.io/valigo/dev/features/conversions/#your-types).
 
 ## Example
 

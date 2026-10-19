@@ -13,10 +13,10 @@ if errs := v.Validate(r.Context(), &req); errs != nil {
 
 - `problem.Transformer(opts...)` makes `Validate` return one error, the `*problem.Details` of all errors; `problem.From(errs)` gets it back, `problem.New(errs)` builds it from the errors of `ValidateTyped`.
 - `Details.Write(w)` writes the status and the JSON with the `application/problem+json` content type.
-- Every error of a field has the translated message `detail`, the JSON Pointer `pointer` of RFC 6901 (built from the location: `tags[1]` is `#/tags/1`), the `location`, and the [`code` and `params`](https://insei.github.io/valigo/latest/features/errors/#codes-for-clients) for the clients that translate the messages themselves.
+- Every error of a field has the translated message `detail`, the JSON Pointer `pointer` of RFC 6901 (built from the location: `tags[1]` is `#/tags/1`), the `location`, and the [`code` and `params`](https://insei.github.io/valigo/dev/features/errors/#codes-for-clients) for the clients that translate the messages themselves.
 - Options: `WithType` (the URI of the problem type, `about:blank` when it is empty), `WithTitle` ("Validation failed" by default), `WithStatus` (422 by default), `WithDetail`.
 
-Use JSON locations, so the pointers point to the fields of the request, see [Errors](https://insei.github.io/valigo/latest/features/errors/#location-of-fields).
+Use JSON locations, so the pointers point to the fields of the request, see [Errors](https://insei.github.io/valigo/dev/features/errors/#location-of-fields).
 
 ## Example
 

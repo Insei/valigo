@@ -4,7 +4,7 @@ Messages are translated by a `translator.Translator`. The default one of `valigo
 
 ## Locale keys
 
-The rules build messages by *locale keys*: `validation:string:Cannot be longer than %d characters`. The translator looks the key up in the languages of the context, then in the default language, and formats the found message with the arguments of the rule. A key without a translation is used as is: so the messages of [custom rules](https://insei.github.io/valigo/latest/features/custom/index.md) work without translations.
+The rules build messages by *locale keys*: `validation:string:Cannot be longer than %d characters`. The translator looks the key up in the languages of the context, then in the default language, and formats the found message with the arguments of the rule. A key without a translation is used as is: so the messages of [custom rules](https://insei.github.io/valigo/dev/features/custom/index.md) work without translations.
 
 The keys of the built-in rules are in [`translator/locales`](https://github.com/Insei/valigo/tree/main/translator/locales):
 
@@ -157,4 +157,4 @@ Output:
 
 - `storage.Merge(locales)` adds the translations of several languages at once, e.g. from your own YAML files read by `translator.LocalesFromFS(fsys)`: `locales/<lang>/data.yaml` with the same nested format as the built-in locales.
 - `translator.NewInMemStorage(translator.WithInMemData(data))` replaces the built-in locales with yours.
-- [`str.WithRegexpLocaleKey`](https://insei.github.io/valigo/latest/features/strings/#regexp-message) sets the key of a `Regexp` rule.
+- [`str.WithRegexpLocaleKey`](https://insei.github.io/valigo/dev/features/strings/#regexp-message) sets the key of a `Regexp` rule.

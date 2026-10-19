@@ -63,9 +63,9 @@ b.Field(&u.Website).As(str.Of).
     Regexp(urlRe)                                                            // only for a non-empty value
 ```
 
-The value is typed: `string` for `str.Of`, the number type for `num.Of` and `num.Ptr`, `uuid.UUID` for `uuid.Of`, and `shared.Elems[E]` for slices, see [Slices](https://insei.github.io/valigo/latest/features/slices/#custom-and-when).
+The value is typed: `string` for `str.Of`, the number type for `num.Of` and `num.Ptr`, `uuid.UUID` for `uuid.Of`, and `shared.Elems[E]` for slices, see [Slices](https://insei.github.io/valigo/dev/features/slices/#custom-and-when).
 
-For an [absent value](https://insei.github.io/valigo/latest/features/absent/index.md) the condition isn't called and the rules after it are skipped, including `Required`.
+For an [absent value](https://insei.github.io/valigo/dev/features/absent/index.md) the condition isn't called and the rules after it are skipped, including `Required`.
 
 ## Conditional requiredness
 
@@ -125,4 +125,4 @@ Output:
 
 ## Conditions and custom rules
 
-A condition on several fields can also be written as a [struct custom rule](https://insei.github.io/valigo/latest/features/custom/#struct-rules), which reports errors itself. Prefer `When`: the rules after it are the regular ones, with their messages and translations.
+A condition on several fields can also be written as a [struct custom rule](https://insei.github.io/valigo/dev/features/custom/#struct-rules), which reports errors itself. Prefer `When`: the rules after it are the regular ones, with their messages and translations.

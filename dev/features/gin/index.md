@@ -8,7 +8,7 @@ go get github.com/insei/valigo/integrations/gin@latest
 
 - `vgin.New(v)` is the `binding.StructValidator` of gin: set `binding.Validator = vgin.New(v)`, and `c.ShouldBindJSON` and the other binding methods validate the requests by the rules of valigo. Slices are validated element by element, the location of an error has the index: `[1].email`.
 - gin doesn't pass the request to its validator, so these messages are in the default language. `vgin.Validate(c, v, &req)` validates with the languages of the `Accept-Language` header of the request.
-- The error is [`shared.Errors`](https://insei.github.io/valigo/latest/features/errors/#errors-transformer), get the errors by `errors.As` and write them, e.g. as [problem details](https://insei.github.io/valigo/latest/features/problem/index.md).
+- The error is [`shared.Errors`](https://insei.github.io/valigo/dev/features/errors/#errors-transformer), get the errors by `errors.As` and write them, e.g. as [problem details](https://insei.github.io/valigo/dev/features/problem/index.md).
 
 ## Example
 

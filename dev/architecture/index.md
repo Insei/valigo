@@ -6,7 +6,7 @@ This page is for the contributors and for those who want to know the cost of a r
 
 `Configure[T]` creates the *model*, a `*T` with all exported nested structs stored by pointer allocated (pointers to the types being allocated are left nil, so recursive types stop). The model gives every field a unique address, so a pointer `&u.Address.City` identifies the field: [fmap](https://github.com/Insei/fmap) finds the field descriptor by the address relative to the model.
 
-The descriptor knows the offset of the field and the chain of the nested pointer structs, so it reads the field of any object of the type: `Address.City` of a `*User` follows the `Address` pointer and returns a typed nil pointer when it is nil. That's how [absent values](https://insei.github.io/valigo/latest/features/absent/index.md) appear.
+The descriptor knows the offset of the field and the chain of the nested pointer structs, so it reads the field of any object of the type: `Address.City` of a `*User` follows the `Address` pointer and returns a typed nil pointer when it is nil. That's how [absent values](https://insei.github.io/valigo/dev/features/absent/index.md) appear.
 
 ## Typed rules
 

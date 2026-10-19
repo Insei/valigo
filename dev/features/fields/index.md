@@ -9,18 +9,18 @@ b.Field(&u.Confirmation).As(str.Of).EqualField(&u.Password)
 b.Field(&u.Plan).As(eq.Of).EqualField(&u.CurrentPlan)
 ```
 
-| Configurator                                                                        | Rule                | Fails when                    | Message                   |
-| ----------------------------------------------------------------------------------- | ------------------- | ----------------------------- | ------------------------- |
-| [strings](https://insei.github.io/valigo/latest/features/strings/index.md)          | `EqualField(&m.X)`  | the value isn't equal to `X`  | Should be equal to %s     |
-| [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)          | `MinField(&m.X)`    | the value is less than `X`    | Cannot be less than %v    |
-| [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)          | `MaxField(&m.X)`    | the value is greater than `X` | Cannot be greater than %v |
-| [time](https://insei.github.io/valigo/latest/features/time/index.md)                | `BeforeField(&m.X)` | the value isn't before `X`    | Should be before %s       |
-| [time](https://insei.github.io/valigo/latest/features/time/index.md)                | `AfterField(&m.X)`  | the value isn't after `X`     | Should be after %s        |
-| [comparable values](https://insei.github.io/valigo/latest/features/values/index.md) | `EqualField(&m.X)`  | the value isn't equal to `X`  | Should be equal to %s     |
+| Configurator                                                                     | Rule                | Fails when                    | Message                   |
+| -------------------------------------------------------------------------------- | ------------------- | ----------------------------- | ------------------------- |
+| [strings](https://insei.github.io/valigo/dev/features/strings/index.md)          | `EqualField(&m.X)`  | the value isn't equal to `X`  | Should be equal to %s     |
+| [numbers](https://insei.github.io/valigo/dev/features/numbers/index.md)          | `MinField(&m.X)`    | the value is less than `X`    | Cannot be less than %v    |
+| [numbers](https://insei.github.io/valigo/dev/features/numbers/index.md)          | `MaxField(&m.X)`    | the value is greater than `X` | Cannot be greater than %v |
+| [time](https://insei.github.io/valigo/dev/features/time/index.md)                | `BeforeField(&m.X)` | the value isn't before `X`    | Should be before %s       |
+| [time](https://insei.github.io/valigo/dev/features/time/index.md)                | `AfterField(&m.X)`  | the value isn't after `X`     | Should be after %s        |
+| [comparable values](https://insei.github.io/valigo/dev/features/values/index.md) | `EqualField(&m.X)`  | the value isn't equal to `X`  | Should be equal to %s     |
 
 - The other field has the type of the configurator: `string` for `str.Of`, the number type for `num.Of`, `time.Time` for `timex.Of`.
-- The message has the location of the other field, by the [location function](https://insei.github.io/valigo/latest/features/errors/#location-of-fields) of the validator: `Should be after StartsAt`, or `Should be after starts_at` with JSON paths.
-- The rule is skipped when the value or the value of the other field is [absent](https://insei.github.io/valigo/latest/features/absent/index.md), e.g. a field of a nil nested struct.
+- The message has the location of the other field, by the [location function](https://insei.github.io/valigo/dev/features/errors/#location-of-fields) of the validator: `Should be after StartsAt`, or `Should be after starts_at` with JSON paths.
+- The rule is skipped when the value or the value of the other field is [absent](https://insei.github.io/valigo/dev/features/absent/index.md), e.g. a field of a nil nested struct.
 - In `Each` the elements are compared with a field of the object: `e.As(timex.Of).AfterField(&m.StartsAt)`.
 
 ## Example
@@ -79,4 +79,4 @@ Cannot be less than MinBid (Bids[1]: 90)
 Should be equal to Password (Repeat: Secret)
 ```
 
-For a comparison of several fields that doesn't fit one rule, use a [struct custom rule](https://insei.github.io/valigo/latest/features/custom/#struct-rules).
+For a comparison of several fields that doesn't fit one rule, use a [struct custom rule](https://insei.github.io/valigo/dev/features/custom/#struct-rules).

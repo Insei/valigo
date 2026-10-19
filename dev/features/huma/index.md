@@ -18,7 +18,7 @@ func (i *CreateUserInput) Resolve(ctx huma.Context) []error {
 
 - `vhuma.Location` is the location function of the input structs of huma: the fields of `Body` are `body` and their JSON path, the parameters are their kind and name from the `path`, `query`, `header`, `cookie` and `form` tags.
 - `vhuma.Resolve` validates the input with the languages of the `Accept-Language` header and returns the error details of huma, huma calls `Resolve` of the input after it has parsed the request.
-- `vhuma.Errors` converts the errors of `ValidateTyped` to the error details of huma. The error details of huma have no codes, use [`problem`](https://insei.github.io/valigo/latest/features/problem/index.md) when the clients need them.
+- `vhuma.Errors` converts the errors of `ValidateTyped` to the error details of huma. The error details of huma have no codes, use [`problem`](https://insei.github.io/valigo/dev/features/problem/index.md) when the clients need them.
 
 huma validates the input by its JSON schema first, so the rules of valigo extend the schema: formats, rules on other fields, rules from data, translated messages.
 
@@ -102,7 +102,7 @@ body.tags[1] - Должно содержать только латинские �
 
 ## The rules in the OpenAPI document
 
-`vhuma.OpenAPI(api, v)` returns the OpenAPI document of the api with the rules of valigo in the schemas of the request bodies and their nested structs, by [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md): `maxLength` of `MaxRunes`, `format: email` of `Email`, `items` of `Each`, the required properties of `Required`. Serve it, so the clients and the generators of SDKs see the rules:
+`vhuma.OpenAPI(api, v)` returns the OpenAPI document of the api with the rules of valigo in the schemas of the request bodies and their nested structs, by [JSON Schema](https://insei.github.io/valigo/dev/features/schema/index.md): `maxLength` of `MaxRunes`, `format: email` of `Email`, `items` of `Each`, the required properties of `Required`. Serve it, so the clients and the generators of SDKs see the rules:
 
 ```go
 mux.HandleFunc("GET /openapi.json", func(w http.ResponseWriter, r *http.Request) {

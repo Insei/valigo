@@ -26,10 +26,10 @@ valigo.Configure[User](v, func(b valigo.Configurator[User], u *User) {
 
 The function is called once, with:
 
-- `b` — the configurator of `T`: `Field`, `Slice` and `Map` return the base configurators of fields, converted to the configurators of their types by `As`, see [Types and conversions](https://insei.github.io/valigo/latest/features/conversions/index.md); [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md) and [`Custom`](https://insei.github.io/valigo/latest/features/custom/index.md) are the rules of the struct;
+- `b` — the configurator of `T`: `Field`, `Slice` and `Map` return the base configurators of fields, converted to the configurators of their types by `As`, see [Types and conversions](https://insei.github.io/valigo/dev/features/conversions/index.md); [`When`](https://insei.github.io/valigo/dev/features/conditions/index.md) and [`Custom`](https://insei.github.io/valigo/dev/features/custom/index.md) are the rules of the struct;
 - `u` — the *model*, a `*User` created by `Configure`. Rules are bound to the fields of the model by their pointers.
 
-The rules are applied to objects of type `*T`: `v.Validate(ctx, &user)`. A struct value is validated too, by a copy, see [Errors](https://insei.github.io/valigo/latest/features/errors/#validate-and-validatetyped).
+The rules are applied to objects of type `*T`: `v.Validate(ctx, &user)`. A struct value is validated too, by a copy, see [Errors](https://insei.github.io/valigo/dev/features/errors/#validate-and-validatetyped).
 
 `Configure` is called on the application start. It isn't safe to call concurrently with `Validate`, and it **panics** on invalid configuration: a configuration error is a bug of the code, not a state of the running service. A repeated `Configure` of the same type replaces its rules.
 
@@ -94,7 +94,7 @@ Output:
 [Should be fulfilled (Work.City: <nil>)]
 ```
 
-When the validated object has a nil `Work`, the field `Work.City` is absent: rules skip it and `Required` fails, see [Absent values](https://insei.github.io/valigo/latest/features/absent/index.md).
+When the validated object has a nil `Work`, the field `Work.City` is absent: rules skip it and `Required` fails, see [Absent values](https://insei.github.io/valigo/dev/features/absent/index.md).
 
 Embedded structs work the same way, `&u.ID` for a field of an embedded `Base`. Unexported fields are allowed in the model, and unexported fields of the model itself can be configured too.
 
