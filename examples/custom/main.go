@@ -7,6 +7,7 @@ import (
 
 	"github.com/insei/valigo"
 	"github.com/insei/valigo/shared"
+	"github.com/insei/valigo/str"
 )
 
 type User struct {
@@ -28,7 +29,7 @@ func main() {
 		})
 
 		//Custom on field
-		c.String(&obj.LastName).
+		c.Field(&obj.LastName).As(str.Of).
 			Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value string) []shared.Error {
 				if value != "Rebecca" {
 					localeKey := "Only Rebecca is allowed" // you can add translations if you want, see translation example

@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/insei/valigo"
+	"github.com/insei/valigo/str"
 )
 
 type car struct {
@@ -18,7 +19,7 @@ type car struct {
 func TestStringBuilderTrim(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[car](v, func(builder valigo.Configurator[car], obj *car) {
-		builder.String(&obj.Model).
+		builder.Field(&obj.Model).As(str.Of).
 			Trim()
 	})
 
@@ -51,7 +52,7 @@ func TestStringBuilderRegexp(t *testing.T) {
 	v := valigo.New()
 	re := regexp.MustCompile(`^[a-zA-Z0-9]{3,20}$`)
 	valigo.Configure[car](v, func(builder valigo.Configurator[car], obj *car) {
-		builder.String(&obj.Model).
+		builder.Field(&obj.Model).As(str.Of).
 			Regexp(re)
 	})
 
@@ -113,7 +114,7 @@ type admin struct {
 func TestStringBuilderMaxLen(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[admin](v, func(builder valigo.Configurator[admin], obj *admin) {
-		builder.String(&obj.PhoneNumber).
+		builder.Field(&obj.PhoneNumber).As(str.Of).
 			MaxLen(12)
 	})
 
