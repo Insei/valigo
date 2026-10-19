@@ -24,6 +24,13 @@ validation:
     "Only %v values is allowed": Only %v values is allowed
     "Only interval[%v - %v] is allowed": Only interval[%v - %v] is allowed
     "Invalid value": Invalid value
+  time:
+    "Should be fulfilled": Should be fulfilled
+    "Should be before %s": Should be before %s
+    "Should be after %s": Should be after %s
+    "Should be between %s and %s": Should be between %s and %s
+    "Should be in the past": Should be in the past
+    "Should be in the future": Should be in the future
   uuid:
     "Should be fulfilled": Should be fulfilled
     "Only %s values is allowed": Only %s values is allowed
