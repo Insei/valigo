@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/insei/valigo/internal/testenv"
 )
 
 func check(t *testing.T, name string, fn func(string) bool, valid, invalid []string) {
@@ -104,6 +106,9 @@ func TestIsAlphanumeric(t *testing.T) {
 }
 
 func TestFormatsDontAllocate(t *testing.T) {
+	if testenv.RaceEnabled {
+		t.Skip("allocations are not stable under the race detector")
+	}
 	for name, fn := range map[string]func() bool{
 		"url":      func() bool { return isURL("https://user@example.com:8443/path?q=1#f") },
 		"url ipv6": func() bool { return isURL("https://[2001:db8::1]:8080/x") },
@@ -135,6 +140,9 @@ func TestMoreFormats(t *testing.T) {
 }
 
 func TestMoreFormatsDontAllocate(t *testing.T) {
+	if testenv.RaceEnabled {
+		t.Skip("allocations are not stable under the race detector")
+	}
 	for name, fn := range map[string]func() bool{
 		"base64":   func() bool { return isBase64("Zm9vYg==") },
 		"json":     func() bool { return isJSON(`{"a": [1, {"b": null}]}`) },
@@ -165,6 +173,9 @@ func TestLuhn(t *testing.T) {
 }
 
 func TestCodesDontAllocate(t *testing.T) {
+	if testenv.RaceEnabled {
+		t.Skip("allocations are not stable under the race detector")
+	}
 	for name, fn := range map[string]func() bool{
 		"country":  func() bool { return isCountryCode("DE") },
 		"currency": func() bool { return isCurrencyCode("EUR") },
