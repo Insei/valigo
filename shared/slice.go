@@ -48,10 +48,10 @@ func (e Elems[E]) All() iter.Seq2[int, *E] {
 	}
 }
 
-// ElemsGetter returns a function that reads elements of the slice field from obj.
+// elemsGetter returns a function that reads elements of the slice field from obj.
 // The field type can be []E, *[]E, []*E or *[]*E, named types with the same underlying layout are allowed.
 // The returned function reports false when the slice is absent.
-func ElemsGetter[E any](field fmap.Field) func(obj any) (Elems[E], bool) {
+func elemsGetter[E any](field fmap.Field) func(obj any) (Elems[E], bool) {
 	t := field.GetType()
 	slicePtr := t.Kind() == reflect.Pointer
 	if slicePtr {
@@ -68,7 +68,7 @@ func ElemsGetter[E any](field fmap.Field) func(obj any) (Elems[E], bool) {
 	}
 	mustLayout[E](field, elem)
 	return func(obj any) (Elems[E], bool) {
-		p := DataPtr(field.GetPtr(obj))
+		p := dataPtr(field.GetPtr(obj))
 		if p != nil && slicePtr {
 			p = *(*unsafe.Pointer)(p)
 		}
@@ -84,12 +84,12 @@ func ElemsGetter[E any](field fmap.Field) func(obj any) (Elems[E], bool) {
 	}
 }
 
-// EachSource applies checks to every element of the slice read by get.
+// eachSource applies checks to every element of the slice read by get.
 // All checks are registered as a single validation function, so the slice is read once.
 // Locations of the elements errors are suffixed with the element index, e.g. Tags[1].
-func EachSource[E any](add func(fn ValidationFn), get func(obj any) (Elems[E], bool)) func(fn CheckFn[E]) {
-	var checks []CheckFn[E]
-	return func(fn CheckFn[E]) {
+func eachSource[E any](add func(fn ValidationFn), get func(obj any) (Elems[E], bool)) func(fn checkFn[E]) {
+	var checks []checkFn[E]
+	return func(fn checkFn[E]) {
 		checks = append(checks, fn)
 		if len(checks) > 1 {
 			return
@@ -120,9 +120,11 @@ type SliceFieldConfigurator[E any] struct {
 	add   func(fn ValidationFn)
 }
 
-// NewSliceFieldConfigurator creates a new SliceFieldConfigurator.
-func NewSliceFieldConfigurator[E any](field fmap.Field, h Helper, get func(obj any) (Elems[E], bool), add func(fn ValidationFn)) *SliceFieldConfigurator[E] {
-	return &SliceFieldConfigurator[E]{field: field, h: h, get: get, add: add}
+// NewSliceFieldConfigurator creates a SliceFieldConfigurator for the field of type []E, *[]E, []*E or *[]*E,
+// named types with the same underlying layout are allowed.
+// add registers a validation function of the configured struct.
+func NewSliceFieldConfigurator[E any](field fmap.Field, h Helper, add func(fn ValidationFn)) *SliceFieldConfigurator[E] {
+	return &SliceFieldConfigurator[E]{field: field, h: h, get: elemsGetter[E](field), add: add}
 }
 
 // Each configures rules applied to every element of the slice.
@@ -133,7 +135,7 @@ func (s *SliceFieldConfigurator[E]) Each(fn func(elem *Field[E])) *SliceFieldCon
 
 // EachField returns a Field that applies rules to every element of the slice.
 func (s *SliceFieldConfigurator[E]) EachField() *Field[E] {
-	return NewField(s.field, s.h, EachSource(s.add, s.get))
+	return &Field[E]{field: s.field, h: s.h, add: eachSource(s.add, s.get)}
 }
 
 func (s *SliceFieldConfigurator[E]) check(ok func(n int) bool, localeKey string, args ...any) {
@@ -192,7 +194,7 @@ func (s *SliceFieldConfigurator[E]) When(whenFn func(ctx context.Context, value 
 		return s
 	}
 	add, get := s.add, s.get
-	return NewSliceFieldConfigurator(s.field, s.h, get, func(fn ValidationFn) {
+	return &SliceFieldConfigurator[E]{field: s.field, h: s.h, get: get, add: func(fn ValidationFn) {
 		add(func(ctx context.Context, h Helper, obj any) []Error {
 			elems, _ := get(obj)
 			if !whenFn(ctx, elems) {
@@ -200,5 +202,5 @@ func (s *SliceFieldConfigurator[E]) When(whenFn func(ctx context.Context, value 
 			}
 			return fn(ctx, h, obj)
 		})
-	})
+	}}
 }

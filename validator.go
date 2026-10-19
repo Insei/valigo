@@ -3,6 +3,7 @@ package valigo
 import (
 	"context"
 	"reflect"
+	"unsafe"
 
 	"github.com/insei/fmap/v3"
 
@@ -24,7 +25,7 @@ func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
 	validators, ok := v.validators[reflect.TypeOf(obj)]
 	if !ok {
 		validators, obj = v.byValue(obj)
-	} else if shared.DataPtr(obj) == nil {
+	} else if dataPtr(obj) == nil {
 		return nil
 	}
 	var errs []shared.Error
@@ -57,6 +58,11 @@ func (v *Validator) Validate(ctx context.Context, obj any) []error {
 		return nil
 	}
 	return v.transformError(errsTyped)
+}
+
+// dataPtr returns the data pointer of the interface value, i.e. the pointer itself for pointer values.
+func dataPtr(v any) unsafe.Pointer {
+	return (*[2]unsafe.Pointer)(unsafe.Pointer(&v))[1]
 }
 
 // GetHelper returns the helper object associated with the Validator instance.
