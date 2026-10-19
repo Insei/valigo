@@ -1,6 +1,8 @@
 package shared
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -56,5 +58,19 @@ func TestError(t *testing.T) {
 				t.Errorf("Expected error: %v, but got: %s", tt.expectedError, result)
 			}
 		})
+	}
+}
+
+func TestErrors(t *testing.T) {
+	errs := Errors{{Message: "a", Location: "x", Value: 1}, {Message: "b"}}
+	if got := errs.Error(); got != "a (x: 1); b" {
+		t.Errorf("Error() = %q", got)
+	}
+	var target Errors
+	if !errors.As(fmt.Errorf("wrapped: %w", errs), &target) || len(target) != 2 {
+		t.Errorf("errors.As failed: %v", target)
+	}
+	if got := Errors(nil).Error(); got != "" {
+		t.Errorf("Error() of no errors = %q", got)
 	}
 }
