@@ -1,0 +1,77 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs.yml'
+    # the paths are not checked for the tags
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  # the versions of the documentation are stored in the gh-pages branch by mike
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+      - run: pip install -r docs/requirements.txt
+      - run: mkdocs build --strict --site-dir site-check
+
+      - name: Deploy the version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages --depth=1 || true
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            # v1.4.2 is the version 1.4, the latest release
+            version="${GITHUB_REF_NAME#v}"
+            export LLMSTXT_BASE_URL="https://insei.github.io/valigo/${version%.*}/"
+            mike deploy --push --update-aliases "${version%.*}" latest
+          elif mike list | grep -v '^dev' | grep -q .; then
+            export LLMSTXT_BASE_URL="https://insei.github.io/valigo/dev/"
+            mike deploy --push dev
+          else
+            # latest is dev until the first release with the versions of the documentation
+            mike deploy --push --update-aliases dev latest
+          fi
+          mike set-default --push latest
+
+      - name: Checkout the site
+        run: |
+          # mike builds the version into the site directory, the published site is checked out to another one
+          git fetch origin gh-pages --depth=1
+          git worktree add pages origin/gh-pages
+          # llms.txt of the latest version is also at the root of the site, where the agents look for it first
+          cp -L pages/latest/llms.txt pages/latest/llms-full.txt pages/ 2>/dev/null || true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
