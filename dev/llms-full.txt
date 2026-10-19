@@ -229,13 +229,14 @@ Reference of valigo capabilities grouped by area.
 
 ## Rules
 
-| Page                                                                       | What's inside                                                                                                                                      |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Strings](https://insei.github.io/valigo/latest/features/strings/index.md) | `str.Of`: `Required`, lengths, `AnyOf`, `Prefix`, `Suffix`, `Contains`, `Regexp`, `Email`, `URL`, `IP`, `Hostname`, `UUID`, `Alphanumeric`, `Trim` |
-| [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md) | `num.Of` and `num.Ptr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval`                                                                         |
-| [Time](https://insei.github.io/valigo/latest/features/time/index.md)       | `timex.Of`: `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture`                                                                         |
-| [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)       | `uuid.Of` of the separate module: `Required`, `AnyOf`                                                                                              |
-| [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)   | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements                                                                              |
+| Page                                                                                | What's inside                                                                                                                                      |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Strings](https://insei.github.io/valigo/latest/features/strings/index.md)          | `str.Of`: `Required`, lengths, `AnyOf`, `Prefix`, `Suffix`, `Contains`, `Regexp`, `Email`, `URL`, `IP`, `Hostname`, `UUID`, `Alphanumeric`, `Trim` |
+| [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)          | `num.Of` and `num.Ptr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval`                                                                         |
+| [Time](https://insei.github.io/valigo/latest/features/time/index.md)                | `timex.Of`: `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture`                                                                         |
+| [Comparable values](https://insei.github.io/valigo/latest/features/values/index.md) | `eq.Of`, `eq.Ptr`, `eq.Slice`: enums, bools — `Required`, `OneOf`, `NotOneOf`, `Equal`, `NotEqual`, `Unique`                                       |
+| [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)                | `uuid.Of` of the separate module: `Required`, `AnyOf`                                                                                              |
+| [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)            | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements                                                                              |
 
 ## Results
 
@@ -529,17 +530,19 @@ b.Field(&u.Age).As(str.Of)
 
 ## Built-in conversions
 
-| Conversion        | Fields                                                | Configurator                                                                                                                  |
-| ----------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `str.Of`          | `string`, `*string`, named strings                    | [strings](https://insei.github.io/valigo/latest/features/strings/index.md)                                                    |
-| `num.Of`          | numbers and named numbers                             | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                    |
-| `num.Ptr`         | pointers to numbers                                   | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md), `Required` checks only that the pointer isn't nil |
-| `timex.Of`        | `time.Time`, `*time.Time`                             | [time](https://insei.github.io/valigo/latest/features/time/index.md)                                                          |
-| `vuuid.Of`        | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid` | [uuid](https://insei.github.io/valigo/latest/features/uuid/index.md), the separate module `github.com/insei/valigo/uuid`      |
-| `str.Slice`       | `Slice` of strings, `*string` or named strings        | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the string rules of elements                    |
-| `timex.Slice`     | `Slice` of `time.Time`, `*time.Time`                  | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the time rules of elements                      |
-| `vuuid.Slice`     | `Slice` of `uuid.UUID`, `*uuid.UUID`                  | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the uuid rules of elements                      |
-| `shared.SlicePtr` | `Field` of `*[]E`                                     | the slice configurator, a nil pointer is absent                                                                               |
+| Conversion        | Fields                                                  | Configurator                                                                                                                  |
+| ----------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `str.Of`          | `string`, `*string`, named strings                      | [strings](https://insei.github.io/valigo/latest/features/strings/index.md)                                                    |
+| `num.Of`          | numbers and named numbers                               | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                    |
+| `num.Ptr`         | pointers to numbers                                     | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md), `Required` checks only that the pointer isn't nil |
+| `timex.Of`        | `time.Time`, `*time.Time`                               | [time](https://insei.github.io/valigo/latest/features/time/index.md)                                                          |
+| `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](https://insei.github.io/valigo/latest/features/values/index.md)                                           |
+| `vuuid.Of`        | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid`   | [uuid](https://insei.github.io/valigo/latest/features/uuid/index.md), the separate module `github.com/insei/valigo/uuid`      |
+| `str.Slice`       | `Slice` of strings, `*string` or named strings          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the string rules of elements                    |
+| `timex.Slice`     | `Slice` of `time.Time`, `*time.Time`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the time rules of elements                      |
+| `eq.Slice`        | `Slice` of a `comparable` type                          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with `Unique` and the equality rules of elements     |
+| `vuuid.Slice`     | `Slice` of `uuid.UUID`, `*uuid.UUID`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the uuid rules of elements                      |
+| `shared.SlicePtr` | `Field` of `*[]E`                                       | the slice configurator, a nil pointer is absent                                                                               |
 
 The elements of a slice are converted in `Each`: `b.Slice(&m.Sizes).Each(func(e *shared.Field[int]) { e.As(num.Of).Min(1) })`.
 
@@ -1439,6 +1442,94 @@ Output:
 ```text
 [Should be fulfilled (ID: 00000000-0000-0000-0000-000000000000) Should be UUID v7 (ID: 00000000-0000-0000-0000-000000000000)]
 [Should be UUID v7 (ID: 6ba7b810-9dad-11d1-80b4-00c04fd430c8)]
+```
+
+# Comparable values
+
+`eq.Of` converts a field of any `comparable` type — an enum of a named type, a `bool`, a number, a string — to the configurator of equality rules. `eq.Ptr` converts a pointer to such a field, `eq.Slice` — a slice of them:
+
+```go
+type Status string
+
+const (
+    Active  Status = "active"
+    Blocked Status = "blocked"
+)
+
+b.Field(&u.Status).As(eq.Of).Required().OneOf(Active, Blocked) // the arguments are Status
+b.Field(&u.Agreed).As(eq.Of).Equal(true)                        // a bool
+b.Field(&u.Role).As(eq.Ptr).OneOf(Admin, Editor)                // a nil Role is skipped
+b.Slice(&u.Roles).As(eq.Slice).Unique()
+```
+
+For strings and numbers [`str.Of`](https://insei.github.io/valigo/latest/features/strings/index.md) and [`num.Of`](https://insei.github.io/valigo/latest/features/numbers/index.md) have more rules, `eq.Of` is for the types without their own configurator. `eq.Of` of a pointer field compares the pointers, use `eq.Ptr` to compare the values.
+
+## Rules
+
+| Rule                  | Fails when                                                | Message                                                                                                                                    |
+| --------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Required()`          | `eq.Of`: the value is zero; `eq.Ptr`: the value is absent | Should be fulfilled                                                                                                                        |
+| `OneOf(values...)`    | the value isn't one of `values`                           | Only %v values is allowed                                                                                                                  |
+| `NotOneOf(values...)` | the value is one of `values`                              | Values %v are not allowed                                                                                                                  |
+| `Equal(v)`            | the value isn't `v`                                       | Should be %v                                                                                                                               |
+| `NotEqual(v)`         | the value is `v`                                          | Cannot be %v                                                                                                                               |
+| `Custom(fn)`          | `fn` returns errors                                       | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
+| `When(fn)`            | —                                                         | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+
+`eq.Slice` has the rules of the [slice itself](https://insei.github.io/valigo/latest/features/slices/index.md), `Each` with the rules above for the elements, `OneOf` for every element and `Unique`:
+
+| Rule       | Fails when                                                               | Message                      |
+| ---------- | ------------------------------------------------------------------------ | ---------------------------- |
+| `Unique()` | the slice has duplicate elements, the error value is the first duplicate | Should contain unique values |
+
+`Unique` compares the elements pairwise without allocations for slices up to 32 elements, and by a map for longer ones.
+
+## Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/eq"
+)
+
+type Plan string
+
+const (
+    Free Plan = "free"
+    Pro  Plan = "pro"
+)
+
+type SignUp struct {
+    Plan     Plan
+    Terms    bool
+    Features []string
+}
+
+func main() {
+    v := valigo.New()
+    valigo.Configure[SignUp](v, func(b valigo.Configurator[SignUp], s *SignUp) {
+        b.Field(&s.Plan).As(eq.Of).Required().OneOf(Free, Pro)
+        b.Field(&s.Terms).As(eq.Of).Equal(true)
+        b.Slice(&s.Features).As(eq.Slice).MaxLen(5).Unique()
+    })
+
+    for _, err := range v.Validate(context.Background(), &SignUp{Plan: "gold", Features: []string{"sso", "api", "sso"}}) {
+        fmt.Println(err)
+    }
+}
+```
+
+Output:
+
+```text
+Only [free pro] values is allowed (Plan: gold)
+Should be true (Terms: false)
+Should contain unique values (Features: sso)
 ```
 # Architecture
 

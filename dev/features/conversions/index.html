@@ -537,6 +537,8 @@
       
         
       
+        
+      
     
     
     
@@ -905,6 +907,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../values/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Comparable values
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../uuid/" class="md-nav__link">
         
   
@@ -1215,6 +1245,11 @@
 <td><a href="../time/">time</a></td>
 </tr>
 <tr>
+<td><code>eq.Of</code>, <code>eq.Ptr</code></td>
+<td>any <code>comparable</code> type and pointers to it: enums, <code>bool</code></td>
+<td><a href="../values/">comparable values</a></td>
+</tr>
+<tr>
 <td><code>vuuid.Of</code></td>
 <td><code>uuid.UUID</code>, <code>*uuid.UUID</code> of <code>github.com/google/uuid</code></td>
 <td><a href="../uuid/">uuid</a>, the separate module <code>github.com/insei/valigo/uuid</code></td>
@@ -1228,6 +1263,11 @@
 <td><code>timex.Slice</code></td>
 <td><code>Slice</code> of <code>time.Time</code>, <code>*time.Time</code></td>
 <td><a href="../slices/">slices</a> with the time rules of elements</td>
+</tr>
+<tr>
+<td><code>eq.Slice</code></td>
+<td><code>Slice</code> of a <code>comparable</code> type</td>
+<td><a href="../slices/">slices</a> with <code>Unique</code> and the equality rules of elements</td>
 </tr>
 <tr>
 <td><code>vuuid.Slice</code></td>
