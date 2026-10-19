@@ -48,7 +48,7 @@ func getPriorityLanguages(acceptLanguage string) []string {
 			continue
 		}
 		langWithQ := strings.Split(notParsedLang, ";")
-		lang, ok := parseLang(langWithQ[0])
+		lang, ok := parseLang(strings.TrimSpace(langWithQ[0]))
 		if !ok {
 			continue
 		}
@@ -86,7 +86,7 @@ func parseLang(lang string) (string, bool) {
 // Otherwise, the quotient is parsed from the q parameter, false is reported if it is malformed.
 func parseQuotient(parts []string) (float32, bool) {
 	for _, param := range parts[1:] {
-		key, value, _ := strings.Cut(param, "=")
+		key, value, _ := strings.Cut(strings.TrimSpace(param), "=")
 		if key != "q" {
 			continue
 		}
