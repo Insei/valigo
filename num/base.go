@@ -2,10 +2,8 @@ package num
 
 import (
 	"context"
-	"fmt"
-	"reflect"
+	"slices"
 
-	"github.com/insei/fmap/v3"
 	"github.com/insei/valigo/shared"
 )
 
@@ -17,119 +15,63 @@ const (
 	anyOfIntervalLocalKey = "validation:num:Only interval[%v - %v] is allowed"
 )
 
-func minT[T numbers](val T, min T) bool {
-	return val >= min
+// Number is a constraint for numeric types supported by BaseConfigurator.
+type Number interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
+		~float32 | ~float64
 }
 
-func maxT[T numbers](val T, max T) bool {
-	return val <= max
+// BaseConfigurator configures rules for a numeric value.
+type BaseConfigurator[N Number] struct {
+	f        *shared.Field[N]
+	optional bool
 }
 
-func anyOfT[T numbers](val T, allowed []T) bool {
-	for _, v := range allowed {
-		if v == val {
-			return true
-		}
-	}
-	return false
+// NewBaseConfigurator creates a new BaseConfigurator.
+// optional is true for pointer fields: Required then checks only that the value is present, zero is allowed.
+func NewBaseConfigurator[N Number](f *shared.Field[N], optional bool) *BaseConfigurator[N] {
+	return &BaseConfigurator[N]{f: f, optional: optional}
 }
 
-func anyOfIntervalT[T numbers](val T, begin, end T) bool {
-	return end > val && val > begin
-}
-
-var _ BaseConfigurator = &baseConfigurator[int]{}
-
-type baseConfigurator[T numbers] struct {
-	c     *shared.FieldConfigurator[T]
-	field fmap.Field
-	h     shared.Helper
-}
-
-// Max checks if the integer exceeds the maximum allowed number.
-func (i *baseConfigurator[T]) Max(maxNum any) BaseConfigurator {
-	if i.field.GetDereferencedType() != reflect.TypeOf(maxNum) {
-		panic(fmt.Sprintf("field dereferenced type is %s, but maxNum type is %s", i.field.GetDereferencedType().String(), reflect.TypeOf(maxNum).String()))
-	}
-	i.c.Append(func(v T) bool {
-		return maxT[T](v, maxNum.(T))
-	}, maxLocaleKey, maxNum)
+// Required checks if the number is not zero, for pointer fields checks if the pointer is not nil.
+func (i *BaseConfigurator[N]) Required() *BaseConfigurator[N] {
+	optional := i.optional
+	i.f.Required(func(v N) bool { return optional || v != 0 }, requiredLocaleKey)
 	return i
 }
 
-// Min checks if the integer is less than the minimum allowed number.
-func (i *baseConfigurator[T]) Min(minNum any) BaseConfigurator {
-	if i.field.GetDereferencedType() != reflect.TypeOf(minNum) {
-		panic(fmt.Sprintf("field dereferenced type is %s, but minNum type is %s", i.field.GetDereferencedType().String(), reflect.TypeOf(minNum).String()))
-	}
-	i.c.Append(func(v T) bool {
-		return minT[T](v, minNum.(T))
-	}, minLocaleKey, minNum)
+// Max checks if the number is not greater than maxNum.
+func (i *BaseConfigurator[N]) Max(maxNum N) *BaseConfigurator[N] {
+	i.f.Check(func(v N) bool { return v <= maxNum }, maxLocaleKey, maxNum)
 	return i
 }
 
-// Required checks if the integer value is not empty.
-func (i *baseConfigurator[T]) Required() BaseConfigurator {
-	i.c.Append(func(v T) bool {
-		return true
-	}, requiredLocaleKey)
+// Min checks if the number is not less than minNum.
+func (i *BaseConfigurator[N]) Min(minNum N) *BaseConfigurator[N] {
+	i.f.Check(func(v N) bool { return v >= minNum }, minLocaleKey, minNum)
 	return i
 }
 
-func sliceCast[T numbers](slice []any) []T {
-	ret := make([]T, 0, len(slice))
-	for _, val := range slice {
-		valTyped, ok := val.(T)
-		if !ok {
-			panic(fmt.Errorf("can't cast value %v to number type %s", val, reflect.TypeOf(*new(T)).String()))
-		}
-		ret = append(ret, valTyped)
-	}
-	return ret
-}
-
-// AnyOf checks if the integer value is one of the allowed values.
-func (i *baseConfigurator[T]) AnyOf(allowed ...any) BaseConfigurator {
-	slice := sliceCast[T](allowed)
-	if i.field.GetDereferencedType().Kind() != reflect.TypeOf(slice).Elem().Kind() {
-		panic(fmt.Sprintf("field dereferenced type is %s, but minNum type is %s", i.field.GetDereferencedType().Kind().String(), reflect.TypeOf(allowed).Elem().Kind().String()))
-	}
-	i.c.Append(func(v T) bool {
-		return anyOfT[T](v, slice)
-	}, anyOfLocaleKey, allowed)
+// AnyOf checks if the number is one of the allowed values.
+func (i *BaseConfigurator[N]) AnyOf(allowed ...N) *BaseConfigurator[N] {
+	i.f.Check(func(v N) bool { return slices.Contains(allowed, v) }, anyOfLocaleKey, allowed)
 	return i
 }
 
-// AnyOfInterval checks if the integer value is one of the allowed values intervals.
-func (i *baseConfigurator[T]) AnyOfInterval(begin, end any) BaseConfigurator {
-	if i.field.GetDereferencedType() != reflect.TypeOf(begin) ||
-		i.field.GetDereferencedType() != reflect.TypeOf(end) {
-		panic(fmt.Sprintf("field dereferenced type is %s, but begin and end type is %s", i.field.GetDereferencedType().String(), reflect.TypeOf(reflect.TypeOf(end)).String()))
-	}
-	i.c.Append(func(v T) bool {
-		return anyOfIntervalT[T](v, begin.(T), end.(T))
-	}, anyOfIntervalLocalKey, begin, end)
+// AnyOfInterval checks if the number is within [begin, end] interval, both ends inclusive.
+func (i *BaseConfigurator[N]) AnyOfInterval(begin, end N) *BaseConfigurator[N] {
+	i.f.Check(func(v N) bool { return v >= begin && v <= end }, anyOfIntervalLocalKey, begin, end)
 	return i
 }
 
-// Custom allows for custom validation logic to be applied to the integer value.
-func (i *baseConfigurator[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value any) []shared.Error) BaseConfigurator {
-	customHelper := shared.NewFieldCustomHelper(i.field, i.h)
-	i.c.CustomAppend(func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		return f(ctx, customHelper, value)
-	})
+// Custom allows for custom validation logic to be applied to the number.
+func (i *BaseConfigurator[N]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value N) []shared.Error) *BaseConfigurator[N] {
+	i.f.Custom(f)
 	return i
 }
 
-// When allows for conditional validation logic to be applied to the integer value.
-func (i *baseConfigurator[T]) When(whenFn func(ctx context.Context, value any) bool) BaseConfigurator {
-	if whenFn == nil {
-		return i
-	}
-	base := i.c.NewWithWhen(whenFn)
-	return &baseConfigurator[T]{
-		c:     base,
-		field: i.field,
-		h:     i.h,
-	}
+// When allows for conditional validation logic to be applied to the number.
+func (i *BaseConfigurator[N]) When(whenFn func(ctx context.Context, value N) bool) *BaseConfigurator[N] {
+	return NewBaseConfigurator(i.f.When(whenFn), i.optional)
 }

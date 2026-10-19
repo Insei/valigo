@@ -4,22 +4,27 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/insei/fmap/v3"
+
 	"github.com/insei/valigo/shared"
 )
 
-// Validator is a struct that holds a storage and a helper object.
+// Validator holds validation rules of the configured types.
 type Validator struct {
-	storage        *storage
+	validators     map[reflect.Type][]shared.ValidationFn
 	helper         *helper
 	transformError func(errs []shared.Error) []error
 }
 
-// ValidateTyped validates an object of any type using validators from the storage.
-// It takes a context.Context and an object as input and returns a slice of shared.Error objects.
-// If no validators are found for the object's type, it returns nil.
+// ValidateTyped validates obj using the rules configured for its type.
+// obj is a pointer to the configured struct, a struct value is validated by a copy,
+// so modifications like Trim are not visible to the caller.
+// It returns nil if there are no errors, no rules for the obj type or obj is a nil pointer.
 func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
-	validators, ok := v.storage.validators[reflect.TypeOf(obj)]
+	validators, ok := v.validators[reflect.TypeOf(obj)]
 	if !ok {
+		validators, obj = v.byValue(obj)
+	} else if shared.DataPtr(obj) == nil {
 		return nil
 	}
 	var errs []shared.Error
@@ -29,10 +34,28 @@ func (v *Validator) ValidateTyped(ctx context.Context, obj any) []shared.Error {
 	return errs
 }
 
-// Validate is similar to ValidateTyped, but it returns a slice of error
-// objects instead of shared.Error objects.
+// byValue returns validators and a pointer to the copy of obj if obj is a value of the configured struct.
+func (v *Validator) byValue(obj any) ([]shared.ValidationFn, any) {
+	val := reflect.ValueOf(obj)
+	if !val.IsValid() || val.Kind() == reflect.Pointer {
+		return nil, obj
+	}
+	validators, ok := v.validators[reflect.PointerTo(val.Type())]
+	if !ok {
+		return nil, obj
+	}
+	ptr := reflect.New(val.Type())
+	ptr.Elem().Set(val)
+	return validators, ptr.Interface()
+}
+
+// Validate is similar to ValidateTyped, but returns errors transformed by the errors transformer.
+// It returns nil if there are no errors.
 func (v *Validator) Validate(ctx context.Context, obj any) []error {
 	errsTyped := v.ValidateTyped(ctx, obj)
+	if len(errsTyped) == 0 {
+		return nil
+	}
 	return v.transformError(errsTyped)
 }
 
@@ -45,8 +68,8 @@ func (v *Validator) GetHelper() shared.Helper {
 // It also applies any options passed to the function to the new instance.
 func New(opts ...Option) *Validator {
 	v := &Validator{
-		storage: newStorage(),
-		helper:  newHelper(),
+		validators: make(map[reflect.Type][]shared.ValidationFn),
+		helper:     newHelper(),
 		transformError: func(errs []shared.Error) []error {
 			errsNew := make([]error, len(errs))
 			for i, err := range errs {
@@ -61,15 +84,17 @@ func New(opts ...Option) *Validator {
 	return v
 }
 
-// Configure configures a Validator instance for a specific type T, i.e.: var t *T.
-// It creates a new instance of type T, allocates values for all fields recursively,
-// creates a Configurator instance for the type T, calls the provided function fn with the Configurator
-// instance and the instance of type T, and appends any user-defined validators to the Configurator instance.
+// Configure configures validation rules for the struct type T.
+// fn receives a model with all nested pointer structs allocated, rules are configured
+// by pointers to the model fields. Configure panics on invalid configuration,
+// call it on application start and not concurrently with Validate.
 func Configure[T any](v *Validator, fn func(builder Configurator[T], m *T)) {
 	model := new(T)
 	// allocate all pointer fields values recursively
 	mustZero(model)
-	b := configure[T](v, model, nil)
-	// Append users validators
-	fn(b, model)
+	fields, err := fmap.GetFrom(model)
+	if err != nil {
+		panic(err)
+	}
+	fn(Configurator[T]{b: &builder[T]{v: v, obj: model, fields: fields}}, model)
 }

@@ -48,8 +48,8 @@ func benchValidateInit() {
 	}
 	initialized = true
 	Configure[Sender](validator, func(builder Configurator[Sender], temp *Sender) {
-		builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value any) []shared.Error {
-			v := *value.(*string)
+		builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value string) []shared.Error {
+			v := value
 			if len(v) < 20 {
 				return []shared.Error{h.ErrorT(ctx, v, "Should be longer than 20 characters")}
 			}
@@ -140,7 +140,7 @@ func TestValidatorValidateTyped(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			v := New()
-			v.storage.validators[reflect.TypeOf(test.obj)] = []structValidationFn{test.validator}
+			v.validators[reflect.TypeOf(test.obj)] = []shared.ValidationFn{test.validator}
 			errs := v.ValidateTyped(context.Background(), test.obj)
 			if len(errs) != test.expectedErrs {
 				t.Errorf("expected %d errors, got %d", test.expectedErrs, len(errs))
@@ -213,7 +213,7 @@ func TestValidatorValidate(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			v := New()
-			v.storage.validators[reflect.TypeOf(test.obj)] = []structValidationFn{test.validator}
+			v.validators[reflect.TypeOf(test.obj)] = []shared.ValidationFn{test.validator}
 			if test.transformError != nil {
 				v.transformError = test.transformError
 			}
@@ -235,8 +235,8 @@ func TestValidatorGetHelper(t *testing.T) {
 
 func TestNewValidator(t *testing.T) {
 	v := New()
-	if v.storage == nil {
-		t.Errorf("expected storage to not be nil")
+	if v.validators == nil {
+		t.Errorf("expected validators to not be nil")
 	}
 	if v.helper == nil {
 		t.Errorf("expected helper to not be nil")
@@ -279,8 +279,8 @@ func TestConfigure(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			Configure[Sender](validator, func(builder Configurator[Sender], temp *Sender) {
-				builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value any) []shared.Error {
-					v := *value.(*string)
+				builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value string) []shared.Error {
+					v := value
 					if len(v) < 20 {
 						return []shared.Error{h.ErrorT(ctx, v, "Should be longer than 20 characters")}
 					}

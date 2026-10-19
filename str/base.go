@@ -6,7 +6,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/insei/fmap/v3"
 	"github.com/insei/valigo/shared"
 )
 
@@ -17,103 +16,77 @@ const (
 	regexpLocaleKey    = "validation:string:Doesn't match required regexp pattern"
 	anyOfLocaleKey     = "validation:string:Only %s values is allowed"
 	emailLocaleKey     = "validation:string:Should be email address"
-
-	emailRegexp = `^[^\s,@#$%^&*!()]+@([a-zA-Z0-9]+[.])+[a-zA-Z]{2,8}$`
 )
 
-type baseConfigurator[T strPtr] struct {
-	c     *shared.FieldConfigurator[T]
-	field fmap.Field
-	h     shared.Helper
+var emailRegexp = regexp.MustCompile(`^[^\s,@#$%^&*!()]+@([a-zA-Z0-9]+[.])+[a-zA-Z]{2,8}$`)
+
+// BaseConfigurator configures rules for a string value.
+type BaseConfigurator struct {
+	f *shared.Field[string]
+}
+
+// NewBaseConfigurator creates a new BaseConfigurator.
+func NewBaseConfigurator(f *shared.Field[string]) *BaseConfigurator {
+	return &BaseConfigurator{f: f}
 }
 
 // Trim removes leading and trailing whitespace from the string value.
-func (i *baseConfigurator[T]) Trim() BaseConfigurator {
-	i.c.Append(func(v T) bool {
-		if v != nil {
-			*v = strings.TrimSpace(*v)
-		}
-		return true
-	}, "")
-	return i
-}
-
-// MaxLen checks if the string length exceeds the maximum allowed length.
-func (i *baseConfigurator[T]) MaxLen(maxLen int) BaseConfigurator {
-	i.c.Append(func(v T) bool {
-		return len(*v) <= maxLen
-	}, maxLengthLocaleKey, maxLen)
-
-	return i
-}
-
-// MinLen checks if the string length is not less than the given minimum length.
-func (i *baseConfigurator[T]) MinLen(minLen int) BaseConfigurator {
-	i.c.Append(func(v T) bool {
-		return len(*v) >= minLen
-	}, minLengthLocaleKey, minLen)
-
-	return i
-}
-
-// Required checks if the string is not empty.
-func (i *baseConfigurator[T]) Required() BaseConfigurator {
-	i.c.Append(func(v T) bool {
-		return len(*v) > 0
-	}, requiredLocaleKey)
-
-	return i
-}
-
-// Custom allows for custom validation logic to be applied to the string value.
-func (i *baseConfigurator[T]) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value any) []shared.Error) BaseConfigurator {
-	customHelper := shared.NewFieldCustomHelper(i.field, i.h)
-	i.c.CustomAppend(func(ctx context.Context, h shared.Helper, value any) []shared.Error {
-		return f(ctx, customHelper, value)
+func (i *BaseConfigurator) Trim() *BaseConfigurator {
+	i.f.Modify(func(v *string) {
+		*v = strings.TrimSpace(*v)
 	})
 	return i
 }
 
+// MaxLen checks if the string length is not greater than the given maximum length.
+func (i *BaseConfigurator) MaxLen(maxLen int) *BaseConfigurator {
+	i.f.Check(func(v string) bool { return len(v) <= maxLen }, maxLengthLocaleKey, maxLen)
+	return i
+}
+
+// MinLen checks if the string length is not less than the given minimum length.
+func (i *BaseConfigurator) MinLen(minLen int) *BaseConfigurator {
+	i.f.Check(func(v string) bool { return len(v) >= minLen }, minLengthLocaleKey, minLen)
+	return i
+}
+
+// Required checks if the string is present and not empty.
+func (i *BaseConfigurator) Required() *BaseConfigurator {
+	i.f.Required(func(v string) bool { return len(v) > 0 }, requiredLocaleKey)
+	return i
+}
+
+// Custom allows for custom validation logic to be applied to the string value.
+func (i *BaseConfigurator) Custom(f func(ctx context.Context, h *shared.FieldCustomHelper, value string) []shared.Error) *BaseConfigurator {
+	i.f.Custom(f)
+	return i
+}
+
 // Regexp checks if the string value matches the given regular expression.
-func (i *baseConfigurator[T]) Regexp(regexp *regexp.Regexp, opts ...RegexpOption) BaseConfigurator {
+func (i *BaseConfigurator) Regexp(regexp *regexp.Regexp, opts ...RegexpOption) *BaseConfigurator {
 	options := regexpOptions{
 		localeKey: regexpLocaleKey,
 	}
 	for _, opt := range opts {
 		opt.apply(&options)
 	}
-	i.c.Append(func(v T) bool {
-		return regexp.MatchString(*v)
-	}, options.localeKey)
+	i.f.Check(regexp.MatchString, options.localeKey)
 	return i
 }
 
 // AnyOf checks if the string value is one of the allowed values.
-func (i *baseConfigurator[T]) AnyOf(allowed ...string) BaseConfigurator {
-	i.c.Append(func(v T) bool {
-		return slices.Contains(allowed, *v)
-	}, anyOfLocaleKey, allowed)
+func (i *BaseConfigurator) AnyOf(allowed ...string) *BaseConfigurator {
+	i.f.Check(func(v string) bool { return slices.Contains(allowed, v) }, anyOfLocaleKey, allowed)
 	return i
 }
 
-// Email checks is the string value is email.
-func (i *baseConfigurator[T]) Email() BaseConfigurator {
-	i.c.Append(func(v T) bool {
-		r := regexp.MustCompile(emailRegexp)
-		return r.MatchString(*v)
-	}, emailLocaleKey)
+// Email checks if the string value is an email address.
+func (i *BaseConfigurator) Email() *BaseConfigurator {
+	i.f.Check(emailRegexp.MatchString, emailLocaleKey)
 	return i
 }
 
 // When allows for conditional validation logic to be applied to the string value.
-func (i *baseConfigurator[T]) When(whenFn func(ctx context.Context, value any) bool) BaseConfigurator {
-	if whenFn == nil {
-		return i
-	}
-	base := i.c.NewWithWhen(whenFn)
-	return &baseConfigurator[T]{
-		c:     base,
-		field: i.field,
-		h:     i.h,
-	}
+func (i *BaseConfigurator) When(whenFn func(ctx context.Context, value string) bool) *BaseConfigurator {
+	return NewBaseConfigurator(i.f.When(whenFn))
 }

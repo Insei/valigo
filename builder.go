@@ -2,160 +2,137 @@ package valigo
 
 import (
 	"context"
+	"fmt"
+	"reflect"
 
+	guuid "github.com/google/uuid"
 	"github.com/insei/fmap/v3"
+
 	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
 	"github.com/insei/valigo/uuid"
 )
 
-// builder represents a builder for validators.
-// It is generic and can be used to build validators for any type.
+// Configurator configures validation rules for the struct type T.
+// Field pointers passed to its methods must point to the fields of the model passed to the Configure function.
+type Configurator[T any] struct {
+	b *builder[T]
+}
+
+// builder holds the configuration state shared by Configurator copies.
 type builder[T any] struct {
-	*str.StringBundle
-	*num.NumberBundle
-	*uuid.UUIDBundle
-	obj       any
-	v         *Validator
-	enablerFn func(ctx context.Context, obj any) bool
+	v      *Validator
+	obj    *T
+	fields fmap.Storage
+	when   func(ctx context.Context, obj *T) bool
 }
 
-// When adds a condition to the builder.
-// It takes a function that returns a boolean and returns a builder.
-// The function is called with the context and the object being validated.
-// If the function returns true, the validation is enabled.
-func (b *builder[T]) When(fn func(ctx context.Context, obj *T) bool) Configurator[T] {
-	return configure[T](b.v, b.obj, func(ctx context.Context, obj any) bool {
-		enablerFn := fn
-		if b.enablerFn != nil {
-			enablerFn = func(ctx context.Context, obj *T) bool {
-				if b.enablerFn(ctx, obj) && fn(ctx, obj) {
-					return true
-				}
-				return false
+// field returns the model field by the pointer to it.
+func (c Configurator[T]) field(fieldPtr any) fmap.Field {
+	field, err := c.b.fields.GetFieldByPtr(c.b.obj, fieldPtr)
+	if err != nil {
+		panic(fmt.Sprintf("valigo: %T is not a pointer to a field of %T: %v", fieldPtr, c.b.obj, err))
+	}
+	return field
+}
+
+// add registers a validation function, the struct level condition is applied if set.
+func (c Configurator[T]) add(fn shared.ValidationFn) {
+	if when := c.b.when; when != nil {
+		inner := fn
+		fn = func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
+			if !when(ctx, obj.(*T)) {
+				return nil
 			}
+			return inner(ctx, h, obj)
 		}
-		return enablerFn(ctx, obj.(*T))
-	})
+	}
+	t := reflect.TypeFor[*T]()
+	c.b.v.validators[t] = append(c.b.v.validators[t], fn)
 }
 
-// errorTFn represents a function that returns an error.
-// It takes a context, a pointer to a field, a field value, a locale key, and optional arguments as input,
-// and returns a shared.Error.
+// When returns a Configurator whose rules are applied only if fn returns true.
+// Conditions of chained When calls are combined with AND.
+func (c Configurator[T]) When(fn func(ctx context.Context, obj *T) bool) Configurator[T] {
+	if fn == nil {
+		return c
+	}
+	when := fn
+	if prev := c.b.when; prev != nil {
+		when = func(ctx context.Context, obj *T) bool {
+			return prev(ctx, obj) && fn(ctx, obj)
+		}
+	}
+	b := *c.b
+	b.when = when
+	return Configurator[T]{b: &b}
+}
+
+// errorTFn implements shared.StructCustomHelper.
 type errorTFn func(ctx context.Context, ptrToField, fieldValue any, localeKey string, args ...any) shared.Error
 
 // ErrorT calls the errorTFn function and returns a shared.Error.
-// It takes a context, a pointer to a field, a field value, a locale key, and optional arguments as input,
-// and returns a shared.Error.
 func (e errorTFn) ErrorT(ctx context.Context, ptrToFieldValue, fieldValue any, localeKey string, args ...any) shared.Error {
 	return e(ctx, ptrToFieldValue, fieldValue, localeKey, args...)
 }
 
-// Custom adds a custom validation function to the builder.
-// It takes a function that takes a context, a helper, and an object as input,
-// and returns a slice of shared.Error.
-// The helper is used to create errors.
-func (b *builder[T]) Custom(fn func(ctx context.Context, h shared.StructCustomHelper, obj *T) []shared.Error) {
-	newHFn := func(obj any, h shared.Helper) errorTFn {
-		return func(ctx context.Context, ptrToField, fieldValue any, localeKey string, args ...any) shared.Error {
-			fields, err := fmap.GetFrom(obj)
-			if err != nil {
-				panic(err)
-			}
+// Custom adds a custom validation function on the whole struct.
+func (c Configurator[T]) Custom(fn func(ctx context.Context, h shared.StructCustomHelper, obj *T) []shared.Error) {
+	fields := c.b.fields
+	c.add(func(ctx context.Context, h shared.Helper, obj any) []shared.Error {
+		return fn(ctx, errorTFn(func(ctx context.Context, ptrToField, fieldValue any, localeKey string, args ...any) shared.Error {
 			field, err := fields.GetFieldByPtr(obj, ptrToField)
 			if err != nil {
-				panic(err)
+				panic(fmt.Sprintf("valigo: %T is not a pointer to a field of %T: %v", ptrToField, obj, err))
 			}
 			return h.ErrorT(ctx, field, fieldValue, localeKey, args...)
-		}
-	}
-	fnConvert := func(ctx context.Context, h shared.Helper, objAny any) []shared.Error {
-		return fn(ctx, newHFn(objAny, h), objAny.(*T))
-	}
-	b.v.storage.newOnStructAppend(b.obj, b.enablerFn, fnConvert)
-}
-
-func (b *builder[T]) StringSlice(sliceFieldPtr any) *str.StringSliceFieldConfigurator {
-	fields, err := fmap.GetFrom(b.obj)
-	if err != nil {
-		panic(err)
-	}
-	field, err := fields.GetFieldByPtr(b.obj, sliceFieldPtr)
-	if err != nil {
-		panic(err)
-	}
-	appendFn := b.v.storage.newOnFieldAppend(b.obj, b.enablerFn)
-	return str.NewStringSliceFieldConfigurator(shared.SliceFieldConfiguratorParams{
-		Field:  field,
-		Helper: b.v.GetHelper(),
-		AppendFn: func(fn shared.FieldValidationFn) {
-			appendFn(field, fn)
-		},
+		}), obj.(*T))
 	})
 }
 
-func (b *builder[T]) UUIDSlice(sliceFieldPtr any) *uuid.UUIDSliceFieldConfigurator {
-	fields, err := fmap.GetFrom(b.obj)
-	if err != nil {
-		panic(err)
-	}
-	field, err := fields.GetFieldByPtr(b.obj, sliceFieldPtr)
-	if err != nil {
-		panic(err)
-	}
-	appendFn := b.v.storage.newOnFieldAppend(b.obj, b.enablerFn)
-	return uuid.NewUUIDSliceFieldConfigurator(shared.SliceFieldConfiguratorParams{
-		Field:  field,
-		Helper: b.v.GetHelper(),
-		AppendFn: func(fn shared.FieldValidationFn) {
-			appendFn(field, fn)
-		},
-	})
+// String returns a configurator for a string or *string field.
+func (c Configurator[T]) String[F ~string | *string](fieldPtr *F) *str.BaseConfigurator {
+	field := c.field(fieldPtr)
+	get := shared.ValueGetter[string](field)
+	return str.NewBaseConfigurator(shared.NewField(field, c.b.v.helper, shared.FieldSource(c.add, get)))
 }
 
-func (b *builder[T]) Slice(sliceFieldPtr any) *shared.SliceFieldConfigurator {
-	fields, err := fmap.GetFrom(b.obj)
-	if err != nil {
-		panic(err)
-	}
-	field, err := fields.GetFieldByPtr(b.obj, sliceFieldPtr)
-	if err != nil {
-		panic(err)
-	}
-	appendFn := b.v.storage.newOnFieldAppend(b.obj, b.enablerFn)
-	return shared.NewSliceFieldConfigurator(shared.SliceFieldConfiguratorParams{
-		Field:  field,
-		Helper: b.v.GetHelper(),
-		AppendFn: func(fn shared.FieldValidationFn) {
-			appendFn(field, fn)
-		},
-	})
+// Number returns a configurator for a numeric field.
+func (c Configurator[T]) Number[N num.Number](fieldPtr *N) *num.BaseConfigurator[N] {
+	field := c.field(fieldPtr)
+	get := shared.ValueGetter[N](field)
+	return num.NewBaseConfigurator(shared.NewField(field, c.b.v.helper, shared.FieldSource(c.add, get)), false)
 }
 
-// configure creates a new builder with the given validator, object, and enabler function.
-// It takes a validator, an object, and an enabler function as input,
-// and returns a builder.
-func configure[T any](v *Validator, obj any, enabler func(ctx context.Context, obj any) bool) *builder[T] {
-	fields, err := fmap.GetFrom(obj)
-	if err != nil {
-		panic(err)
-	}
-	bundleDeps := shared.BundleDependencies{
-		Object:   obj,
-		Helper:   v.GetHelper(),
-		AppendFn: v.storage.newOnFieldAppend(obj, enabler),
-		Fields:   fields,
-	}
-	sb := str.NewStringBundle(bundleDeps)
-	nb := num.NewNumBundle(bundleDeps)
-	ub := uuid.NewUUIDBundle(bundleDeps)
-	return &builder[T]{
-		StringBundle: sb,
-		NumberBundle: nb,
-		UUIDBundle:   ub,
-		obj:          obj,
-		v:            v,
-		enablerFn:    enabler,
-	}
+// NumberPtr returns a configurator for a pointer to numeric field, nil values are skipped by all rules except Required.
+func (c Configurator[T]) NumberPtr[N num.Number](fieldPtr **N) *num.BaseConfigurator[N] {
+	field := c.field(fieldPtr)
+	get := shared.ValueGetter[N](field)
+	return num.NewBaseConfigurator(shared.NewField(field, c.b.v.helper, shared.FieldSource(c.add, get)), true)
+}
+
+// UUID returns a configurator for an uuid.UUID or *uuid.UUID field.
+func (c Configurator[T]) UUID[F guuid.UUID | *guuid.UUID](fieldPtr *F) *uuid.BaseConfigurator {
+	field := c.field(fieldPtr)
+	get := shared.ValueGetter[guuid.UUID](field)
+	return uuid.NewBaseConfigurator(shared.NewField(field, c.b.v.helper, shared.FieldSource(c.add, get)))
+}
+
+// Slice returns a configurator for a slice field.
+func (c Configurator[T]) Slice[E any](sliceFieldPtr *[]E) *shared.SliceFieldConfigurator[E] {
+	field := c.field(sliceFieldPtr)
+	return shared.NewSliceFieldConfigurator(field, c.b.v.helper, shared.ElemsGetter[E](field), c.add)
+}
+
+// StringSlice returns a configurator for a slice of strings field.
+func (c Configurator[T]) StringSlice[F []string | *[]string | []*string | *[]*string](sliceFieldPtr *F) *str.StringSliceFieldConfigurator {
+	field := c.field(sliceFieldPtr)
+	return str.NewStringSliceFieldConfigurator(shared.NewSliceFieldConfigurator(field, c.b.v.helper, shared.ElemsGetter[string](field), c.add))
+}
+
+// UUIDSlice returns a configurator for a slice of uuids field.
+func (c Configurator[T]) UUIDSlice[F []guuid.UUID | *[]guuid.UUID | []*guuid.UUID | *[]*guuid.UUID](sliceFieldPtr *F) *uuid.UUIDSliceFieldConfigurator {
+	field := c.field(sliceFieldPtr)
+	return uuid.NewUUIDSliceFieldConfigurator(shared.NewSliceFieldConfigurator(field, c.b.v.helper, shared.ElemsGetter[guuid.UUID](field), c.add))
 }
