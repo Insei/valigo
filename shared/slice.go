@@ -60,7 +60,8 @@ func ElemsGetter[E any](field fmap.Field) func(obj any) (Elems[E], bool) {
 		panic(fmt.Sprintf("valigo: field %s has type %s, slice expected", field.GetStructPath(), field.GetType()))
 	}
 	elem := t.Elem()
-	ptrs := elem.Kind() == reflect.Pointer
+	// []*E is read as pointers to E, unless E is a pointer type itself, e.g. Slice(&m.X) for X []*int
+	ptrs := elem.Kind() == reflect.Pointer && reflect.TypeFor[E]().Kind() != reflect.Pointer
 	if ptrs {
 		elem = elem.Elem()
 	}
