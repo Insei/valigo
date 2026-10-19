@@ -8,6 +8,7 @@ import (
 
 	"github.com/insei/fmap/v3"
 
+	"github.com/insei/valigo/internal/tags"
 	"github.com/insei/valigo/shared"
 )
 
@@ -132,4 +133,16 @@ func (c Configurator[T]) Slice[E any](sliceFieldPtr *[]E) *shared.SliceFieldConf
 func (c Configurator[T]) Map[K comparable, V any](mapFieldPtr *map[K]V) *shared.MapFieldConfigurator[K, V] {
 	field := c.field(mapFieldPtr)
 	return shared.NewMapFieldConfigurator[K, V](field, c.b.v.helper, c.field, c.add, c.describe())
+}
+
+// Tags configures the rules of the tag name of the fields of T and of its nested structs in the syntax of
+// go-playground/validator, validate:"required,max=64", for a migration from it: the tags and the rules in code
+// can be mixed in one Configure. The rules are the rules of valigo with their messages, codes and constraints:
+// required is Required, min and max are the lengths in characters of strings, the values of numbers and the lengths
+// of slices and maps, dive applies the next rules to the elements of a slice or the values of a map[string]V.
+// The rules of the fields of a nil nested struct are skipped, like by go-playground/validator, unlike the rules in code.
+// See the documentation for the list of the rules. Tags panics on an unknown rule, like Configure on invalid rules.
+func (c Configurator[T]) Tags(name string) {
+	tags.Apply(tags.Struct{Storage: c.b.fields, Model: c.b.obj, Helper: c.b.v.helper, Fields: c.field,
+		Add: c.add, Describe: c.describe()}, name)
 }

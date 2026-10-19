@@ -1,4 +1,6 @@
-package valigo
+// Package zero allocates the pointer fields of the models of Configure, so the rules are configured by the pointers
+// to the fields of the nested structs.
+package zero
 
 import (
 	"fmt"
@@ -6,13 +8,13 @@ import (
 	"slices"
 )
 
-// Zero allocates an input structure such that all pointer fields
+// Allocate allocates an input structure such that all pointer fields
 // are fully allocated, i.e. rather than having a nil value,
 // the pointer contains a pointer to an initialized value,
 // e.g. an *int field will be a pointer to 0 instead of a nil pointer.
 //
-// zero does not allocate private fields.
-func zero(obj interface{}) error {
+// Allocate does not allocate private fields.
+func Allocate(obj interface{}) error {
 	val := reflect.ValueOf(obj)
 	if val.Kind() != reflect.Pointer || val.IsNil() {
 		return fmt.Errorf("input interface is not addressable (can't Set the memory address): %#v",
@@ -56,9 +58,9 @@ func zeroStruct(val reflect.Value, path []reflect.Type) {
 	}
 }
 
-// MustZero will panic instead of return error
-func mustZero(obj interface{}) {
-	err := zero(obj)
+// Must is Allocate that panics on an error.
+func Must(obj interface{}) {
+	err := Allocate(obj)
 	if err != nil {
 		panic(err)
 	}

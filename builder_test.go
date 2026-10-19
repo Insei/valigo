@@ -381,3 +381,15 @@ func TestZeroAllocationsOnValid(t *testing.T) {
 	require.Nil(t, v.Validate(ctx, obj))
 	assert.Zero(t, testing.AllocsPerRun(100, func() { v.Validate(ctx, obj) }))
 }
+
+func TestConfiguratorTags(t *testing.T) {
+	type tagged struct {
+		Name string `validate:"required"`
+	}
+	v := New()
+	Configure[tagged](v, func(b Configurator[tagged], _ *tagged) { b.Tags("validate") })
+	errs := v.ValidateTyped(context.Background(), &tagged{})
+	if len(errs) != 1 || errs[0].Code != "string.required" {
+		t.Errorf("errors of the tags: %v", errs)
+	}
+}
