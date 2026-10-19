@@ -1340,7 +1340,7 @@
 
 
 <h1 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h1>
-<p>The <a href="https://github.com/Insei/valigo/tree/main/bench"><code>bench</code></a> module compares valigo with <a href="https://github.com/go-playground/validator">go-playground/validator</a> and <a href="https://github.com/go-ozzo/ozzo-validation">ozzo-validation</a> on the same struct and the same rules: a required name up to 64 characters, a required email, an age in <code>[18, 120]</code>, up to 5 required tags up to 16 characters and a required city of a nested struct. A test checks that the libraries find the same errors.</p>
+<p>The <a href="https://github.com/Insei/valigo/tree/main/bench"><code>bench</code></a> module compares valigo with <a href="https://github.com/go-playground/validator">go-playground/validator</a>, <a href="https://github.com/go-ozzo/ozzo-validation">ozzo-validation</a>, <a href="https://github.com/Oudwins/zog">zog</a>, <a href="https://github.com/gookit/validate">gookit/validate</a> and hand-written Go code on the same struct and the same rules: a required name up to 64 characters, a required email, an age in <code>[18, 120]</code>, up to 5 required tags up to 16 characters and a required city of a nested struct. A test checks that the libraries find the same errors.</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Name</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">().</span><span class="nx">MaxRunes</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Email</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">Required</span><span class="p">().</span><span class="nx">Email</span><span class="p">()</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nx">b</span><span class="p">.</span><span class="nx">Field</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">u</span><span class="p">.</span><span class="nx">Age</span><span class="p">).</span><span class="nx">As</span><span class="p">(</span><span class="nx">num</span><span class="p">.</span><span class="nx">Of</span><span class="p">).</span><span class="nx">AnyOfInterval</span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="w"> </span><span class="mi">120</span><span class="p">)</span>
@@ -1361,22 +1361,40 @@
 </thead>
 <tbody>
 <tr>
+<td>hand-written code, the lower bound</td>
+<td>286</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
 <td>valigo</td>
-<td><strong>460</strong></td>
+<td><strong>458</strong></td>
 <td><strong>0</strong></td>
 <td><strong>0</strong></td>
 </tr>
 <tr>
+<td>zog</td>
+<td>1 690</td>
+<td>6</td>
+<td>2</td>
+</tr>
+<tr>
 <td>go-playground/validator</td>
-<td>1 830</td>
+<td>1 785</td>
 <td>296</td>
 <td>16</td>
 </tr>
 <tr>
 <td>ozzo-validation</td>
-<td>2 880</td>
+<td>2 950</td>
 <td>2 000</td>
 <td>38</td>
+</tr>
+<tr>
+<td>gookit/validate</td>
+<td>6 880</td>
+<td>4 560</td>
+<td>65</td>
 </tr>
 </tbody>
 </table>
@@ -1392,33 +1410,53 @@
 </thead>
 <tbody>
 <tr>
+<td>hand-written code, errors without messages</td>
+<td>590</td>
+<td>288</td>
+<td>8</td>
+</tr>
+<tr>
 <td>valigo, translated messages</td>
-<td><strong>2 215</strong></td>
+<td><strong>2 205</strong></td>
 <td><strong>1 168</strong></td>
 <td><strong>14</strong></td>
 </tr>
 <tr>
 <td>go-playground/validator, without messages</td>
-<td>2 690</td>
+<td>2 665</td>
 <td>1 688</td>
 <td>45</td>
 </tr>
 <tr>
 <td>go-playground/validator, with <code>Error()</code> of every error</td>
-<td>4 160</td>
+<td>4 150</td>
 <td>2 488</td>
 <td>69</td>
 </tr>
 <tr>
+<td>zog, issues with messages</td>
+<td>4 600</td>
+<td>1 056</td>
+<td>24</td>
+</tr>
+<tr>
 <td>ozzo-validation, with <code>Error()</code></td>
-<td>12 590</td>
+<td>12 665</td>
 <td>11 026</td>
 <td>140</td>
 </tr>
+<tr>
+<td>gookit/validate</td>
+<td>13 250</td>
+<td>9 569</td>
+<td>120</td>
+</tr>
 </tbody>
 </table>
+<p>valigo is about 1.6 times slower than the same rules written by hand on a valid object, it pays for the closures of the rules and the generic reading of the fields; it doesn't allocate either. Code generators of validators produce code like the hand-written one, so they are expected to be about as fast as it.</p>
 <ul>
 <li>valigo builds the rules once in <code>Configure</code> and reads the fields by precomputed accessors, so valid objects cost no allocations; go-playground/validator parses the tags once too, but works through <code>reflect</code> on every call, ozzo-validation builds its rules on every call of <code>Validate</code>.</li>
+<li>gookit/validate creates a validation per call, it is its API, and reports the errors of the elements of a slice under one key <code>Tags.*</code>; zog builds the messages of its issues.</li>
 <li>valigo builds the translated messages of the errors at once, go-playground/validator returns the errors without messages and builds them by <code>Error</code> or <code>Translate</code>: compare valigo with the row "with <code>Error()</code>".</li>
 <li>The rules of valigo append the errors to one pooled buffer, <code>Validate</code> copies it once; most allocations of an invalid object are the messages and the boxed values of the errors.</li>
 </ul>
