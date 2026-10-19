@@ -14,6 +14,73 @@ validation:
     "Cannot be longer than %d characters": Не может быть длиннее %d символов
 ```
 
+## Plural forms
+
+A message with a count has plural forms: the value of its key is a map of the plural categories of [CLDR](https://cldr.unicode.org/index/cldr-spec/plural-rules) — `one`, `few`, `many`, `other`. The form is selected by the first integer argument of the message, the categories of the language are built in for English and the default, French, Russian, Ukrainian and Belarusian; a missing category falls back to `other`.
+
+```yaml
+validation:
+  string:
+    "Cannot be longer than %d characters":
+      one: Не может быть длиннее %d символа
+      few: Не может быть длиннее %d символов
+      many: Не может быть длиннее %d символов
+      other: Не может быть длиннее %d символа
+```
+
+The forms are stored as the keys `key#one`, `key#few`, `key#many` and `key#other`, so they are added by `storage.Add` too:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/insei/valigo"
+	"github.com/insei/valigo/shared"
+	"github.com/insei/valigo/translator"
+)
+
+type Cart struct {
+	Items []string
+	Name  string
+}
+
+func main() {
+	storage := translator.NewInMemStorage()
+	storage.Add("ru", map[string]string{
+		"Up to %d items in a cart#one":  "В корзине может быть не больше %d товара",
+		"Up to %d items in a cart#many": "В корзине может быть не больше %d товаров",
+	})
+	t := translator.New(translator.WithStorage(storage), translator.WithPreferredLanguagesFn(func(context.Context) []string {
+		return []string{"ru"}
+	}))
+
+	v := valigo.New(valigo.WithTranslator(t))
+	valigo.Configure[Cart](v, func(b valigo.Configurator[Cart], c *Cart) {
+		b.Slice(&c.Items).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, items shared.Elems[string]) []shared.Error {
+			if items.Len() > 5 {
+				return []shared.Error{h.ErrorT(ctx, items.Len(), "Up to %d items in a cart", 5)}
+			}
+			return nil
+		})
+		b.Slice(&c.Items).MaxLen(1)
+	})
+
+	for _, err := range v.Validate(context.Background(), &Cart{Items: []string{"a", "b", "c", "d", "e", "f"}}) {
+		fmt.Println(err)
+	}
+}
+```
+
+Output:
+
+```text
+В корзине может быть не больше 5 товаров (Items: 6)
+Не может содержать больше 1 элемента (Items: 6)
+```
+
 ## Languages from the context
 
 The languages of the request are taken from the context, `translator.NewAcceptLanguageMiddleware` puts the languages of the `Accept-Language` header there, ordered by their `q`:
