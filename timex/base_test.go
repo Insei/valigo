@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/insei/valigo"
+	"github.com/insei/valigo/internal/testenv"
 	"github.com/insei/valigo/shared"
 )
 
@@ -101,6 +102,9 @@ func TestErrorValue(t *testing.T) {
 }
 
 func TestZeroAllocationsOnValid(t *testing.T) {
+	if testenv.RaceEnabled {
+		t.Skip("allocations are not stable under the race detector")
+	}
 	v := valigo.New()
 	valigo.Configure[event](v, func(c valigo.Configurator[event], m *event) {
 		c.Field(&m.At).As(Of).Required().Between(day1, day3).InPast()

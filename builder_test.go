@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/insei/valigo/internal/testenv"
 	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
@@ -312,7 +313,7 @@ func TestConfigureNonStructPanics(t *testing.T) {
 }
 
 func TestZeroAllocationsOnValid(t *testing.T) {
-	if raceEnabled {
+	if testenv.RaceEnabled {
 		t.Skip("allocations are not stable under the race detector")
 	}
 	v := New()

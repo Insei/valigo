@@ -8,6 +8,7 @@ import (
 
 	"github.com/insei/valigo"
 	"github.com/insei/valigo/eq"
+	"github.com/insei/valigo/internal/testenv"
 	"github.com/insei/valigo/shared"
 )
 
@@ -115,6 +116,9 @@ func TestUniqueErrorValue(t *testing.T) {
 }
 
 func TestZeroAllocationsOnValid(t *testing.T) {
+	if testenv.RaceEnabled {
+		t.Skip("allocations are not stable under the race detector")
+	}
 	v := valigo.New()
 	valigo.Configure[account](v, func(c valigo.Configurator[account], m *account) {
 		c.Field(&m.Status).As(eq.Of).Required().OneOf(active, blocked).NotOneOf(deleted)
