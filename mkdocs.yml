@@ -92,6 +92,7 @@ nav:
       - Maps: features/maps.md
       - Errors: features/errors.md
       - Translations: features/translations.md
+      - HTTP problem details: features/problem.md
   - Architecture:
       - How it works: architecture/index.md
 
