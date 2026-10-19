@@ -67,8 +67,9 @@ func elemsGetter[E any](field fmap.Field) func(obj any) (Elems[E], bool) {
 		elem = elem.Elem()
 	}
 	mustLayout[E](field, elem)
+	addr := fieldAddr(field)
 	return func(obj any) (Elems[E], bool) {
-		p := dataPtr(field.GetPtr(obj))
+		p := addr(dataPtr(obj))
 		if p != nil && slicePtr {
 			p = *(*unsafe.Pointer)(p)
 		}
