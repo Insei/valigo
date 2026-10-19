@@ -275,6 +275,16 @@ func TestConfigureWithUnexportedStructField(t *testing.T) {
 	assert.Len(t, v.ValidateTyped(context.Background(), &withMutex{}), 1)
 }
 
+func TestConfigureRecursiveType(t *testing.T) {
+	type node struct {
+		Name string
+		Next *node
+	}
+	v := New()
+	Configure[node](v, func(c Configurator[node], m *node) { c.String(&m.Name).Required() })
+	assert.Len(t, v.ValidateTyped(context.Background(), &node{Next: &node{}}), 1)
+}
+
 func TestZeroAllocationsOnValid(t *testing.T) {
 	if raceEnabled {
 		t.Skip("allocations are not stable under the race detector")

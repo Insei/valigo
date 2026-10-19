@@ -3,6 +3,7 @@ package valigo
 import (
 	"fmt"
 	"reflect"
+	"slices"
 )
 
 // Zero allocates an input structure such that all pointer fields
@@ -12,30 +13,36 @@ import (
 //
 // zero does not allocate private fields.
 func zero(obj interface{}) error {
-	indirectVal := reflect.Indirect(reflect.ValueOf(obj))
-
-	if !indirectVal.CanSet() {
+	val := reflect.ValueOf(obj)
+	if val.Kind() != reflect.Ptr || val.IsNil() {
 		return fmt.Errorf("Input interface is not addressable (can't Set the memory address): %#v",
 			obj)
 	}
-	if indirectVal.Kind() != reflect.Struct {
+	if val.Elem().Kind() != reflect.Struct {
 		return fmt.Errorf("allocate.Zero currently only works with [pointers to] structs, not type %v",
-			indirectVal.Kind())
+			val.Elem().Kind())
 	}
+	zeroStruct(val.Elem(), nil)
+	return nil
+}
 
-	// allocate each of the structs fields
-	var err error
-	for i := 0; i < indirectVal.NumField(); i++ {
-		if !indirectVal.Type().Field(i).IsExported() {
+// zeroStruct allocates exported pointer and map fields of the struct recursively.
+// path holds the types of the structs being allocated, pointers to them are left nil,
+// so recursive types like struct{ Next *Node } are allocated once.
+func zeroStruct(val reflect.Value, path []reflect.Type) {
+	path = append(path, val.Type())
+	for i := 0; i < val.NumField(); i++ {
+		if !val.Type().Field(i).IsExported() {
 			continue
 		}
-		field := indirectVal.Field(i)
+		field := val.Field(i)
 
 		// pre-allocate pointer fields
 		if field.Kind() == reflect.Ptr && field.IsNil() {
-			if field.CanSet() {
-				field.Set(reflect.New(field.Type().Elem()))
+			if slices.Contains(path, field.Type().Elem()) {
+				continue
 			}
+			field.Set(reflect.New(field.Type().Elem()))
 		}
 
 		indirectField := reflect.Indirect(field)
@@ -44,23 +51,9 @@ func zero(obj interface{}) error {
 			indirectField.Set(reflect.MakeMap(indirectField.Type()))
 		case reflect.Struct:
 			// recursively allocate each of the structs embedded fields
-			if field.Kind() == reflect.Ptr {
-				err = zero(field.Interface())
-			} else {
-				// field of Struct can always use field.Addr()
-				fieldAddr := field.Addr()
-				if fieldAddr.CanInterface() {
-					err = zero(fieldAddr.Interface())
-				} else {
-					err = fmt.Errorf("struct field can't interface, %#v", fieldAddr)
-				}
-			}
-		}
-		if err != nil {
-			return err
+			zeroStruct(indirectField, path)
 		}
 	}
-	return err
 }
 
 // MustZero will panic instead of return error
