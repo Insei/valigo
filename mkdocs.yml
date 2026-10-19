@@ -1,0 +1,114 @@
+site_name: valigo
+site_description: Typed, zero allocation validation of Go structs, rules are configured by pointers to the fields
+site_url: https://insei.github.io/valigo/
+repo_url: https://github.com/Insei/valigo
+repo_name: Insei/valigo
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra:
+  version:
+    provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Insei/valigo
+    - icon: simple/go
+      link: https://pkg.go.dev/github.com/insei/valigo
+
+nav:
+  - Get started: index.md
+  - Why valigo?: why-valigo.md
+  - Upgrading from v0.0.x: upgrading.md
+  - For AI agents: ai-agents.md
+  - Features:
+      - features/index.md
+      - Validator and Configure: features/configure.md
+      - Absent values: features/absent.md
+      - Conditions: features/conditions.md
+      - Custom rules: features/custom.md
+      - Strings: features/strings.md
+      - Numbers: features/numbers.md
+      - UUID: features/uuid.md
+      - Slices: features/slices.md
+      - Errors: features/errors.md
+      - Translations: features/translations.md
+  - Architecture:
+      - How it works: architecture/index.md
+
+plugins:
+  - search
+  # llms.txt and llms-full.txt for AI agents: https://llmstxt.org
+  - llmstxt:
+      full_output: llms-full.txt
+      # the links point to the pages of the deployed version, it is set by the docs workflow
+      base_url: !ENV [LLMSTXT_BASE_URL, "https://insei.github.io/valigo/latest/"]
+      markdown_description: >-
+        valigo validates Go structs by rules configured once with pointers to the fields of a model:
+        b.String(&u.Name).Required().MaxLen(64). The configurator methods are generic (Go 1.27), so the compiler
+        checks the field types and the rule arguments. Validation of valid objects doesn't allocate, absent values
+        are skipped by all rules except Required, errors have field locations and translated messages.
+        The module path is github.com/insei/valigo.
+      sections:
+        Start:
+          - index.md: installation and the first validator
+          - why-valigo.md: what it gives compared to tag based validators
+          - upgrading.md: upgrading from v0.0.x
+          - ai-agents.md: the skill for AI agents
+        Features:
+          - features/*.md
+        Architecture:
+          - architecture/*.md
