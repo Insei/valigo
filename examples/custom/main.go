@@ -29,8 +29,8 @@ func main() {
 
 		//Custom on field
 		c.String(&obj.LastName).
-			Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value *string) []shared.Error {
-				if *value != "Rebecca" {
+			Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value string) []shared.Error {
+				if value != "Rebecca" {
 					localeKey := "Only Rebecca is allowed" // you can add translations if you want, see translation example
 					return []shared.Error{h.ErrorT(ctx, value, localeKey)}
 				}

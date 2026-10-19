@@ -48,15 +48,15 @@ func main() {
 	allowedClientID := uuid.New()
 	valigo.Configure[Sender](v, func(builder valigo.Configurator[Sender], obj *Sender) {
 		builder.Number(&obj.Int).AnyOf(2)
-		builder.String(&obj.Type).When(func(ctx context.Context, value any) bool {
+		builder.String(&obj.Type).When(func(ctx context.Context, value string) bool {
 			return true
 		}).Trim()
-		builder.String(&obj.Description).When(func(ctx context.Context, value any) bool {
+		builder.String(&obj.Description).When(func(ctx context.Context, value string) bool {
 			return true
 		}).Trim()
 		builder.String(&obj.SMTPHost).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
-		builder.UUID(&obj.Id).When(func(ctx context.Context, value any) bool {
+		builder.UUID(&obj.Id).When(func(ctx context.Context, value uuid.UUID) bool {
 			return true
 		}).AnyOf(uuid.Nil)
 		builder.String(&obj.Email).Email()
