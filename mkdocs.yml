@@ -88,6 +88,7 @@ nav:
       - Comparable values: features/values.md
       - UUID: features/uuid.md
       - Slices: features/slices.md
+      - Maps: features/maps.md
       - Errors: features/errors.md
       - Translations: features/translations.md
   - Architecture:

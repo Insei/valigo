@@ -3,7 +3,8 @@
 The configurator knows nothing about the types of the values. It has two methods for the fields:
 
 - `b.Field(&m.X)` returns `*shared.Field[T]`, the base configurator of a field of type `T`;
-- `b.Slice(&m.X)` returns `*shared.SliceFieldConfigurator[E]` of a `[]E` field, with the rules of the slice itself: `Required`, `MinLen`, `MaxLen`, `Custom`, `When` and `Each`.
+- `b.Slice(&m.X)` returns `*shared.SliceFieldConfigurator[E]` of a `[]E` field, with the rules of the slice itself: `Required`, `MinLen`, `MaxLen`, `Custom`, `When` and `Each`;
+- `b.Map(&m.X)` returns `*shared.MapFieldConfigurator[K, V]` of a `map[K]V` field, with the rules of the map itself, `EachKey` and `EachValue`, see [Maps](maps.md).
 
 `As` converts a base configurator to the configurator of its type. A conversion is a function with a type constraint, so a conversion that doesn't fit the field doesn't compile:
 

@@ -22,6 +22,7 @@ Reference of valigo capabilities grouped by area.
 | [Time](time.md) | `timex.Of`: `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture` |
 | [Comparable values](values.md) | `eq.Of`, `eq.Ptr`, `eq.Slice`: enums, bools — `Required`, `OneOf`, `NotOneOf`, `Equal`, `NotEqual`, `Unique` |
 | [UUID](uuid.md) | `uuid.Of` of the separate module: `Required`, `AnyOf` |
+| [Maps](maps.md) | `Map`: length rules, `EachKey` and `EachValue` with conversions |
 | [Slices](slices.md) | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements |
 
 ## Results
