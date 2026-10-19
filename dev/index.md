@@ -78,6 +78,7 @@ What happens here:
 - [Why valigo?](https://insei.github.io/valigo/latest/why-valigo/index.md) — what it gives compared to tag based validators.
 - [Features](https://insei.github.io/valigo/latest/features/index.md) — the rules of every type, conditions, custom rules, errors, translations.
 - [How it works](https://insei.github.io/valigo/latest/architecture/index.md) — the model, the field pointers and why valid objects don't allocate.
-- [Performance](https://insei.github.io/valigo/latest/performance/index.md) — benchmarks with go-playground/validator and ozzo-validation.
+- [Performance](https://insei.github.io/valigo/latest/performance/index.md) — benchmarks with go-playground/validator, ozzo-validation, zog, gookit/validate and hand-written code.
+- [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) and [huma](https://insei.github.io/valigo/latest/features/huma/index.md) — valigo in HTTP APIs.
 - [Upgrading from v0.0.x](https://insei.github.io/valigo/latest/upgrading/index.md) — the configurator API has changed.
 - [For AI agents](https://insei.github.io/valigo/latest/ai-agents/index.md) — the skill and the documentation in one file.

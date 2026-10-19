@@ -581,6 +581,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#slices-maps-and-other-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slices, maps and other fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ready-for-http-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ready for HTTP APIs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#errors-that-point-to-the-field" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1454,6 +1476,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#slices-maps-and-other-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slices, maps and other fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ready-for-http-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ready for HTTP APIs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#errors-that-point-to-the-field" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1584,6 +1628,10 @@
 </tr>
 </tbody>
 </table>
+<h3 id="slices-maps-and-other-fields">Slices, maps and other fields<a class="headerlink" href="#slices-maps-and-other-fields" title="Permanent link">&para;</a></h3>
+<p>The rules of a slice check the slice itself and, by <code>Each</code>, every element with the rules of its type; maps have <code>EachKey</code> and <code>EachValue</code>; a rule can compare a field with another one by its pointer — <code>b.Field(&amp;o.EndsAt).As(timex.Of).AfterField(&amp;o.StartsAt)</code> — with the type of the other field checked by the compiler. See <a href="../features/slices/">Slices</a>, <a href="../features/maps/">Maps</a> and <a href="../features/fields/">Rules on other fields</a>.</p>
+<h3 id="ready-for-http-apis">Ready for HTTP APIs<a class="headerlink" href="#ready-for-http-apis" title="Permanent link">&para;</a></h3>
+<p>The <code>problem</code> package writes the errors as <code>application/problem+json</code> of RFC 9457 with JSON pointers to the fields, the <code>github.com/insei/valigo/huma</code> module puts the rules into the inputs of huma operations with the locations of huma. See <a href="../features/problem/">HTTP problem details</a> and <a href="../features/huma/">huma</a>.</p>
 <h3 id="errors-that-point-to-the-field">Errors that point to the field<a class="headerlink" href="#errors-that-point-to-the-field" title="Permanent link">&para;</a></h3>
 <p>Every error has the message, the location and the value: <code>Tags[1]</code> for an element of a slice, <code>Address.City</code> for a nested field, or the JSON path of the field with a custom location function. See <a href="../features/errors/">Errors</a>.</p>
 <h2 id="when-valigo-is-not-the-right-tool">When valigo is not the right tool<a class="headerlink" href="#when-valigo-is-not-the-right-tool" title="Permanent link">&para;</a></h2>

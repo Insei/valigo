@@ -1341,7 +1341,7 @@
 </tbody>
 </table>
 <p><code>When(cond)</code> wraps the next rules of the field with the condition. <code>MaxLen</code> of a string is <code>Check(func(v string) bool { return len(v) &lt;= n }, ...)</code>.</p>
-<p><code>shared.Field[T]</code> doesn't know where the value comes from. For a struct field the source reads the field, for <code>Each</code> the source iterates over the elements of the slice and adds the index to the locations of the errors. That's why the same string configurator validates a <code>Name string</code> field and every element of <code>Tags []*string</code>.</p>
+<p><code>shared.Field[T]</code> doesn't know where the value comes from. For a struct field the source reads the field, for <code>Each</code> the source iterates over the elements of the slice and adds the index to the locations of the errors, for the keys and the values of a map it copies them to a pooled slot. All rules of a source share one read of the value. That's why the same string configurator validates a <code>Name string</code> field and every element of <code>Tags []*string</code>.</p>
 <h2 id="validate-the-hot-path">Validate: the hot path<a class="headerlink" href="#validate-the-hot-path" title="Permanent link">&para;</a></h2>
 <p><code>Configure</code> registers one validation function per field source in the validator, keyed by the type <code>*T</code>. <code>Validate</code>:</p>
 <ol>
@@ -1349,7 +1349,8 @@
 <li>calls every function: it reads the field once through the descriptor, a pointer into the object, and runs the rules of the field;</li>
 <li>a rule returns <code>nil</code> for a valid value, and builds a <code>shared.Error</code> with the translated message otherwise.</li>
 </ol>
-<p>Nothing in this path allocates for valid objects: the values are read by pointers, the rules are closures created by <code>Configure</code>, the regexps are compiled once, and the helper of struct <code>Custom</code> rules is pooled. A test checks it with <code>testing.AllocsPerRun</code>.</p>
+<p>Nothing in this path allocates for valid objects: the values are read by pointers, the rules are closures created by <code>Configure</code>, the regexps are compiled once, the messages and their parameters are built by <code>shared.M</code> on the configuration, and the helper of struct <code>Custom</code> rules is pooled. A test of every package checks it with <code>testing.AllocsPerRun</code>.</p>
+<p>The rules append their errors to one pooled buffer of the validation, and <code>Validate</code> copies it once: an invalid object allocates the copy, the translated messages and the boxed values of its errors.</p>
 <h2 id="packages">Packages<a class="headerlink" href="#packages" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1368,12 +1369,20 @@
 <td>the rules core <code>Field[T]</code>, slice configurator and <code>Elems[E]</code>, <code>As</code> and the conversions <code>Deref</code>, <code>Retype</code>, <code>RetypeSlice</code>, <code>SlicePtr</code>, <code>SliceRules</code>, <code>Error</code>, helpers</td>
 </tr>
 <tr>
-<td><code>str</code>, <code>num</code></td>
-<td>configurators of strings and numbers built on <code>shared.Field[T]</code>, the conversions <code>str.Of</code>, <code>str.Slice</code>, <code>num.Of</code>, <code>num.Ptr</code></td>
+<td><code>str</code>, <code>num</code>, <code>timex</code>, <code>eq</code></td>
+<td>configurators of strings, numbers, times and comparable values built on <code>shared.Field[T]</code>, their conversions <code>str.Of</code>, <code>num.Of</code>, <code>num.Ptr</code>, <code>timex.Of</code>, <code>eq.Of</code>... and slice conversions</td>
+</tr>
+<tr>
+<td><code>problem</code></td>
+<td>the problem details of RFC 9457</td>
 </tr>
 <tr>
 <td><code>github.com/insei/valigo/uuid</code></td>
 <td>the separate module with the rules of <code>github.com/google/uuid</code>, the core doesn't depend on a uuid package</td>
+</tr>
+<tr>
+<td><code>github.com/insei/valigo/huma</code></td>
+<td>the separate module of the inputs of huma operations</td>
 </tr>
 <tr>
 <td><code>translator</code></td>

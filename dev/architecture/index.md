@@ -23,7 +23,7 @@ Every typed configurator is a thin wrapper over one core type, `shared.Field[T]`
 
 `When(cond)` wraps the next rules of the field with the condition. `MaxLen` of a string is `Check(func(v string) bool { return len(v) <= n }, ...)`.
 
-`shared.Field[T]` doesn't know where the value comes from. For a struct field the source reads the field, for `Each` the source iterates over the elements of the slice and adds the index to the locations of the errors. That's why the same string configurator validates a `Name string` field and every element of `Tags []*string`.
+`shared.Field[T]` doesn't know where the value comes from. For a struct field the source reads the field, for `Each` the source iterates over the elements of the slice and adds the index to the locations of the errors, for the keys and the values of a map it copies them to a pooled slot. All rules of a source share one read of the value. That's why the same string configurator validates a `Name string` field and every element of `Tags []*string`.
 
 ## Validate: the hot path
 
@@ -33,17 +33,21 @@ Every typed configurator is a thin wrapper over one core type, `shared.Field[T]`
 1. calls every function: it reads the field once through the descriptor, a pointer into the object, and runs the rules of the field;
 1. a rule returns `nil` for a valid value, and builds a `shared.Error` with the translated message otherwise.
 
-Nothing in this path allocates for valid objects: the values are read by pointers, the rules are closures created by `Configure`, the regexps are compiled once, and the helper of struct `Custom` rules is pooled. A test checks it with `testing.AllocsPerRun`.
+Nothing in this path allocates for valid objects: the values are read by pointers, the rules are closures created by `Configure`, the regexps are compiled once, the messages and their parameters are built by `shared.M` on the configuration, and the helper of struct `Custom` rules is pooled. A test of every package checks it with `testing.AllocsPerRun`.
+
+The rules append their errors to one pooled buffer of the validation, and `Validate` copies it once: an invalid object allocates the copy, the translated messages and the boxed values of its errors.
 
 ## Packages
 
-| Package                        | Contents                                                                                                                                                            |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `valigo`                       | `Validator`, `Configure`, `Configurator` with `Field`, `Slice`, `When` and `Custom`, options                                                                        |
-| `shared`                       | the rules core `Field[T]`, slice configurator and `Elems[E]`, `As` and the conversions `Deref`, `Retype`, `RetypeSlice`, `SlicePtr`, `SliceRules`, `Error`, helpers |
-| `str`, `num`                   | configurators of strings and numbers built on `shared.Field[T]`, the conversions `str.Of`, `str.Slice`, `num.Of`, `num.Ptr`                                         |
-| `github.com/insei/valigo/uuid` | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package                                                           |
-| `translator`                   | translator, in-memory storage, built-in locales, `Accept-Language` middleware                                                                                       |
+| Package                        | Contents                                                                                                                                                                                 |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valigo`                       | `Validator`, `Configure`, `Configurator` with `Field`, `Slice`, `When` and `Custom`, options                                                                                             |
+| `shared`                       | the rules core `Field[T]`, slice configurator and `Elems[E]`, `As` and the conversions `Deref`, `Retype`, `RetypeSlice`, `SlicePtr`, `SliceRules`, `Error`, helpers                      |
+| `str`, `num`, `timex`, `eq`    | configurators of strings, numbers, times and comparable values built on `shared.Field[T]`, their conversions `str.Of`, `num.Of`, `num.Ptr`, `timex.Of`, `eq.Of`... and slice conversions |
+| `problem`                      | the problem details of RFC 9457                                                                                                                                                          |
+| `github.com/insei/valigo/uuid` | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package                                                                                |
+| `github.com/insei/valigo/huma` | the separate module of the inputs of huma operations                                                                                                                                     |
+| `translator`                   | translator, in-memory storage, built-in locales, `Accept-Language` middleware                                                                                                            |
 
 ## Contributing
 

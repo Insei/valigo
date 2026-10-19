@@ -28,3 +28,4 @@ Rules are still configured by pointers to the fields of the model, but the confi
 - The errors of slice elements have the index in the location: `Tags[1]`.
 - A field `When` isn't called for an absent value, it got the zero value.
 - A repeated `Configure` of the same type replaces its rules, it appended them.
+- `shared.Error` has `Code` and `Params`, its JSON has them when they aren't empty; the messages of counts have plural forms: "longer than 1 character".

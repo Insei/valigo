@@ -2,7 +2,7 @@
 
 > Typed, zero allocation validation of Go structs, rules are configured by pointers to the fields
 
-valigo validates Go structs by rules configured once with pointers to the fields of a model: b.String(&u.Name).Required().MaxLen(64). The configurator methods are generic (Go 1.27), so the compiler checks the field types and the rule arguments. Validation of valid objects doesn't allocate, absent values are skipped by all rules except Required, errors have field locations and translated messages. The module path is github.com/insei/valigo.
+valigo validates Go structs by rules configured once with pointers to the fields of a model: b.Field(&u.Name).As(str.Of).Required().MaxLen(64). The configurator has Field, Slice, Map, When and Custom, As converts a field to the configurator of its type by a conversion with a type constraint (str.Of, num.Of, num.Ptr, timex.Of, eq.Of, str.Slice...), so the compiler checks the field types and the rule arguments (Go 1.27 generic methods). Validation of valid objects doesn't allocate, absent values are skipped by all rules except Required, errors have field locations, translated messages (en, de, es, fr, ru), stable codes and named params; the problem package writes RFC 9457 problem details, the github.com/insei/valigo/huma module validates huma inputs. The module path is github.com/insei/valigo.
 
 # Start
 
@@ -86,7 +86,8 @@ What happens here:
 - [Why valigo?](https://insei.github.io/valigo/latest/why-valigo/index.md) — what it gives compared to tag based validators.
 - [Features](https://insei.github.io/valigo/latest/features/index.md) — the rules of every type, conditions, custom rules, errors, translations.
 - [How it works](https://insei.github.io/valigo/latest/architecture/index.md) — the model, the field pointers and why valid objects don't allocate.
-- [Performance](https://insei.github.io/valigo/latest/performance/index.md) — benchmarks with go-playground/validator and ozzo-validation.
+- [Performance](https://insei.github.io/valigo/latest/performance/index.md) — benchmarks with go-playground/validator, ozzo-validation, zog, gookit/validate and hand-written code.
+- [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) and [huma](https://insei.github.io/valigo/latest/features/huma/index.md) — valigo in HTTP APIs.
 - [Upgrading from v0.0.x](https://insei.github.io/valigo/latest/upgrading/index.md) — the configurator API has changed.
 - [For AI agents](https://insei.github.io/valigo/latest/ai-agents/index.md) — the skill and the documentation in one file.
 
@@ -153,6 +154,14 @@ How the libraries compare, by their documentation:
 | Plural forms                | CLDR categories in the locale files                                   | cardinal rules of `universal-translator`                                                     | —                                             |
 | Codes for clients           | `Code` and named `Params` of every error                              | the tag and one string parameter of a field error                                            | the code and the parameters of an error       |
 | Messages of own rules       | the message is its locale key, translated when a translation is added | a translation is registered for every tag                                                    | the message of the error                      |
+
+### Slices, maps and other fields
+
+The rules of a slice check the slice itself and, by `Each`, every element with the rules of its type; maps have `EachKey` and `EachValue`; a rule can compare a field with another one by its pointer — `b.Field(&o.EndsAt).As(timex.Of).AfterField(&o.StartsAt)` — with the type of the other field checked by the compiler. See [Slices](https://insei.github.io/valigo/latest/features/slices/index.md), [Maps](https://insei.github.io/valigo/latest/features/maps/index.md) and [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md).
+
+### Ready for HTTP APIs
+
+The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) and [huma](https://insei.github.io/valigo/latest/features/huma/index.md).
 
 ### Errors that point to the field
 
@@ -249,6 +258,7 @@ Rules are still configured by pointers to the fields of the model, but the confi
 - The errors of slice elements have the index in the location: `Tags[1]`.
 - A field `When` isn't called for an absent value, it got the zero value.
 - A repeated `Configure` of the same type replaces its rules, it appended them.
+- `shared.Error` has `Code` and `Params`, its JSON has them when they aren't empty; the messages of counts have plural forms: "longer than 1 character".
 
 # For AI agents
 
@@ -2307,7 +2317,7 @@ Every typed configurator is a thin wrapper over one core type, `shared.Field[T]`
 
 `When(cond)` wraps the next rules of the field with the condition. `MaxLen` of a string is `Check(func(v string) bool { return len(v) <= n }, ...)`.
 
-`shared.Field[T]` doesn't know where the value comes from. For a struct field the source reads the field, for `Each` the source iterates over the elements of the slice and adds the index to the locations of the errors. That's why the same string configurator validates a `Name string` field and every element of `Tags []*string`.
+`shared.Field[T]` doesn't know where the value comes from. For a struct field the source reads the field, for `Each` the source iterates over the elements of the slice and adds the index to the locations of the errors, for the keys and the values of a map it copies them to a pooled slot. All rules of a source share one read of the value. That's why the same string configurator validates a `Name string` field and every element of `Tags []*string`.
 
 ## Validate: the hot path
 
@@ -2317,17 +2327,21 @@ Every typed configurator is a thin wrapper over one core type, `shared.Field[T]`
 1. calls every function: it reads the field once through the descriptor, a pointer into the object, and runs the rules of the field;
 1. a rule returns `nil` for a valid value, and builds a `shared.Error` with the translated message otherwise.
 
-Nothing in this path allocates for valid objects: the values are read by pointers, the rules are closures created by `Configure`, the regexps are compiled once, and the helper of struct `Custom` rules is pooled. A test checks it with `testing.AllocsPerRun`.
+Nothing in this path allocates for valid objects: the values are read by pointers, the rules are closures created by `Configure`, the regexps are compiled once, the messages and their parameters are built by `shared.M` on the configuration, and the helper of struct `Custom` rules is pooled. A test of every package checks it with `testing.AllocsPerRun`.
+
+The rules append their errors to one pooled buffer of the validation, and `Validate` copies it once: an invalid object allocates the copy, the translated messages and the boxed values of its errors.
 
 ## Packages
 
-| Package                        | Contents                                                                                                                                                            |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `valigo`                       | `Validator`, `Configure`, `Configurator` with `Field`, `Slice`, `When` and `Custom`, options                                                                        |
-| `shared`                       | the rules core `Field[T]`, slice configurator and `Elems[E]`, `As` and the conversions `Deref`, `Retype`, `RetypeSlice`, `SlicePtr`, `SliceRules`, `Error`, helpers |
-| `str`, `num`                   | configurators of strings and numbers built on `shared.Field[T]`, the conversions `str.Of`, `str.Slice`, `num.Of`, `num.Ptr`                                         |
-| `github.com/insei/valigo/uuid` | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package                                                           |
-| `translator`                   | translator, in-memory storage, built-in locales, `Accept-Language` middleware                                                                                       |
+| Package                        | Contents                                                                                                                                                                                 |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valigo`                       | `Validator`, `Configure`, `Configurator` with `Field`, `Slice`, `When` and `Custom`, options                                                                                             |
+| `shared`                       | the rules core `Field[T]`, slice configurator and `Elems[E]`, `As` and the conversions `Deref`, `Retype`, `RetypeSlice`, `SlicePtr`, `SliceRules`, `Error`, helpers                      |
+| `str`, `num`, `timex`, `eq`    | configurators of strings, numbers, times and comparable values built on `shared.Field[T]`, their conversions `str.Of`, `num.Of`, `num.Ptr`, `timex.Of`, `eq.Of`... and slice conversions |
+| `problem`                      | the problem details of RFC 9457                                                                                                                                                          |
+| `github.com/insei/valigo/uuid` | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package                                                                                |
+| `github.com/insei/valigo/huma` | the separate module of the inputs of huma operations                                                                                                                                     |
+| `translator`                   | translator, in-memory storage, built-in locales, `Accept-Language` middleware                                                                                                            |
 
 ## Contributing
 
