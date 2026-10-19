@@ -1,8 +1,8 @@
-module github.com/insei/valigo/huma
+module github.com/insei/valigo/integrations/huma
 
 go 1.27
 
-replace github.com/insei/valigo => ../
+replace github.com/insei/valigo => ../../
 
 require (
 	github.com/danielgtaylor/huma/v2 v2.39.1

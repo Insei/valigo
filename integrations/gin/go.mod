@@ -1,8 +1,8 @@
-module github.com/insei/valigo/gin
+module github.com/insei/valigo/integrations/gin
 
 go 1.27
 
-replace github.com/insei/valigo => ../
+replace github.com/insei/valigo => ../../
 
 require (
 	github.com/gin-gonic/gin v1.12.0

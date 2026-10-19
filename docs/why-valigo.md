@@ -68,7 +68,7 @@ The rules of a slice check the slice itself and, by `Each`, every element with t
 
 ### Ready for HTTP APIs
 
-The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](features/problem.md) and [huma](features/huma.md).
+The `problem` package writes the errors as `application/problem+json` of RFC 9457 with JSON pointers to the fields, the `github.com/insei/valigo/integrations/huma` module puts the rules into the inputs of huma operations with the locations of huma. See [HTTP problem details](features/problem.md) and [huma](features/huma.md).
 
 ### Errors that point to the field
 

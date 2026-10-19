@@ -4,9 +4,9 @@ updates:
     directories:
       - "/"
       - "/rules/uuid"
-      - "/huma"
-      - "/gin"
-      - "/echo"
+      - "/integrations/huma"
+      - "/integrations/gin"
+      - "/integrations/echo"
       - "/bench"
       - "/examples/*"
     schedule:

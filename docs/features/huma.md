@@ -1,13 +1,13 @@
 # huma
 
-The module `github.com/insei/valigo/huma` validates the inputs of [huma](https://huma.rocks) operations by valigo. The errors are the error details of huma with its locations — `body.email`, `query.limit`, `path.id` — in the 422 response of huma, and the messages are translated to the languages of the `Accept-Language` header.
+The module `github.com/insei/valigo/integrations/huma` validates the inputs of [huma](https://huma.rocks) operations by valigo. The errors are the error details of huma with its locations — `body.email`, `query.limit`, `path.id` — in the 422 response of huma, and the messages are translated to the languages of the `Accept-Language` header.
 
 ```bash
-go get github.com/insei/valigo/huma@latest
+go get github.com/insei/valigo/integrations/huma@latest
 ```
 
 ```go
-import vhuma "github.com/insei/valigo/huma"
+import vhuma "github.com/insei/valigo/integrations/huma"
 
 var validator = valigo.New(valigo.WithFieldLocationNamingFn(vhuma.Location))
 
@@ -38,7 +38,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
 	"github.com/insei/valigo"
-	vhuma "github.com/insei/valigo/huma"
+	vhuma "github.com/insei/valigo/integrations/huma"
 	"github.com/insei/valigo/rules/num"
 	"github.com/insei/valigo/rules/str"
 )
@@ -134,7 +134,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
 	"github.com/insei/valigo"
-	vhuma "github.com/insei/valigo/huma"
+	vhuma "github.com/insei/valigo/integrations/huma"
 	"github.com/insei/valigo/rules/str"
 )
 

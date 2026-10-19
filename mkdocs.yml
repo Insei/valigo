@@ -119,7 +119,7 @@ plugins:
         num.Ptr, timex.Of, eq.Of, str.Slice...), so the compiler checks the field types and the rule arguments
         (Go 1.27 generic methods). Validation of valid objects doesn't allocate, absent values are skipped by all
         rules except Required, errors have field locations, translated messages (en, de, es, fr, ru), stable codes
-        and named params; the problem package writes RFC 9457 problem details, the github.com/insei/valigo/huma
+        and named params; the problem package writes RFC 9457 problem details, the github.com/insei/valigo/integrations/huma
         module validates huma inputs. The module path is github.com/insei/valigo.
       sections:
         Start:

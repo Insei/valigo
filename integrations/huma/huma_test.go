@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/insei/valigo"
-	vhuma "github.com/insei/valigo/huma"
+	vhuma "github.com/insei/valigo/integrations/huma"
 	"github.com/insei/valigo/rules/num"
 	"github.com/insei/valigo/rules/str"
 )
