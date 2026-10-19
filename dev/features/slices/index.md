@@ -34,9 +34,9 @@ import (
 
     "github.com/google/uuid"
     "github.com/insei/valigo"
+    "github.com/insei/valigo/rules/str"
+    vuuid "github.com/insei/valigo/rules/uuid"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
-    vuuid "github.com/insei/valigo/uuid"
 )
 
 type Post struct {

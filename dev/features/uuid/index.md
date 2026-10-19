@@ -1,9 +1,9 @@
 # UUID
 
-The rules of [`github.com/google/uuid`](https://pkg.go.dev/github.com/google/uuid) are in the separate module `github.com/insei/valigo/uuid`, so the core doesn't depend on a uuid package:
+The rules of [`github.com/google/uuid`](https://pkg.go.dev/github.com/google/uuid) are in the separate module `github.com/insei/valigo/rules/uuid`, so the core doesn't depend on a uuid package:
 
 ```bash
-go get github.com/insei/valigo/uuid@latest
+go get github.com/insei/valigo/rules/uuid@latest
 ```
 
 `uuid.Of` converts a `uuid.UUID` field or a `*uuid.UUID` field to the uuid configurator, `uuid.Slice` — a slice of them. The module's package is also named `uuid`, import it with an alias next to `github.com/google/uuid`:
@@ -11,7 +11,7 @@ go get github.com/insei/valigo/uuid@latest
 ```go
 import (
     "github.com/google/uuid"
-    vuuid "github.com/insei/valigo/uuid"
+    vuuid "github.com/insei/valigo/rules/uuid"
 )
 
 type Comment struct {
@@ -46,8 +46,8 @@ import (
 
     "github.com/google/uuid"
     "github.com/insei/valigo"
+    vuuid "github.com/insei/valigo/rules/uuid"
     "github.com/insei/valigo/shared"
-    vuuid "github.com/insei/valigo/uuid"
 )
 
 type Comment struct {

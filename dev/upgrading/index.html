@@ -1688,6 +1688,14 @@
 </thead>
 <tbody>
 <tr>
+<td><code>github.com/insei/valigo/str</code>, <code>github.com/insei/valigo/num</code></td>
+<td><code>github.com/insei/valigo/rules/str</code>, <code>github.com/insei/valigo/rules/num</code>, also <code>rules/eq</code> and <code>rules/timex</code></td>
+</tr>
+<tr>
+<td><code>github.com/insei/valigo/uuid</code> of the core module</td>
+<td>the separate module <code>github.com/insei/valigo/rules/uuid</code></td>
+</tr>
+<tr>
 <td><code>b.String(&amp;u.Name)</code></td>
 <td><code>b.Field(&amp;u.Name).As(str.Of)</code></td>
 </tr>
@@ -1701,7 +1709,7 @@
 </tr>
 <tr>
 <td><code>b.UUID(&amp;u.ID)</code></td>
-<td><code>b.Field(&amp;u.ID).As(vuuid.Of)</code> of the separate module <code>github.com/insei/valigo/uuid</code></td>
+<td><code>b.Field(&amp;u.ID).As(vuuid.Of)</code> of the separate module <code>github.com/insei/valigo/rules/uuid</code></td>
 </tr>
 <tr>
 <td><code>b.StringSlice(&amp;u.Tags)</code></td>
@@ -1737,7 +1745,7 @@
 </tr>
 <tr>
 <td><code>shared.NewSliceFieldConfigurator(params)</code>, <code>shared.FieldConfigurator</code></td>
-<td><code>shared.NewSliceFieldConfigurator(field, helper, add)</code>, <code>shared.Field[T]</code></td>
+<td><code>shared.NewSliceFieldConfigurator(field, helper, fields, add, describe)</code>, <code>shared.Field[T]</code></td>
 </tr>
 </tbody>
 </table>

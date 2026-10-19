@@ -28,8 +28,8 @@ import (
     "github.com/insei/valigo"
     vgin "github.com/insei/valigo/gin"
     "github.com/insei/valigo/problem"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
 )
 
 type SignUp struct {

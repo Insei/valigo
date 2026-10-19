@@ -34,9 +34,9 @@ import (
     "time"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
-    "github.com/insei/valigo/str"
-    "github.com/insei/valigo/timex"
+    "github.com/insei/valigo/rules/num"
+    "github.com/insei/valigo/rules/str"
+    "github.com/insei/valigo/rules/timex"
 )
 
 type Auction struct {

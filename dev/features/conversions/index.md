@@ -19,20 +19,20 @@ b.Field(&u.Age).As(str.Of)
 
 ## Built-in conversions
 
-| Conversion        | Fields                                                  | Configurator                                                                                                                  |
-| ----------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `str.Of`          | `string`, `*string`, named strings                      | [strings](https://insei.github.io/valigo/latest/features/strings/index.md)                                                    |
-| `num.Of`          | numbers and named numbers                               | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                    |
-| `num.Slice`       | `Slice` of numbers                                      | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the number rules of elements                    |
-| `num.Ptr`         | pointers to numbers                                     | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md), `Required` checks only that the pointer isn't nil |
-| `timex.Of`        | `time.Time`, `*time.Time`                               | [time](https://insei.github.io/valigo/latest/features/time/index.md)                                                          |
-| `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](https://insei.github.io/valigo/latest/features/values/index.md)                                           |
-| `vuuid.Of`        | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid`   | [uuid](https://insei.github.io/valigo/latest/features/uuid/index.md), the separate module `github.com/insei/valigo/uuid`      |
-| `str.Slice`       | `Slice` of strings, `*string` or named strings          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the string rules of elements                    |
-| `timex.Slice`     | `Slice` of `time.Time`, `*time.Time`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the time rules of elements                      |
-| `eq.Slice`        | `Slice` of a `comparable` type                          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with `Unique` and the equality rules of elements     |
-| `vuuid.Slice`     | `Slice` of `uuid.UUID`, `*uuid.UUID`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the uuid rules of elements                      |
-| `shared.SlicePtr` | `Field` of `*[]E`                                       | the slice configurator, a nil pointer is absent                                                                               |
+| Conversion        | Fields                                                  | Configurator                                                                                                                   |
+| ----------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `str.Of`          | `string`, `*string`, named strings                      | [strings](https://insei.github.io/valigo/latest/features/strings/index.md)                                                     |
+| `num.Of`          | numbers and named numbers                               | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                     |
+| `num.Slice`       | `Slice` of numbers                                      | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the number rules of elements                     |
+| `num.Ptr`         | pointers to numbers                                     | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md), `Required` checks only that the pointer isn't nil  |
+| `timex.Of`        | `time.Time`, `*time.Time`                               | [time](https://insei.github.io/valigo/latest/features/time/index.md)                                                           |
+| `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](https://insei.github.io/valigo/latest/features/values/index.md)                                            |
+| `vuuid.Of`        | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid`   | [uuid](https://insei.github.io/valigo/latest/features/uuid/index.md), the separate module `github.com/insei/valigo/rules/uuid` |
+| `str.Slice`       | `Slice` of strings, `*string` or named strings          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the string rules of elements                     |
+| `timex.Slice`     | `Slice` of `time.Time`, `*time.Time`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the time rules of elements                       |
+| `eq.Slice`        | `Slice` of a `comparable` type                          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with `Unique` and the equality rules of elements      |
+| `vuuid.Slice`     | `Slice` of `uuid.UUID`, `*uuid.UUID`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the uuid rules of elements                       |
+| `shared.SlicePtr` | `Field` of `*[]E`                                       | the slice configurator, a nil pointer is absent                                                                                |
 
 The elements of a slice are converted in `Each`: `b.Slice(&m.Sizes).Each(func(e *shared.Field[int]) { e.As(num.Of).Min(1) })`.
 
@@ -126,4 +126,4 @@ Output:
 [Should be after 2026-01-01 (EndsAt: 2025-12-31 00:00:00 +0000 UTC)]
 ```
 
-The type constraint of `TimeOf` makes `b.Field(&e.Title).As(TimeOf)` a compile error for a `string` field. The rules of another uuid package are added the same way, see the source of [`github.com/insei/valigo/uuid`](https://github.com/Insei/valigo/tree/main/uuid).
+The type constraint of `TimeOf` makes `b.Field(&e.Title).As(TimeOf)` a compile error for a `string` field. The rules of another uuid package are added the same way, see the source of [`github.com/insei/valigo/rules/uuid`](https://github.com/Insei/valigo/tree/main/rules/uuid).

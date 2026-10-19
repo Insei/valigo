@@ -34,7 +34,7 @@ import (
     "github.com/insei/fmap/v3"
     "github.com/insei/valigo"
     "github.com/insei/valigo/problem"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/translator"
 )
 

@@ -33,8 +33,8 @@ import (
     "regexp"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/num"
+    "github.com/insei/valigo/rules/str"
 )
 
 type User struct {
@@ -233,21 +233,23 @@ Every pull request gets a comment with the benchmarks of the core compared with 
 
 Rules are still configured by pointers to the fields of the model, but the configurator is typed now and knows nothing about the types of the values: a field is converted to the configurator of its type by `As`. Go 1.27 is required.
 
-| v0.0.x                                                                             | Now                                                                                                        |
-| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `b.String(&u.Name)`                                                                | `b.Field(&u.Name).As(str.Of)`                                                                              |
-| `b.Number(&u.Age)`                                                                 | `b.Field(&u.Age).As(num.Of)`                                                                               |
-| `b.Number(&u.Score)` for `*int`                                                    | `b.Field(&u.Score).As(num.Ptr)`                                                                            |
-| `b.UUID(&u.ID)`                                                                    | `b.Field(&u.ID).As(vuuid.Of)` of the separate module `github.com/insei/valigo/uuid`                        |
-| `b.StringSlice(&u.Tags)`                                                           | `b.Slice(&u.Tags).As(str.Slice)`, for `*[]string`: `b.Field(&u.Tags).As(shared.SlicePtr).As(str.Slice)`    |
-| `b.UUIDSlice(&u.IDs)`                                                              | `b.Slice(&u.IDs).As(vuuid.Slice)`                                                                          |
-| `b.Slice(any)` with `Custom(func(ctx, h, value []*any) ...)`                       | `b.Slice(&u.Items)` with `Custom(func(ctx, h, value shared.Elems[E]) ...)` and `Each`                      |
-| `Configurator[T]` is an interface                                                  | a struct with generic methods, the signature of the `Configure` function is the same                       |
-| field configurators are interfaces: `str.BaseConfigurator`, `num.BaseConfigurator` | pointers to concrete types: `*str.BaseConfigurator`, `*num.BaseConfigurator[N]`, `*vuuid.BaseConfigurator` |
-| `Max(any)`, `Min(any)`, `AnyOf(...any)`, `AnyOfInterval(any, any)`                 | the arguments have the type of the field, `Max(5)` works for `int64`                                       |
-| `Custom(func(ctx, h, value any) ...)`, `When(func(ctx, value any) bool)` of fields | the value is typed: `string`, the number type, `uuid.UUID`                                                 |
-| `StringSlice(...).MaxLen(n)`                                                       | the same: the number of elements; rules on elements are set by `Each`                                      |
-| `shared.NewSliceFieldConfigurator(params)`, `shared.FieldConfigurator`             | `shared.NewSliceFieldConfigurator(field, helper, add)`, `shared.Field[T]`                                  |
+| v0.0.x                                                                             | Now                                                                                                         |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `github.com/insei/valigo/str`, `github.com/insei/valigo/num`                       | `github.com/insei/valigo/rules/str`, `github.com/insei/valigo/rules/num`, also `rules/eq` and `rules/timex` |
+| `github.com/insei/valigo/uuid` of the core module                                  | the separate module `github.com/insei/valigo/rules/uuid`                                                    |
+| `b.String(&u.Name)`                                                                | `b.Field(&u.Name).As(str.Of)`                                                                               |
+| `b.Number(&u.Age)`                                                                 | `b.Field(&u.Age).As(num.Of)`                                                                                |
+| `b.Number(&u.Score)` for `*int`                                                    | `b.Field(&u.Score).As(num.Ptr)`                                                                             |
+| `b.UUID(&u.ID)`                                                                    | `b.Field(&u.ID).As(vuuid.Of)` of the separate module `github.com/insei/valigo/rules/uuid`                   |
+| `b.StringSlice(&u.Tags)`                                                           | `b.Slice(&u.Tags).As(str.Slice)`, for `*[]string`: `b.Field(&u.Tags).As(shared.SlicePtr).As(str.Slice)`     |
+| `b.UUIDSlice(&u.IDs)`                                                              | `b.Slice(&u.IDs).As(vuuid.Slice)`                                                                           |
+| `b.Slice(any)` with `Custom(func(ctx, h, value []*any) ...)`                       | `b.Slice(&u.Items)` with `Custom(func(ctx, h, value shared.Elems[E]) ...)` and `Each`                       |
+| `Configurator[T]` is an interface                                                  | a struct with generic methods, the signature of the `Configure` function is the same                        |
+| field configurators are interfaces: `str.BaseConfigurator`, `num.BaseConfigurator` | pointers to concrete types: `*str.BaseConfigurator`, `*num.BaseConfigurator[N]`, `*vuuid.BaseConfigurator`  |
+| `Max(any)`, `Min(any)`, `AnyOf(...any)`, `AnyOfInterval(any, any)`                 | the arguments have the type of the field, `Max(5)` works for `int64`                                        |
+| `Custom(func(ctx, h, value any) ...)`, `When(func(ctx, value any) bool)` of fields | the value is typed: `string`, the number type, `uuid.UUID`                                                  |
+| `StringSlice(...).MaxLen(n)`                                                       | the same: the number of elements; rules on elements are set by `Each`                                       |
+| `shared.NewSliceFieldConfigurator(params)`, `shared.FieldConfigurator`             | `shared.NewSliceFieldConfigurator(field, helper, fields, add, describe)`, `shared.Field[T]`                 |
 
 ## Behavior changes
 
@@ -407,7 +409,7 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
 )
 
 type Address struct {
@@ -480,20 +482,20 @@ b.Field(&u.Age).As(str.Of)
 
 ## Built-in conversions
 
-| Conversion        | Fields                                                  | Configurator                                                                                                                  |
-| ----------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `str.Of`          | `string`, `*string`, named strings                      | [strings](https://insei.github.io/valigo/latest/features/strings/index.md)                                                    |
-| `num.Of`          | numbers and named numbers                               | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                    |
-| `num.Slice`       | `Slice` of numbers                                      | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the number rules of elements                    |
-| `num.Ptr`         | pointers to numbers                                     | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md), `Required` checks only that the pointer isn't nil |
-| `timex.Of`        | `time.Time`, `*time.Time`                               | [time](https://insei.github.io/valigo/latest/features/time/index.md)                                                          |
-| `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](https://insei.github.io/valigo/latest/features/values/index.md)                                           |
-| `vuuid.Of`        | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid`   | [uuid](https://insei.github.io/valigo/latest/features/uuid/index.md), the separate module `github.com/insei/valigo/uuid`      |
-| `str.Slice`       | `Slice` of strings, `*string` or named strings          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the string rules of elements                    |
-| `timex.Slice`     | `Slice` of `time.Time`, `*time.Time`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the time rules of elements                      |
-| `eq.Slice`        | `Slice` of a `comparable` type                          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with `Unique` and the equality rules of elements     |
-| `vuuid.Slice`     | `Slice` of `uuid.UUID`, `*uuid.UUID`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the uuid rules of elements                      |
-| `shared.SlicePtr` | `Field` of `*[]E`                                       | the slice configurator, a nil pointer is absent                                                                               |
+| Conversion        | Fields                                                  | Configurator                                                                                                                   |
+| ----------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `str.Of`          | `string`, `*string`, named strings                      | [strings](https://insei.github.io/valigo/latest/features/strings/index.md)                                                     |
+| `num.Of`          | numbers and named numbers                               | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                     |
+| `num.Slice`       | `Slice` of numbers                                      | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the number rules of elements                     |
+| `num.Ptr`         | pointers to numbers                                     | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md), `Required` checks only that the pointer isn't nil  |
+| `timex.Of`        | `time.Time`, `*time.Time`                               | [time](https://insei.github.io/valigo/latest/features/time/index.md)                                                           |
+| `eq.Of`, `eq.Ptr` | any `comparable` type and pointers to it: enums, `bool` | [comparable values](https://insei.github.io/valigo/latest/features/values/index.md)                                            |
+| `vuuid.Of`        | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid`   | [uuid](https://insei.github.io/valigo/latest/features/uuid/index.md), the separate module `github.com/insei/valigo/rules/uuid` |
+| `str.Slice`       | `Slice` of strings, `*string` or named strings          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the string rules of elements                     |
+| `timex.Slice`     | `Slice` of `time.Time`, `*time.Time`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the time rules of elements                       |
+| `eq.Slice`        | `Slice` of a `comparable` type                          | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with `Unique` and the equality rules of elements      |
+| `vuuid.Slice`     | `Slice` of `uuid.UUID`, `*uuid.UUID`                    | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the uuid rules of elements                       |
+| `shared.SlicePtr` | `Field` of `*[]E`                                       | the slice configurator, a nil pointer is absent                                                                                |
 
 The elements of a slice are converted in `Each`: `b.Slice(&m.Sizes).Each(func(e *shared.Field[int]) { e.As(num.Of).Min(1) })`.
 
@@ -587,7 +589,7 @@ Output:
 [Should be after 2026-01-01 (EndsAt: 2025-12-31 00:00:00 +0000 UTC)]
 ```
 
-The type constraint of `TimeOf` makes `b.Field(&e.Title).As(TimeOf)` a compile error for a `string` field. The rules of another uuid package are added the same way, see the source of [`github.com/insei/valigo/uuid`](https://github.com/Insei/valigo/tree/main/uuid).
+The type constraint of `TimeOf` makes `b.Field(&e.Title).As(TimeOf)` a compile error for a `string` field. The rules of another uuid package are added the same way, see the source of [`github.com/insei/valigo/rules/uuid`](https://github.com/Insei/valigo/tree/main/rules/uuid).
 
 # Absent values
 
@@ -608,9 +610,9 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
+    "github.com/insei/valigo/rules/num"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
 )
 
 type Address struct {
@@ -680,8 +682,8 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/num"
+    "github.com/insei/valigo/rules/str"
 )
 
 type Sender struct {
@@ -747,8 +749,8 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
 )
 
 type Customer struct {
@@ -810,9 +812,9 @@ import (
     "strings"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
+    "github.com/insei/valigo/rules/num"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
 )
 
 type Account struct {
@@ -929,8 +931,8 @@ import (
     "unicode/utf8"
 
     "github.com/insei/valigo"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
 )
 
 type tenantKey struct{}
@@ -1016,9 +1018,9 @@ import (
     "time"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
-    "github.com/insei/valigo/str"
-    "github.com/insei/valigo/timex"
+    "github.com/insei/valigo/rules/num"
+    "github.com/insei/valigo/rules/str"
+    "github.com/insei/valigo/rules/timex"
 )
 
 type Auction struct {
@@ -1079,7 +1081,7 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
 )
 
 type Address struct {
@@ -1229,7 +1231,7 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
 )
 
 type Webhook struct {
@@ -1286,7 +1288,7 @@ import (
     "regexp"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
 )
 
 type Product struct {
@@ -1362,7 +1364,7 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
+    "github.com/insei/valigo/rules/num"
 )
 
 type UpdateProduct struct {
@@ -1435,7 +1437,7 @@ import (
     "time"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/timex"
+    "github.com/insei/valigo/rules/timex"
 )
 
 type Report struct {
@@ -1517,7 +1519,7 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/eq"
+    "github.com/insei/valigo/rules/eq"
 )
 
 type Plan string
@@ -1557,10 +1559,10 @@ Should contain unique values (Features: sso)
 
 # UUID
 
-The rules of [`github.com/google/uuid`](https://pkg.go.dev/github.com/google/uuid) are in the separate module `github.com/insei/valigo/uuid`, so the core doesn't depend on a uuid package:
+The rules of [`github.com/google/uuid`](https://pkg.go.dev/github.com/google/uuid) are in the separate module `github.com/insei/valigo/rules/uuid`, so the core doesn't depend on a uuid package:
 
 ```bash
-go get github.com/insei/valigo/uuid@latest
+go get github.com/insei/valigo/rules/uuid@latest
 ```
 
 `uuid.Of` converts a `uuid.UUID` field or a `*uuid.UUID` field to the uuid configurator, `uuid.Slice` — a slice of them. The module's package is also named `uuid`, import it with an alias next to `github.com/google/uuid`:
@@ -1568,7 +1570,7 @@ go get github.com/insei/valigo/uuid@latest
 ```go
 import (
     "github.com/google/uuid"
-    vuuid "github.com/insei/valigo/uuid"
+    vuuid "github.com/insei/valigo/rules/uuid"
 )
 
 type Comment struct {
@@ -1603,8 +1605,8 @@ import (
 
     "github.com/google/uuid"
     "github.com/insei/valigo"
+    vuuid "github.com/insei/valigo/rules/uuid"
     "github.com/insei/valigo/shared"
-    vuuid "github.com/insei/valigo/uuid"
 )
 
 type Comment struct {
@@ -1671,9 +1673,9 @@ import (
 
     "github.com/google/uuid"
     "github.com/insei/valigo"
+    "github.com/insei/valigo/rules/str"
+    vuuid "github.com/insei/valigo/rules/uuid"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
-    vuuid "github.com/insei/valigo/uuid"
 )
 
 type Post struct {
@@ -1789,9 +1791,9 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
+    "github.com/insei/valigo/rules/num"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
 )
 
 type Service struct {
@@ -1869,9 +1871,9 @@ import (
     "time"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
-    "github.com/insei/valigo/str"
-    "github.com/insei/valigo/timex"
+    "github.com/insei/valigo/rules/num"
+    "github.com/insei/valigo/rules/str"
+    "github.com/insei/valigo/rules/timex"
 )
 
 type Event struct {
@@ -1950,7 +1952,7 @@ import (
 
     "github.com/insei/fmap/v3"
     "github.com/insei/valigo"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
 )
 
 type Address struct {
@@ -2123,8 +2125,8 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
     "github.com/insei/valigo/translator"
 )
 
@@ -2215,7 +2217,7 @@ import (
     "github.com/insei/fmap/v3"
     "github.com/insei/valigo"
     "github.com/insei/valigo/problem"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/translator"
 )
 
@@ -2384,8 +2386,8 @@ import (
     "github.com/danielgtaylor/huma/v2/adapters/humago"
     "github.com/insei/valigo"
     vhuma "github.com/insei/valigo/huma"
-    "github.com/insei/valigo/num"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/num"
+    "github.com/insei/valigo/rules/str"
 )
 
 type CreateUserInput struct {
@@ -2480,7 +2482,7 @@ import (
     "github.com/danielgtaylor/huma/v2/adapters/humago"
     "github.com/insei/valigo"
     vhuma "github.com/insei/valigo/huma"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
 )
 
 type CreateUserInput struct {
@@ -2580,8 +2582,8 @@ import (
     "github.com/insei/valigo"
     vgin "github.com/insei/valigo/gin"
     "github.com/insei/valigo/problem"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
 )
 
 type SignUp struct {
@@ -2661,8 +2663,8 @@ import (
 
     "github.com/insei/valigo"
     vecho "github.com/insei/valigo/echo"
+    "github.com/insei/valigo/rules/str"
     "github.com/insei/valigo/shared"
-    "github.com/insei/valigo/str"
     "github.com/labstack/echo/v4"
 )
 
@@ -2756,9 +2758,9 @@ The rules append their errors to one pooled buffer of the validation, and `Valid
 | `valigo`                                            | `Validator`, `Configure`, `Configurator` with `Field`, `Slice`, `Map`, `When`, `Custom` and `Tags`, options                                                                              |
 | `internal/zero`, `internal/helper`, `internal/tags` | the allocation of the models of `Configure`, the helper of the errors with the translator and the locations, the rules of the tags                                                       |
 | `shared`                                            | the rules core `Field[T]`, slice configurator and `Elems[E]`, `As` and the conversions `Deref`, `Retype`, `RetypeSlice`, `SlicePtr`, `SliceRules`, `Error`, helpers                      |
-| `str`, `num`, `timex`, `eq`                         | configurators of strings, numbers, times and comparable values built on `shared.Field[T]`, their conversions `str.Of`, `num.Of`, `num.Ptr`, `timex.Of`, `eq.Of`... and slice conversions |
+| `rules/str`, `rules/num`, `rules/timex`, `rules/eq` | configurators of strings, numbers, times and comparable values built on `shared.Field[T]`, their conversions `str.Of`, `num.Of`, `num.Ptr`, `timex.Of`, `eq.Of`... and slice conversions |
 | `problem`                                           | the problem details of RFC 9457                                                                                                                                                          |
-| `github.com/insei/valigo/uuid`                      | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package                                                                                |
+| `github.com/insei/valigo/rules/uuid`                | the separate module with the rules of `github.com/google/uuid`, the core doesn't depend on a uuid package                                                                                |
 | `github.com/insei/valigo/huma`                      | the separate module of the inputs of huma operations                                                                                                                                     |
 | `translator`                                        | translator, in-memory storage, built-in locales, `Accept-Language` middleware                                                                                                            |
 

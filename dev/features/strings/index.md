@@ -79,7 +79,7 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
 )
 
 type Webhook struct {
@@ -136,7 +136,7 @@ import (
     "regexp"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/str"
+    "github.com/insei/valigo/rules/str"
 )
 
 type Product struct {

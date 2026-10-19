@@ -52,7 +52,7 @@ import (
     "fmt"
 
     "github.com/insei/valigo"
-    "github.com/insei/valigo/num"
+    "github.com/insei/valigo/rules/num"
 )
 
 type UpdateProduct struct {
