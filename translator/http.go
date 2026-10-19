@@ -53,7 +53,8 @@ func getPriorityLanguages(acceptLanguage string) []string {
 			continue
 		}
 		q, ok := parseQuotient(langWithQ)
-		if !ok {
+		// q=0 means "not acceptable"
+		if !ok || q <= 0 {
 			continue
 		}
 
