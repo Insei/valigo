@@ -41,6 +41,20 @@ b.Slice(&u.Emails).As(str.Slice).MaxLen(3).Email()
 | `Hostname()` | the value isn't a hostname by RFC 1123 | Should be hostname |
 | `UUID()` | the value isn't a UUID in the canonical form, any case | Should be UUID |
 | `Alphanumeric()` | the value is empty or has characters other than ASCII letters and digits | Should contain only letters and digits |
+| `ASCII()` | the value is empty or has non-ASCII characters | Should contain only ASCII characters |
+| `Lowercase()`, `Uppercase()` | the value is empty or has upper / lower case letters | Should be lowercase, Should be uppercase |
+| `Base64()`, `Base64URL()` | the value isn't base64 of RFC 4648 with the standard alphabet and padding / with the URL alphabet, padding optional | Should be base64 encoded, Should be base64url encoded |
+| `JSON()` | the value isn't a valid JSON value | Should be JSON |
+| `Semver()` | the value isn't a semantic version of semver.org, `1.2.3-rc.1+build.5`, without `v` | Should be semantic version |
+| `CIDR()` | the value isn't an IPv4 or IPv6 prefix, `10.0.0.0/8` | Should be CIDR |
+| `MAC()` | the value isn't a MAC address of 6 or 8 bytes, `00:1a:2b:3c:4d:5e`, `00-1a-...`, `001a.2b3c.4d5e` | Should be MAC address |
+| `E164()` | the value isn't a phone number of E.164, `+14155550123` | Should be E.164 phone number |
+| `HexColor()` | the value isn't `#rgb`, `#rgba`, `#rrggbb` or `#rrggbbaa` | Should be hex color |
+| `Datetime(layout)` | the value isn't parsed by `time.Parse(layout, value)` | Should be date and time in %s format |
+| `CountryCode()` | the value isn't an upper case code of ISO 3166-1 alpha-2, `US` | Should be ISO 3166-1 alpha-2 country code |
+| `CurrencyCode()` | the value isn't an upper case active code of ISO 4217, `EUR` | Should be ISO 4217 currency code |
+| `Luhn()` | the value isn't 2 or more digits with a valid Luhn checksum | Should have valid Luhn checksum |
+| `CreditCard()` | the value isn't 12-19 digits, grouped by spaces or hyphens, with a valid Luhn checksum | Should be credit card number |
 | `Custom(fn)` | `fn` returns errors | your messages, see [Custom rules](custom.md) |
 | `When(fn)` | — | the next rules are applied only if `fn` returns true, see [Conditions](conditions.md) |
 

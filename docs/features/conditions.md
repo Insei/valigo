@@ -67,6 +67,62 @@ The value is typed: `string` for `str.Of`, the number type for `num.Of` and `num
 
 For an [absent value](absent.md) the condition isn't called and the rules after it are skipped, including `Required`.
 
+## Conditional requiredness
+
+Tag based validators have families of tags like `required_if`, `required_with` and `required_without`. In valigo they are `When` with a condition on the fields:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/insei/valigo"
+	"github.com/insei/valigo/shared"
+	"github.com/insei/valigo/str"
+)
+
+type Customer struct {
+	Kind    string
+	TaxID   string
+	Phone   string
+	Email   string
+	Company string
+	Title   string
+}
+
+func main() {
+	v := valigo.New()
+	valigo.Configure[Customer](v, func(b valigo.Configurator[Customer], c *Customer) {
+		// required_if=Kind company
+		b.When(func(_ context.Context, c *Customer) bool { return c.Kind == "company" }).Field(&c.TaxID).As(str.Of).Required()
+		// required_without=Email: a phone or an email
+		b.When(func(_ context.Context, c *Customer) bool { return c.Email == "" }).Field(&c.Phone).As(str.Of).Required()
+		// required_with=Company: the title of the person in the company
+		b.When(func(_ context.Context, c *Customer) bool { return c.Company != "" }).Field(&c.Title).As(str.Of).Required()
+		// excluded_unless=Kind company
+		b.When(func(_ context.Context, c *Customer) bool { return c.Kind != "company" }).Field(&c.Company).As(str.Of).
+			Custom(func(ctx context.Context, h *shared.FieldCustomHelper, company string) []shared.Error {
+				if company != "" {
+					return []shared.Error{h.ErrorT(ctx, company, "Only companies have a company")}
+				}
+				return nil
+			})
+	})
+
+	fmt.Println(v.Validate(context.Background(), &Customer{Kind: "company"}))
+	fmt.Println(v.Validate(context.Background(), &Customer{Kind: "person", Email: "a@b.cc", Company: "ACME"}))
+}
+```
+
+Output:
+
+```text
+[Should be fulfilled (TaxID: ) Should be fulfilled (Phone: )]
+[Should be fulfilled (Title: ) Only companies have a company (Company: ACME)]
+```
+
 ## Conditions and custom rules
 
 A condition on several fields can also be written as a [struct custom rule](custom.md#struct-rules), which reports errors itself. Prefer `When`: the rules after it are the regular ones, with their messages and translations.

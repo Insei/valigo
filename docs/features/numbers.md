@@ -36,6 +36,7 @@ Slices of numbers are converted by `num.Slice`: `b.Slice(&p.Sizes).As(num.Slice)
 | `MinField(&m.X)`, `MaxField(&m.X)` | the value is less or greater than the value of the field `X`, see [Rules on other fields](fields.md) | Cannot be less than %v, Cannot be greater than %v |
 | `AnyOf(values...)` | the value isn't one of `values` | Only %v values is allowed |
 | `AnyOfInterval(begin, end)` | the value is outside `[begin, end]`, both ends are included | Only interval[%v - %v] is allowed |
+| `Latitude()`, `Longitude()` | the value is outside `[-90, 90]` / `[-180, 180]` | Should be latitude, Should be longitude |
 | `Custom(fn)` | `fn` returns errors | your messages, see [Custom rules](custom.md) |
 | `When(fn)` | — | the next rules are applied only if `fn` returns true, see [Conditions](conditions.md) |
 
