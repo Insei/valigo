@@ -19,7 +19,7 @@ func TestStringSliceBuilderRegexp(t *testing.T) {
 	v := valigo.New()
 	re := regexp.MustCompile(`April`)
 	valigo.Configure[year](v, func(builder valigo.Configurator[year], obj *year) {
-		builder.StringSlice(&obj.Month).
+		builder.Slice(&obj.Month).As(str.Slice).
 			Required().
 			Regexp(re)
 	})
@@ -84,7 +84,7 @@ func TestStringSliceBuilderRegexp(t *testing.T) {
 func TestStringSliceBuilderTrim(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[year](v, func(builder valigo.Configurator[year], obj *year) {
-		builder.StringSlice(&obj.Month).
+		builder.Slice(&obj.Month).As(str.Slice).
 			Trim()
 	})
 
@@ -142,7 +142,7 @@ type user struct {
 func TestStringSliceBuilderMaxLen(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[user](v, func(builder valigo.Configurator[user], obj *user) {
-		builder.StringSlice(&obj.PhoneNumbers).
+		builder.Slice(&obj.PhoneNumbers).As(str.Slice).
 			Each(func(e *str.BaseConfigurator) { e.MaxLen(12) })
 	})
 
@@ -181,7 +181,7 @@ func TestStringSliceBuilderMaxLen(t *testing.T) {
 func TestStringSliceBuilderMinLen(t *testing.T) {
 	v := valigo.New()
 	valigo.Configure[user](v, func(builder valigo.Configurator[user], obj *user) {
-		builder.StringSlice(&obj.PhoneNumbers).
+		builder.Slice(&obj.PhoneNumbers).As(str.Slice).
 			Each(func(e *str.BaseConfigurator) { e.MinLen(9) })
 	})
 

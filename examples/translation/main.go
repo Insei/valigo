@@ -8,8 +8,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/insei/valigo"
+	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/str"
 	"github.com/insei/valigo/translator"
+	vuuid "github.com/insei/valigo/uuid"
 )
 
 type Sender struct {
@@ -47,23 +49,23 @@ func main() {
 	v := manualValidatorSettings() //v := valigo.New()
 	allowedClientID := uuid.New()
 	valigo.Configure[Sender](v, func(builder valigo.Configurator[Sender], obj *Sender) {
-		builder.Number(&obj.Int).AnyOf(2)
-		builder.String(&obj.Type).When(func(ctx context.Context, value string) bool {
+		builder.Field(&obj.Int).As(num.Of).AnyOf(2)
+		builder.Field(&obj.Type).As(str.Of).When(func(ctx context.Context, value string) bool {
 			return true
 		}).Trim()
-		builder.String(&obj.Description).When(func(ctx context.Context, value string) bool {
+		builder.Field(&obj.Description).As(str.Of).When(func(ctx context.Context, value string) bool {
 			return true
 		}).Trim()
-		builder.String(&obj.SMTPHost).Trim().
+		builder.Field(&obj.SMTPHost).As(str.Of).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
-		builder.UUID(&obj.Id).When(func(ctx context.Context, value uuid.UUID) bool {
+		builder.Field(&obj.Id).As(vuuid.Of).When(func(ctx context.Context, value uuid.UUID) bool {
 			return true
 		}).AnyOf(uuid.Nil)
-		builder.String(&obj.Email).Email()
-		builder.StringSlice(&obj.Emails).Email()
-		builder.StringSlice(&obj.Templates).Trim().
+		builder.Field(&obj.Email).As(str.Of).Email()
+		builder.Slice(&obj.Emails).As(str.Slice).Email()
+		builder.Slice(&obj.Templates).As(str.Slice).Trim().
 			Regexp(regexp.MustCompile("^[a-zA-Z0-9.]+$"), str.WithRegexpLocaleKey(customRegexpLocaleKey))
-		builder.UUIDSlice(&obj.ClientIDs).AnyOf(allowedClientID)
+		builder.Slice(&obj.ClientIDs).As(vuuid.Slice).AnyOf(allowedClientID)
 	})
 	id, err := uuid.NewV7()
 	if err != nil {
