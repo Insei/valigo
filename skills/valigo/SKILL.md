@@ -175,7 +175,7 @@ func main() {
 
 ## Translations
 
-The built-in messages are in English and Russian. The language comes from the context: wrap the HTTP handler with `translator.NewAcceptLanguageMiddleware()`, or pass `translator.WithPreferredLanguagesFn(fn)` to `translator.New`. Messages of your rules are locale keys: a key without a translation is printed as is, translations are added to a storage:
+The built-in messages are in English, German, Spanish, French and Russian, with plural forms. The language comes from the context: wrap the HTTP handler with `translator.NewAcceptLanguageMiddleware()`, or pass `translator.WithPreferredLanguagesFn(fn)` to `translator.New`. Messages of your rules are locale keys: a key without a translation is printed as is, translations are added to a storage:
 
 ```go
 storage := translator.NewInMemStorage() // with the built-in locales

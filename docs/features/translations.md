@@ -1,6 +1,6 @@
 # Translations
 
-Messages are translated by a `translator.Translator`. The default one of `valigo.New` has the English and Russian messages of the built-in rules, English is the default language.
+Messages are translated by a `translator.Translator`. The default one of `valigo.New` has the English, German, Spanish, French and Russian messages of the built-in rules, English is the default language.
 
 ## Locale keys
 
