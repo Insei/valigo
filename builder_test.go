@@ -3,6 +3,7 @@ package valigo
 import (
 	"context"
 	"regexp"
+	"sync"
 	"testing"
 
 	"github.com/google/uuid"
@@ -262,6 +263,16 @@ func TestConfigurePanics(t *testing.T) {
 	assert.PanicsWithValue(t, "valigo: *string is not a pointer to a field of *valigo.model: field not found", func() {
 		Configure[model](New(), func(c Configurator[model], m *model) { c.String(&foreign) })
 	})
+}
+
+func TestConfigureWithUnexportedStructField(t *testing.T) {
+	type withMutex struct {
+		mu   sync.Mutex
+		Name string
+	}
+	v := New()
+	Configure[withMutex](v, func(c Configurator[withMutex], m *withMutex) { c.String(&m.Name).Required() })
+	assert.Len(t, v.ValidateTyped(context.Background(), &withMutex{}), 1)
 }
 
 func TestZeroAllocationsOnValid(t *testing.T) {
