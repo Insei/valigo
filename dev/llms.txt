@@ -24,6 +24,7 @@ valigo validates Go structs by rules configured once with pointers to the fields
 - [Rules on other fields](https://insei.github.io/valigo/latest/features/fields/index.md)
 - [Maps](https://insei.github.io/valigo/latest/features/maps/index.md)
 - [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)
+- [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md)
 - [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)
 - [Strings](https://insei.github.io/valigo/latest/features/strings/index.md)
 - [Time](https://insei.github.io/valigo/latest/features/time/index.md)

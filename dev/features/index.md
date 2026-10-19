@@ -27,7 +27,8 @@ Reference of valigo capabilities grouped by area.
 
 ## Results
 
-| Page                                                                                 | What's inside                                                                                        |
-| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| [Errors](https://insei.github.io/valigo/latest/features/errors/index.md)             | `Validate` and `ValidateTyped`, `shared.Error`, locations of fields and elements, errors transformer |
-| [Translations](https://insei.github.io/valigo/latest/features/translations/index.md) | Built-in locales, own messages, languages from the context, `Accept-Language` middleware             |
+| Page                                                                                    | What's inside                                                                                        |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [Errors](https://insei.github.io/valigo/latest/features/errors/index.md)                | `Validate` and `ValidateTyped`, `shared.Error`, locations of fields and elements, errors transformer |
+| [HTTP problem details](https://insei.github.io/valigo/latest/features/problem/index.md) | `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers and codes         |
+| [Translations](https://insei.github.io/valigo/latest/features/translations/index.md)    | Built-in locales, own messages, languages from the context, `Accept-Language` middleware             |
