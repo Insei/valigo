@@ -233,6 +233,7 @@ Reference of valigo capabilities grouped by area.
 | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Strings](https://insei.github.io/valigo/latest/features/strings/index.md) | `str.Of`: `Required`, lengths, `AnyOf`, `Prefix`, `Suffix`, `Contains`, `Regexp`, `Email`, `URL`, `IP`, `Hostname`, `UUID`, `Alphanumeric`, `Trim` |
 | [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md) | `num.Of` and `num.Ptr`: `Required`, `Min`, `Max`, `AnyOf`, `AnyOfInterval`                                                                         |
+| [Time](https://insei.github.io/valigo/latest/features/time/index.md)       | `timex.Of`: `Required`, `Before`, `After`, `Between`, `InPast`, `InFuture`                                                                         |
 | [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)       | `uuid.Of` of the separate module: `Required`, `AnyOf`                                                                                              |
 | [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)   | `Slice`, `str.Slice`, `uuid.Slice`: length rules, `Each` for elements                                                                              |
 
@@ -533,8 +534,10 @@ b.Field(&u.Age).As(str.Of)
 | `str.Of`          | `string`, `*string`, named strings                    | [strings](https://insei.github.io/valigo/latest/features/strings/index.md)                                                    |
 | `num.Of`          | numbers and named numbers                             | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)                                                    |
 | `num.Ptr`         | pointers to numbers                                   | [numbers](https://insei.github.io/valigo/latest/features/numbers/index.md), `Required` checks only that the pointer isn't nil |
+| `timex.Of`        | `time.Time`, `*time.Time`                             | [time](https://insei.github.io/valigo/latest/features/time/index.md)                                                          |
 | `vuuid.Of`        | `uuid.UUID`, `*uuid.UUID` of `github.com/google/uuid` | [uuid](https://insei.github.io/valigo/latest/features/uuid/index.md), the separate module `github.com/insei/valigo/uuid`      |
 | `str.Slice`       | `Slice` of strings, `*string` or named strings        | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the string rules of elements                    |
+| `timex.Slice`     | `Slice` of `time.Time`, `*time.Time`                  | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the time rules of elements                      |
 | `vuuid.Slice`     | `Slice` of `uuid.UUID`, `*uuid.UUID`                  | [slices](https://insei.github.io/valigo/latest/features/slices/index.md) with the uuid rules of elements                      |
 | `shared.SlicePtr` | `Field` of `*[]E`                                     | the slice configurator, a nil pointer is absent                                                                               |
 
@@ -565,7 +568,7 @@ A conversion of your type is a function that takes the base configurator and ret
 - `shared.RetypeSlice` does the same for a slice configurator, also for the elements stored by pointer;
 - `shared.SliceRules` gives `Required`, `MinLen`, `MaxLen`, `Custom` and `When` of the slice to your slice configurator, see the source of `str.Slice`.
 
-A configurator of `time.Time`:
+A configurator of `time.Time` (the built-in one is [`timex`](https://insei.github.io/valigo/latest/features/time/index.md), this one shows how it's made):
 
 ```go
 package main
@@ -1187,6 +1190,81 @@ Output:
 
 ```text
 [Should look like ABC-1234 (SKU: abc-1)]
+```
+
+# Time
+
+`timex.Of` converts a `time.Time` field or a `*time.Time` field to the time configurator, `timex.Slice` — a slice of them:
+
+```go
+type Booking struct {
+    CheckIn   time.Time
+    CheckOut  *time.Time
+    Reminders []time.Time
+}
+
+b.Field(&bk.CheckIn).As(timex.Of).Required().InFuture()
+b.Field(&bk.CheckOut).As(timex.Of).After(start) // a nil CheckOut is skipped
+b.Slice(&bk.Reminders).As(timex.Slice).MaxLen(3).Each(func(r *timex.BaseConfigurator) { r.InFuture() })
+```
+
+The package is named `timex` to not shadow the standard `time`.
+
+## Rules
+
+| Rule                | Fails when                                                | Message                                                                                                                                    |
+| ------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Required()`        | the value is absent or zero                               | Should be fulfilled                                                                                                                        |
+| `Before(t)`         | the value isn't before `t`                                | Should be before %s                                                                                                                        |
+| `After(t)`          | the value isn't after `t`                                 | Should be after %s                                                                                                                         |
+| `Between(from, to)` | the value is outside `[from, to]`, both ends are included | Should be between %s and %s                                                                                                                |
+| `InPast()`          | the value isn't before the moment of the validation       | Should be in the past                                                                                                                      |
+| `InFuture()`        | the value isn't after the moment of the validation        | Should be in the future                                                                                                                    |
+| `Custom(fn)`        | `fn` returns errors                                       | your messages, see [Custom rules](https://insei.github.io/valigo/latest/features/custom/index.md)                                          |
+| `When(fn)`          | —                                                         | the next rules are applied only if `fn` returns true, see [Conditions](https://insei.github.io/valigo/latest/features/conditions/index.md) |
+
+The times in the messages are formatted by RFC 3339. `Before`, `After` and `Between` take the bounds of the configuration; for a bound from another field of the object use a [struct custom rule](https://insei.github.io/valigo/latest/features/custom/#struct-rules).
+
+## Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/timex"
+)
+
+type Report struct {
+    From time.Time
+    To   *time.Time
+}
+
+func main() {
+    start := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+    end := time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC)
+
+    v := valigo.New()
+    valigo.Configure[Report](v, func(b valigo.Configurator[Report], r *Report) {
+        b.Field(&r.From).As(timex.Of).Required().Between(start, end)
+        b.Field(&r.To).As(timex.Of).Before(end)
+    })
+
+    late := end.AddDate(0, 1, 0)
+    fmt.Println(v.Validate(context.Background(), &Report{}))
+    fmt.Println(v.Validate(context.Background(), &Report{From: start, To: &late}))
+}
+```
+
+Output:
+
+```text
+[Should be fulfilled (From: 0001-01-01 00:00:00 +0000 UTC) Should be between 2026-01-01T00:00:00Z and 2026-12-31T00:00:00Z (From: 0001-01-01 00:00:00 +0000 UTC)]
+[Should be before 2026-12-31T00:00:00Z (To: 2027-01-31 00:00:00 +0000 UTC)]
 ```
 
 # Translations

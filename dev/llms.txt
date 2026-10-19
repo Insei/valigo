@@ -23,6 +23,7 @@ valigo validates Go structs by rules configured once with pointers to the fields
 - [Numbers](https://insei.github.io/valigo/latest/features/numbers/index.md)
 - [Slices](https://insei.github.io/valigo/latest/features/slices/index.md)
 - [Strings](https://insei.github.io/valigo/latest/features/strings/index.md)
+- [Time](https://insei.github.io/valigo/latest/features/time/index.md)
 - [Translations](https://insei.github.io/valigo/latest/features/translations/index.md)
 - [UUID](https://insei.github.io/valigo/latest/features/uuid/index.md)
 

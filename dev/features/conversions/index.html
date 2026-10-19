@@ -535,6 +535,8 @@
       
         
       
+        
+      
     
     
     
@@ -875,6 +877,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../time/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Time
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../uuid/" class="md-nav__link">
         
   
@@ -1180,6 +1210,11 @@
 <td><a href="../numbers/">numbers</a>, <code>Required</code> checks only that the pointer isn't nil</td>
 </tr>
 <tr>
+<td><code>timex.Of</code></td>
+<td><code>time.Time</code>, <code>*time.Time</code></td>
+<td><a href="../time/">time</a></td>
+</tr>
+<tr>
 <td><code>vuuid.Of</code></td>
 <td><code>uuid.UUID</code>, <code>*uuid.UUID</code> of <code>github.com/google/uuid</code></td>
 <td><a href="../uuid/">uuid</a>, the separate module <code>github.com/insei/valigo/uuid</code></td>
@@ -1188,6 +1223,11 @@
 <td><code>str.Slice</code></td>
 <td><code>Slice</code> of strings, <code>*string</code> or named strings</td>
 <td><a href="../slices/">slices</a> with the string rules of elements</td>
+</tr>
+<tr>
+<td><code>timex.Slice</code></td>
+<td><code>Slice</code> of <code>time.Time</code>, <code>*time.Time</code></td>
+<td><a href="../slices/">slices</a> with the time rules of elements</td>
 </tr>
 <tr>
 <td><code>vuuid.Slice</code></td>
@@ -1244,7 +1284,7 @@
 <li><code>shared.RetypeSlice</code> does the same for a slice configurator, also for the elements stored by pointer;</li>
 <li><code>shared.SliceRules</code> gives <code>Required</code>, <code>MinLen</code>, <code>MaxLen</code>, <code>Custom</code> and <code>When</code> of the slice to your slice configurator, see the source of <code>str.Slice</code>.</li>
 </ul>
-<p>A configurator of <code>time.Time</code>:</p>
+<p>A configurator of <code>time.Time</code> (the built-in one is <a href="../time/"><code>timex</code></a>, this one shows how it's made):</p>
 <div class="language-go highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
