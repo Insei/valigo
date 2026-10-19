@@ -1,0 +1,52 @@
+# valigo
+
+> Typed, zero allocation validation of Go structs, rules are configured by pointers to the fields
+
+valigo validates Go structs by rules configured once with pointers to the fields of a model: b.Field(&u.Name).As(str.Of).Required().MaxLen(64). The configurator has Field, Slice, Map, When and Custom, As converts a field to the configurator of its type by a conversion with a type constraint (str.Of, num.Of, num.Ptr, timex.Of, eq.Of, str.Slice...), so the compiler checks the field types and the rule arguments (Go 1.27 generic methods). Validation of valid objects doesn't allocate, absent values are skipped by all rules except Required, errors have field locations, translated messages (en, de, es, fr, ru), stable codes and named params; the problem package writes RFC 9457 problem details, the github.com/insei/valigo/integrations/huma module validates huma inputs. The module path is github.com/insei/valigo.
+
+## Start
+
+- [valigo](https://insei.github.io/valigo/0.1/index.md): installation and the first validator
+- [Why valigo?](https://insei.github.io/valigo/0.1/why-valigo/index.md): what it gives compared to tag based validators
+- [Performance](https://insei.github.io/valigo/0.1/performance/index.md): benchmarks with go-playground/validator, ozzo-validation, zog, gookit/validate and hand-written code
+- [Upgrading from v0.0.x](https://insei.github.io/valigo/0.1/upgrading/index.md): upgrading from v0.0.x
+- [For AI agents](https://insei.github.io/valigo/0.1/ai-agents/index.md): the skill for AI agents
+
+## Configuration
+
+- [Features](https://insei.github.io/valigo/0.1/features/index.md): the map of the features
+- [Validator and Configure](https://insei.github.io/valigo/0.1/features/configure/index.md): the validator, Configure, the model, field pointers
+- [Types and conversions](https://insei.github.io/valigo/0.1/features/conversions/index.md): Field, Slice, Map and As, the built-in conversions, conversions of your types
+- [Absent values](https://insei.github.io/valigo/0.1/features/absent/index.md): nil pointers and nil nested structs
+- [Conditions](https://insei.github.io/valigo/0.1/features/conditions/index.md): When on the struct and on fields, conditional requiredness
+- [Custom rules](https://insei.github.io/valigo/0.1/features/custom/index.md): Custom rules, rules from data
+- [Rules on other fields](https://insei.github.io/valigo/0.1/features/fields/index.md): rules on other fields
+- [Rules from tags](https://insei.github.io/valigo/0.1/features/tags/index.md): the rules of the tags of go-playground/validator, a migration from it
+
+## Rules
+
+- [Strings](https://insei.github.io/valigo/0.1/features/strings/index.md): the rules and formats of strings
+- [Numbers](https://insei.github.io/valigo/0.1/features/numbers/index.md): the rules of numbers
+- [Time](https://insei.github.io/valigo/0.1/features/time/index.md): the rules of time.Time
+- [Comparable values](https://insei.github.io/valigo/0.1/features/values/index.md): the rules of comparable values, enums, bools
+- [UUID](https://insei.github.io/valigo/0.1/features/uuid/index.md): the rules of uuids, the separate module
+- [Slices](https://insei.github.io/valigo/0.1/features/slices/index.md): the rules of slices and their elements
+- [Maps](https://insei.github.io/valigo/0.1/features/maps/index.md): the rules of maps, their keys and values
+
+## Errors
+
+- [Errors](https://insei.github.io/valigo/0.1/features/errors/index.md): Validate, shared.Error, locations, codes for clients
+- [Translations](https://insei.github.io/valigo/0.1/features/translations/index.md): locales, plural forms, languages from the context
+- [HTTP problem details](https://insei.github.io/valigo/0.1/features/problem/index.md): problem details of RFC 9457
+
+## Integrations
+
+- [JSON Schema](https://insei.github.io/valigo/0.1/features/schema/index.md): the rules as the keywords of JSON Schema, Validator.Constraints
+- [huma](https://insei.github.io/valigo/0.1/features/huma/index.md): huma inputs, the rules in the OpenAPI document
+- [gin](https://insei.github.io/valigo/0.1/features/gin/index.md): gin binding
+- [echo](https://insei.github.io/valigo/0.1/features/echo/index.md): echo validator
+
+## Architecture
+
+- [How it works](https://insei.github.io/valigo/0.1/architecture/index.md)
+
