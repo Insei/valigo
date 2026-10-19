@@ -68,6 +68,6 @@ Every error has the message, the location and the value: `Tags[1]` for an elemen
 
 ## When valigo is not the right tool
 
-- **Rules come from the data**, e.g. a form builder or rules stored in a database: valigo rules are Go code compiled into the service.
+- **The fields aren't known at compile time**, e.g. a form builder with fields defined by users: valigo validates the fields of Go structs. The limits and the conditions of the rules can come from the data — a database, a cache, the settings of a tenant — see [Rules from data](https://insei.github.io/valigo/latest/features/custom/#rules-from-data).
 - **The input is not a struct**: valigo validates structs, decode maps and JSON into a struct first.
 - **Go older than 1.27**: the configurator uses generic methods.

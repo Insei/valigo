@@ -1528,7 +1528,7 @@
 <p>Every error has the message, the location and the value: <code>Tags[1]</code> for an element of a slice, <code>Address.City</code> for a nested field, or the JSON path of the field with a custom location function. See <a href="../features/errors/">Errors</a>.</p>
 <h2 id="when-valigo-is-not-the-right-tool">When valigo is not the right tool<a class="headerlink" href="#when-valigo-is-not-the-right-tool" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Rules come from the data</strong>, e.g. a form builder or rules stored in a database: valigo rules are Go code compiled into the service.</li>
+<li><strong>The fields aren't known at compile time</strong>, e.g. a form builder with fields defined by users: valigo validates the fields of Go structs. The limits and the conditions of the rules can come from the data — a database, a cache, the settings of a tenant — see <a href="../features/custom/#rules-from-data">Rules from data</a>.</li>
 <li><strong>The input is not a struct</strong>: valigo validates structs, decode maps and JSON into a struct first.</li>
 <li><strong>Go older than 1.27</strong>: the configurator uses generic methods.</li>
 </ul>

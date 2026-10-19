@@ -118,3 +118,65 @@ Output:
 - Struct `Custom` can be combined with [`When`](https://insei.github.io/valigo/latest/features/conditions/index.md): `b.When(cond).Custom(fn)`.
 - The helper is valid only during the call of the function, don't keep it.
 - A pointer that doesn't point to a field of the validated object panics.
+
+## Rules from data
+
+The rules are configured once, but they don't have to be constant: a `Custom` rule is a closure, it can read its limits from a database, a cache or the settings of a tenant on every validation, and it gets the context of the request. A `When` condition can do the same. Use the built-in message keys and codes, and the errors are translated and coded like the built-in ones:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "unicode/utf8"
+
+    "github.com/insei/valigo"
+    "github.com/insei/valigo/shared"
+    "github.com/insei/valigo/str"
+)
+
+type tenantKey struct{}
+
+// Limits are the settings of the tenants, a database or a cache in a real service.
+type Limits map[string]int
+
+func (l Limits) MaxTitle(ctx context.Context) int {
+    tenant, _ := ctx.Value(tenantKey{}).(string)
+    return l[tenant]
+}
+
+type Post struct {
+    Title string
+}
+
+func main() {
+    limits := Limits{"free": 10, "pro": 100}
+
+    v := valigo.New()
+    valigo.Configure[Post](v, func(b valigo.Configurator[Post], p *Post) {
+        b.Field(&p.Title).As(str.Of).Required().Custom(func(ctx context.Context, h *shared.FieldCustomHelper, title string) []shared.Error {
+            if maxLen := limits.MaxTitle(ctx); utf8.RuneCountInString(title) > maxLen {
+                msg := shared.M("string.max_runes", "validation:string:Cannot be longer than %d characters", shared.P("max", maxLen))
+                return []shared.Error{h.ErrorMsg(ctx, title, msg)}
+            }
+            return nil
+        })
+    })
+
+    post := &Post{Title: "Rules from the data"}
+    free := context.WithValue(context.Background(), tenantKey{}, "free")
+    pro := context.WithValue(context.Background(), tenantKey{}, "pro")
+    fmt.Println(v.Validate(free, post))
+    fmt.Println(v.Validate(pro, post))
+}
+```
+
+Output:
+
+```text
+[Cannot be longer than 10 characters (Title: Rules from the data)]
+[]
+```
+
+The message of the error is translated by the plural forms of the built-in key, and the client gets the code `string.max_runes` with the `max` of the tenant.
