@@ -1302,7 +1302,7 @@
 <tbody>
 <tr>
 <td>valigo</td>
-<td><strong>485</strong></td>
+<td><strong>460</strong></td>
 <td><strong>0</strong></td>
 <td><strong>0</strong></td>
 </tr>
@@ -1314,7 +1314,7 @@
 </tr>
 <tr>
 <td>ozzo-validation</td>
-<td>2 900</td>
+<td>2 880</td>
 <td>2 000</td>
 <td>38</td>
 </tr>
@@ -1333,25 +1333,25 @@
 <tbody>
 <tr>
 <td>valigo, translated messages</td>
-<td>3 620</td>
-<td>3 152</td>
-<td>40</td>
+<td><strong>2 215</strong></td>
+<td><strong>1 168</strong></td>
+<td><strong>14</strong></td>
 </tr>
 <tr>
 <td>go-playground/validator, without messages</td>
-<td>2 630</td>
+<td>2 690</td>
 <td>1 688</td>
 <td>45</td>
 </tr>
 <tr>
 <td>go-playground/validator, with <code>Error()</code> of every error</td>
-<td>4 120</td>
+<td>4 160</td>
 <td>2 488</td>
 <td>69</td>
 </tr>
 <tr>
 <td>ozzo-validation, with <code>Error()</code></td>
-<td>12 700</td>
+<td>12 590</td>
 <td>11 026</td>
 <td>140</td>
 </tr>
@@ -1360,6 +1360,7 @@
 <ul>
 <li>valigo builds the rules once in <code>Configure</code> and reads the fields by precomputed accessors, so valid objects cost no allocations; go-playground/validator parses the tags once too, but works through <code>reflect</code> on every call, ozzo-validation builds its rules on every call of <code>Validate</code>.</li>
 <li>valigo builds the translated messages of the errors at once, go-playground/validator returns the errors without messages and builds them by <code>Error</code> or <code>Translate</code>: compare valigo with the row "with <code>Error()</code>".</li>
+<li>The rules of valigo append the errors to one pooled buffer, <code>Validate</code> copies it once; most allocations of an invalid object are the messages and the boxed values of the errors.</li>
 </ul>
 <h2 id="run">Run<a class="headerlink" href="#run" title="Permanent link">&para;</a></h2>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">cd</span><span class="w"> </span>bench

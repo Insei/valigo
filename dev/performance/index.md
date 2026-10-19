@@ -18,21 +18,22 @@ A valid object:
 
 | Library                 | ns/op   | B/op  | allocs/op |
 | ----------------------- | ------- | ----- | --------- |
-| valigo                  | **485** | **0** | **0**     |
+| valigo                  | **460** | **0** | **0**     |
 | go-playground/validator | 1 830   | 296   | 16        |
-| ozzo-validation         | 2 900   | 2 000 | 38        |
+| ozzo-validation         | 2 880   | 2 000 | 38        |
 
 An invalid object with 6 errors:
 
-| Library                                                | ns/op  | B/op   | allocs/op |
-| ------------------------------------------------------ | ------ | ------ | --------- |
-| valigo, translated messages                            | 3 620  | 3 152  | 40        |
-| go-playground/validator, without messages              | 2 630  | 1 688  | 45        |
-| go-playground/validator, with `Error()` of every error | 4 120  | 2 488  | 69        |
-| ozzo-validation, with `Error()`                        | 12 700 | 11 026 | 140       |
+| Library                                                | ns/op     | B/op      | allocs/op |
+| ------------------------------------------------------ | --------- | --------- | --------- |
+| valigo, translated messages                            | **2 215** | **1 168** | **14**    |
+| go-playground/validator, without messages              | 2 690     | 1 688     | 45        |
+| go-playground/validator, with `Error()` of every error | 4 160     | 2 488     | 69        |
+| ozzo-validation, with `Error()`                        | 12 590    | 11 026    | 140       |
 
 - valigo builds the rules once in `Configure` and reads the fields by precomputed accessors, so valid objects cost no allocations; go-playground/validator parses the tags once too, but works through `reflect` on every call, ozzo-validation builds its rules on every call of `Validate`.
 - valigo builds the translated messages of the errors at once, go-playground/validator returns the errors without messages and builds them by `Error` or `Translate`: compare valigo with the row "with `Error()`".
+- The rules of valigo append the errors to one pooled buffer, `Validate` copies it once; most allocations of an invalid object are the messages and the boxed values of the errors.
 
 ## Run
 
