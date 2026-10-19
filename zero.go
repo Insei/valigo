@@ -26,6 +26,9 @@ func zero(obj interface{}) error {
 	// allocate each of the structs fields
 	var err error
 	for i := 0; i < indirectVal.NumField(); i++ {
+		if !indirectVal.Type().Field(i).IsExported() {
+			continue
+		}
 		field := indirectVal.Field(i)
 
 		// pre-allocate pointer fields
