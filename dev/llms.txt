@@ -40,7 +40,8 @@ valigo validates Go structs by rules configured once with pointers to the fields
 
 ## Integrations
 
-- [huma](https://insei.github.io/valigo/latest/features/huma/index.md): huma inputs
+- [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md): the rules as the keywords of JSON Schema, Validator.Constraints
+- [huma](https://insei.github.io/valigo/latest/features/huma/index.md): huma inputs, the rules in the OpenAPI document
 - [gin](https://insei.github.io/valigo/latest/features/gin/index.md): gin binding
 - [echo](https://insei.github.io/valigo/latest/features/echo/index.md): echo validator
 

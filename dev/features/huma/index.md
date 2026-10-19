@@ -99,3 +99,108 @@ query.limit - Не может быть больше 100
 body.email - Должно быть электронным адресом
 body.tags[1] - Должно содержать только латинские буквы и цифры
 ```
+
+## The rules in the OpenAPI document
+
+`vhuma.OpenAPI(api, v)` returns the OpenAPI document of the api with the rules of valigo in the schemas of the request bodies and their nested structs, by [JSON Schema](https://insei.github.io/valigo/latest/features/schema/index.md): `maxLength` of `MaxRunes`, `format: email` of `Email`, `items` of `Each`, the required properties of `Required`. Serve it, so the clients and the generators of SDKs see the rules:
+
+```go
+mux.HandleFunc("GET /openapi.json", func(w http.ResponseWriter, r *http.Request) {
+    doc, err := vhuma.OpenAPI(api, validator)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    _ = json.NewEncoder(w).Encode(doc)
+})
+```
+
+with `config.OpenAPIPath = ""` instead of the document of huma, or under another path.
+
+- The schemas of huma are not changed: huma validates the requests by its tags, the rules of valigo are checked in `Resolve` with translated messages, without the duplicates of huma.
+- A keyword with another value than the one of the tags of huma, e.g. two `maxLength`, is added to `allOf`: the value must satisfy both.
+- The parameters keep the schemas of huma: an operation of huma doesn't know its input type.
+- The schemas are found by the registry of huma with the prefix `#/components/schemas/`, the default one.
+
+```go
+package main
+
+import (
+    "context"
+    "encoding/json"
+    "fmt"
+    "net/http"
+
+    "github.com/danielgtaylor/huma/v2"
+    "github.com/danielgtaylor/huma/v2/adapters/humago"
+    "github.com/insei/valigo"
+    vhuma "github.com/insei/valigo/huma"
+    "github.com/insei/valigo/str"
+)
+
+type CreateUserInput struct {
+    Body struct {
+        Name  string   `json:"name"`
+        Email string   `json:"email,omitempty"`
+        Tags  []string `json:"tags,omitempty"`
+    }
+}
+
+func main() {
+    validator := valigo.New(valigo.WithFieldLocationNamingFn(vhuma.Location))
+    valigo.Configure[CreateUserInput](validator, func(b valigo.Configurator[CreateUserInput], i *CreateUserInput) {
+        b.Field(&i.Body.Name).As(str.Of).MaxRunes(64)
+        b.Field(&i.Body.Email).As(str.Of).Required().Email()
+        b.Slice(&i.Body.Tags).As(str.Slice).MaxLen(5).Each(func(tag *str.BaseConfigurator) { tag.Alphanumeric() })
+    })
+
+    api := humago.New(http.NewServeMux(), huma.DefaultConfig("Users", "1.0.0"))
+    huma.Post(api, "/users", func(context.Context, *CreateUserInput) (*struct{}, error) { return nil, nil })
+
+    doc, err := vhuma.OpenAPI(api, validator)
+    if err != nil {
+        panic(err)
+    }
+    body := doc["components"].(map[string]any)["schemas"].(map[string]any)["CreateUserInputBody"].(map[string]any)
+    delete(body["properties"].(map[string]any), "$schema") // the property of huma for the link to the schema
+    out, _ := json.MarshalIndent(body, "", "  ")
+    fmt.Println(string(out))
+}
+```
+
+Output:
+
+```text
+{
+  "additionalProperties": false,
+  "properties": {
+    "email": {
+      "format": "email",
+      "minLength": 1,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 64,
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "pattern": "^[a-zA-Z0-9]+$",
+        "type": "string"
+      },
+      "maxItems": 5,
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "email"
+  ],
+  "type": "object"
+}
+```
+
+`email` is `omitempty` for huma, `Required` of valigo makes it required in the document; `tags` has the rules of its elements in `items`.
