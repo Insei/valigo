@@ -78,6 +78,7 @@ and a conversion that doesn't fit the field doesn't compile:
 # Errors and translations
 * Every error has the translated message, the location (`Tags[1]`, `address.city` with JSON paths), the value, a stable `Code` and named `Params`
 * Messages in English, German, Spanish, French and Russian with plural forms, the language of every request from the context, an `Accept-Language` middleware
+* Translations from a chain of sources: your catalogs of [go-i18n](https://github.com/nicksnyder/go-i18n) by `github.com/insei/valigo/integrations/goi18n`, the built-in YAML for the rest, or your own source
 * `problem`: the errors as `application/problem+json` of RFC 9457 with JSON pointers
 * The rules as the keywords of JSON Schema, `vhuma.OpenAPI` puts them into the OpenAPI document of huma: the clients see `maxLength`, `format`, `enum` of the rules
 * `github.com/insei/valigo/integrations/huma`, `github.com/insei/valigo/integrations/gin`, `github.com/insei/valigo/integrations/echo`: the rules of valigo in [huma](https://huma.rocks), [gin](https://gin-gonic.com) and [echo](https://echo.labstack.com)
