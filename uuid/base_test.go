@@ -149,6 +149,9 @@ func TestRules(t *testing.T) {
 }
 
 func TestZeroAllocationsOnValid(t *testing.T) {
+	if raceEnabled {
+		t.Skip("allocations are not stable under the race detector")
+	}
 	v := valigo.New()
 	valigo.Configure[ids](v, func(c valigo.Configurator[ids], m *ids) {
 		c.Field(&m.ID).As(vuuid.Of).Required().AnyOf(id1, id2)

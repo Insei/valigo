@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/insei/valigo"
+	"github.com/insei/valigo/internal/testenv"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
 )
@@ -146,6 +147,9 @@ func TestTrim(t *testing.T) {
 }
 
 func TestFormatRulesDontAllocate(t *testing.T) {
+	if testenv.RaceEnabled {
+		t.Skip("allocations are not stable under the race detector")
+	}
 	v := valigo.New()
 	valigo.Configure[texts](v, func(c valigo.Configurator[texts], m *texts) {
 		c.Field(&m.Name).As(str.Of).URL().Prefix("https://").Contains("example").MaxRunes(100)
