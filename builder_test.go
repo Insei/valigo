@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
 	"github.com/insei/valigo/str"
 	vuuid "github.com/insei/valigo/uuid"
@@ -60,104 +61,117 @@ func TestConfiguratorRules(t *testing.T) {
 		obj      *model
 		wantErrs int
 	}{
-		{"string max len ok", func(c Configurator[model], m *model) { c.String(&m.Name).MaxLen(3) }, &model{Name: "abc"}, 0},
-		{"string max len fail", func(c Configurator[model], m *model) { c.String(&m.Name).MaxLen(3) }, &model{Name: "abcd"}, 1},
-		{"string min len fail", func(c Configurator[model], m *model) { c.String(&m.Name).MinLen(3) }, &model{Name: "ab"}, 1},
-		{"string required fail", func(c Configurator[model], m *model) { c.String(&m.Name).Required() }, &model{}, 1},
-		{"string any of", func(c Configurator[model], m *model) { c.String(&m.Name).AnyOf("a", "b") }, &model{Name: "c"}, 1},
-		{"string regexp", func(c Configurator[model], m *model) { c.String(&m.Name).Regexp(regexp.MustCompile(`^\d+$`)) }, &model{Name: "12a"}, 1},
-		{"string email ok", func(c Configurator[model], m *model) { c.String(&m.Name).Email() }, &model{Name: "a@b.cc"}, 0},
-		{"string email fail", func(c Configurator[model], m *model) { c.String(&m.Name).Email() }, &model{Name: "a.b.cc"}, 1},
-		{"string chain errors", func(c Configurator[model], m *model) { c.String(&m.Name).MinLen(5).Email() }, &model{Name: "ab"}, 2},
-		{"named string type", func(c Configurator[model], m *model) { c.String(&m.Status).AnyOf("on") }, &model{Status: "off"}, 1},
-		{"nil *string skipped", func(c Configurator[model], m *model) { c.String(&m.NamePtr).MaxLen(1).MinLen(5) }, &model{}, 0},
-		{"nil *string required", func(c Configurator[model], m *model) { c.String(&m.NamePtr).Required() }, &model{}, 1},
-		{"*string checked", func(c Configurator[model], m *model) { c.String(&m.NamePtr).MaxLen(1) }, &model{NamePtr: ptr("ab")}, 1},
-		{"nil nested struct skipped", func(c Configurator[model], m *model) { c.String(&m.Addr.City).MaxLen(1) }, &model{}, 0},
-		{"nil nested struct required", func(c Configurator[model], m *model) { c.String(&m.Addr.City).Required() }, &model{}, 1},
-		{"nested struct checked", func(c Configurator[model], m *model) { c.String(&m.Addr.City).MaxLen(1) }, &model{Addr: &address{City: "ab"}}, 1},
-		{"inner struct checked", func(c Configurator[model], m *model) { c.String(&m.Inner.City).MaxLen(1) }, &model{Inner: address{City: "ab"}}, 1},
+		{"string max len ok", func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).MaxLen(3) }, &model{Name: "abc"}, 0},
+		{"string max len fail", func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).MaxLen(3) }, &model{Name: "abcd"}, 1},
+		{"string min len fail", func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).MinLen(3) }, &model{Name: "ab"}, 1},
+		{"string required fail", func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).Required() }, &model{}, 1},
+		{"string any of", func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).AnyOf("a", "b") }, &model{Name: "c"}, 1},
+		{"string regexp", func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).Regexp(regexp.MustCompile(`^\d+$`)) }, &model{Name: "12a"}, 1},
+		{"string email ok", func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).Email() }, &model{Name: "a@b.cc"}, 0},
+		{"string email fail", func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).Email() }, &model{Name: "a.b.cc"}, 1},
+		{"string chain errors", func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).MinLen(5).Email() }, &model{Name: "ab"}, 2},
+		{"named string type", func(c Configurator[model], m *model) { c.Field(&m.Status).As(str.Of).AnyOf("on") }, &model{Status: "off"}, 1},
+		{"nil *string skipped", func(c Configurator[model], m *model) { c.Field(&m.NamePtr).As(str.Of).MaxLen(1).MinLen(5) }, &model{}, 0},
+		{"nil *string required", func(c Configurator[model], m *model) { c.Field(&m.NamePtr).As(str.Of).Required() }, &model{}, 1},
+		{"*string checked", func(c Configurator[model], m *model) { c.Field(&m.NamePtr).As(str.Of).MaxLen(1) }, &model{NamePtr: ptr("ab")}, 1},
+		{"nil nested struct skipped", func(c Configurator[model], m *model) { c.Field(&m.Addr.City).As(str.Of).MaxLen(1) }, &model{}, 0},
+		{"nil nested struct required", func(c Configurator[model], m *model) { c.Field(&m.Addr.City).As(str.Of).Required() }, &model{}, 1},
+		{"nested struct checked", func(c Configurator[model], m *model) { c.Field(&m.Addr.City).As(str.Of).MaxLen(1) }, &model{Addr: &address{City: "ab"}}, 1},
+		{"inner struct checked", func(c Configurator[model], m *model) { c.Field(&m.Inner.City).As(str.Of).MaxLen(1) }, &model{Inner: address{City: "ab"}}, 1},
 
-		{"number max inclusive", func(c Configurator[model], m *model) { c.Number(&m.Age).Max(10) }, &model{Age: 10}, 0},
-		{"number max fail", func(c Configurator[model], m *model) { c.Number(&m.Age).Max(10) }, &model{Age: 11}, 1},
-		{"number min inclusive", func(c Configurator[model], m *model) { c.Number(&m.Age).Min(10) }, &model{Age: 10}, 0},
-		{"number min fail", func(c Configurator[model], m *model) { c.Number(&m.Age).Min(10) }, &model{Age: 9}, 1},
-		{"number int64 untyped const", func(c Configurator[model], m *model) { c.Number(&m.ID).Max(5) }, &model{ID: 6}, 1},
-		{"number float32", func(c Configurator[model], m *model) { c.Number(&m.Score).Max(1.5) }, &model{Score: 1.6}, 1},
-		{"number any of", func(c Configurator[model], m *model) { c.Number(&m.Age).AnyOf(1, 2) }, &model{Age: 3}, 1},
-		{"number interval inclusive", func(c Configurator[model], m *model) { c.Number(&m.Age).AnyOfInterval(1, 10) }, &model{Age: 10}, 0},
-		{"number interval fail", func(c Configurator[model], m *model) { c.Number(&m.Age).AnyOfInterval(1, 10) }, &model{Age: 11}, 1},
-		{"number required zero", func(c Configurator[model], m *model) { c.Number(&m.Age).Required() }, &model{}, 1},
-		{"number ptr nil skipped", func(c Configurator[model], m *model) { c.NumberPtr(&m.AgePtr).Max(10).Min(20) }, &model{}, 0},
-		{"number ptr nil required", func(c Configurator[model], m *model) { c.NumberPtr(&m.AgePtr).Required() }, &model{}, 1},
-		{"number ptr zero required", func(c Configurator[model], m *model) { c.NumberPtr(&m.AgePtr).Required() }, &model{AgePtr: ptr(0)}, 0},
-		{"number ptr checked", func(c Configurator[model], m *model) { c.NumberPtr(&m.AgePtr).Max(10) }, &model{AgePtr: ptr(11)}, 1},
+		{"number max inclusive", func(c Configurator[model], m *model) { c.Field(&m.Age).As(num.Of).Max(10) }, &model{Age: 10}, 0},
+		{"number max fail", func(c Configurator[model], m *model) { c.Field(&m.Age).As(num.Of).Max(10) }, &model{Age: 11}, 1},
+		{"number min inclusive", func(c Configurator[model], m *model) { c.Field(&m.Age).As(num.Of).Min(10) }, &model{Age: 10}, 0},
+		{"number min fail", func(c Configurator[model], m *model) { c.Field(&m.Age).As(num.Of).Min(10) }, &model{Age: 9}, 1},
+		{"number int64 untyped const", func(c Configurator[model], m *model) { c.Field(&m.ID).As(num.Of).Max(5) }, &model{ID: 6}, 1},
+		{"number float32", func(c Configurator[model], m *model) { c.Field(&m.Score).As(num.Of).Max(1.5) }, &model{Score: 1.6}, 1},
+		{"number any of", func(c Configurator[model], m *model) { c.Field(&m.Age).As(num.Of).AnyOf(1, 2) }, &model{Age: 3}, 1},
+		{"number interval inclusive", func(c Configurator[model], m *model) { c.Field(&m.Age).As(num.Of).AnyOfInterval(1, 10) }, &model{Age: 10}, 0},
+		{"number interval fail", func(c Configurator[model], m *model) { c.Field(&m.Age).As(num.Of).AnyOfInterval(1, 10) }, &model{Age: 11}, 1},
+		{"number required zero", func(c Configurator[model], m *model) { c.Field(&m.Age).As(num.Of).Required() }, &model{}, 1},
+		{"number ptr nil skipped", func(c Configurator[model], m *model) { c.Field(&m.AgePtr).As(num.Ptr).Max(10).Min(20) }, &model{}, 0},
+		{"number ptr nil required", func(c Configurator[model], m *model) { c.Field(&m.AgePtr).As(num.Ptr).Required() }, &model{}, 1},
+		{"number ptr zero required", func(c Configurator[model], m *model) { c.Field(&m.AgePtr).As(num.Ptr).Required() }, &model{AgePtr: ptr(0)}, 0},
+		{"number ptr checked", func(c Configurator[model], m *model) { c.Field(&m.AgePtr).As(num.Ptr).Max(10) }, &model{AgePtr: ptr(11)}, 1},
 
-		{"uuid required", func(c Configurator[model], m *model) { c.UUID(&m.UID).Required() }, &model{}, 1},
-		{"uuid any of", func(c Configurator[model], m *model) { c.UUID(&m.UID).AnyOf(id1) }, &model{UID: id2}, 1},
-		{"uuid ptr nil skipped", func(c Configurator[model], m *model) { c.UUID(&m.UIDPtr).AnyOf(id1) }, &model{}, 0},
-		{"uuid ptr nil required", func(c Configurator[model], m *model) { c.UUID(&m.UIDPtr).Required() }, &model{}, 1},
+		{"uuid required", func(c Configurator[model], m *model) { c.Field(&m.UID).As(vuuid.Of).Required() }, &model{}, 1},
+		{"uuid any of", func(c Configurator[model], m *model) { c.Field(&m.UID).As(vuuid.Of).AnyOf(id1) }, &model{UID: id2}, 1},
+		{"uuid ptr nil skipped", func(c Configurator[model], m *model) { c.Field(&m.UIDPtr).As(vuuid.Of).AnyOf(id1) }, &model{}, 0},
+		{"uuid ptr nil required", func(c Configurator[model], m *model) { c.Field(&m.UIDPtr).As(vuuid.Of).Required() }, &model{}, 1},
 
 		{"slice of ptrs", func(c Configurator[model], m *model) {
 			c.Slice(&m.IntPtrs).MaxLen(1).Each(func(e *shared.Field[*int]) { e.Check(func(v *int) bool { return v != nil }, "not nil") })
 		}, &model{IntPtrs: []*int{ptr(1), nil}}, 2},
+		{"slice each as num ptr", func(c Configurator[model], m *model) {
+			c.Slice(&m.IntPtrs).Each(func(e *shared.Field[*int]) { e.As(num.Ptr).Required().Max(5) })
+		}, &model{IntPtrs: []*int{ptr(1), nil, ptr(6)}}, 2},
+		{"slice each as str", func(c Configurator[model], m *model) {
+			c.Slice(&m.TagPtrs).Each(func(e *shared.Field[*string]) { e.As(str.Of).MinLen(2) })
+		}, &model{TagPtrs: []*string{ptr("a"), nil, ptr("ab")}}, 1},
+		{"base field rules", func(c Configurator[model], m *model) {
+			c.Field(&m.Age).Check(func(v int) bool { return v%2 == 0 }, "Should be even").Check(func(v int) bool { return v > 0 }, "Should be positive")
+		}, &model{Age: -1}, 2},
 		{"slice max len", func(c Configurator[model], m *model) { c.Slice(&m.Ints).MaxLen(2) }, &model{Ints: []int{1, 2, 3}}, 1},
 		{"slice min len", func(c Configurator[model], m *model) { c.Slice(&m.Ints).MinLen(2) }, &model{Ints: []int{1}}, 1},
 		{"slice required", func(c Configurator[model], m *model) { c.Slice(&m.Ints).Required() }, &model{Ints: []int{}}, 1},
 		{"slice each", func(c Configurator[model], m *model) {
 			c.Slice(&m.Ints).Each(func(e *shared.Field[int]) { e.Check(func(v int) bool { return v > 0 }, "positive") })
 		}, &model{Ints: []int{1, -2, 3, -4}}, 2},
-		{"string slice len", func(c Configurator[model], m *model) { c.StringSlice(&m.Tags).MaxLen(1) }, &model{Tags: []string{"a", "b"}}, 1},
+		{"string slice len", func(c Configurator[model], m *model) { c.Slice(&m.Tags).As(str.Slice).MaxLen(1) }, &model{Tags: []string{"a", "b"}}, 1},
 		{"string slice each", func(c Configurator[model], m *model) {
-			c.StringSlice(&m.Tags).Each(func(e *str.BaseConfigurator) { e.MaxLen(2) })
+			c.Slice(&m.Tags).As(str.Slice).Each(func(e *str.BaseConfigurator) { e.MaxLen(2) })
 		}, &model{Tags: []string{"ab", "abc", "abcd"}}, 2},
 		{"string slice regexp", func(c Configurator[model], m *model) {
-			c.StringSlice(&m.Tags).Required().Regexp(regexp.MustCompile(`^a`))
+			c.Slice(&m.Tags).As(str.Slice).Required().Regexp(regexp.MustCompile(`^a`))
 		}, &model{Tags: []string{"ab", "ba"}}, 1},
-		{"string slice email", func(c Configurator[model], m *model) { c.StringSlice(&m.Tags).Email() }, &model{Tags: []string{"a@b.cc", "ab"}}, 1},
+		{"string slice email", func(c Configurator[model], m *model) { c.Slice(&m.Tags).As(str.Slice).Email() }, &model{Tags: []string{"a@b.cc", "ab"}}, 1},
 		{"string slice of ptrs", func(c Configurator[model], m *model) {
-			c.StringSlice(&m.TagPtrs).Each(func(e *str.BaseConfigurator) { e.Required() })
+			c.Slice(&m.TagPtrs).As(str.Slice).Each(func(e *str.BaseConfigurator) { e.Required() })
 		}, &model{TagPtrs: []*string{ptr("a"), nil, ptr("")}}, 2},
-		{"ptr to string slice nil skipped", func(c Configurator[model], m *model) { c.StringSlice(&m.TagsPtr).MinLen(1).Email() }, &model{}, 0},
-		{"ptr to string slice nil required", func(c Configurator[model], m *model) { c.StringSlice(&m.TagsPtr).Required() }, &model{}, 1},
-		{"ptr to string slice checked", func(c Configurator[model], m *model) { c.StringSlice(&m.TagsPtr).Email() }, &model{TagsPtr: &[]string{"a"}}, 1},
+		{"ptr to string slice nil skipped", func(c Configurator[model], m *model) {
+			c.Field(&m.TagsPtr).As(shared.SlicePtr).As(str.Slice).MinLen(1).Email()
+		}, &model{}, 0},
+		{"ptr to string slice nil required", func(c Configurator[model], m *model) {
+			c.Field(&m.TagsPtr).As(shared.SlicePtr).As(str.Slice).Required()
+		}, &model{}, 1},
+		{"ptr to string slice checked", func(c Configurator[model], m *model) { c.Field(&m.TagsPtr).As(shared.SlicePtr).As(str.Slice).Email() }, &model{TagsPtr: &[]string{"a"}}, 1},
 		{"string slice when", func(c Configurator[model], m *model) {
-			c.StringSlice(&m.Tags).When(func(_ context.Context, v shared.Elems[string]) bool { return v.Len() > 1 }).MaxLen(1)
+			c.Slice(&m.Tags).As(str.Slice).When(func(_ context.Context, v shared.Elems[string]) bool { return v.Len() > 1 }).MaxLen(1)
 		}, &model{Tags: []string{"a", "b"}}, 1},
-		{"uuid slice any of", func(c Configurator[model], m *model) { c.UUIDSlice(&m.UIDs).AnyOf(id1) }, &model{UIDs: []*uuid.UUID{&id1, &id2, nil}}, 1},
+		{"uuid slice any of", func(c Configurator[model], m *model) { c.Slice(&m.UIDs).As(vuuid.Slice).AnyOf(id1) }, &model{UIDs: []*uuid.UUID{&id1, &id2, nil}}, 1},
 		{"uuid slice each", func(c Configurator[model], m *model) {
-			c.UUIDSlice(&m.UIDs).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
+			c.Slice(&m.UIDs).As(vuuid.Slice).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
 		}, &model{UIDs: []*uuid.UUID{&id1, nil}}, 1},
 
 		{"field when false", func(c Configurator[model], m *model) {
-			c.String(&m.Name).When(func(_ context.Context, v string) bool { return v != "skip" }).MaxLen(1)
+			c.Field(&m.Name).As(str.Of).When(func(_ context.Context, v string) bool { return v != "skip" }).MaxLen(1)
 		}, &model{Name: "skip"}, 0},
 		{"field when true", func(c Configurator[model], m *model) {
-			c.String(&m.Name).When(func(_ context.Context, v string) bool { return v != "skip" }).MaxLen(1)
+			c.Field(&m.Name).As(str.Of).When(func(_ context.Context, v string) bool { return v != "skip" }).MaxLen(1)
 		}, &model{Name: "other"}, 1},
 		{"field when absent skips required", func(c Configurator[model], m *model) {
-			c.String(&m.NamePtr).When(func(_ context.Context, v string) bool { return true }).Required()
+			c.Field(&m.NamePtr).As(str.Of).When(func(_ context.Context, v string) bool { return true }).Required()
 		}, &model{}, 0},
 		{"number ptr when absent", func(c Configurator[model], m *model) {
-			c.NumberPtr(&m.AgePtr).When(func(_ context.Context, v int) bool { return v == 0 }).Max(-1)
+			c.Field(&m.AgePtr).As(num.Ptr).When(func(_ context.Context, v int) bool { return v == 0 }).Max(-1)
 		}, &model{}, 0},
 		{"number when", func(c Configurator[model], m *model) {
-			c.Number(&m.Age).When(func(_ context.Context, v int) bool { return v > 100 }).Max(10)
+			c.Field(&m.Age).As(num.Of).When(func(_ context.Context, v int) bool { return v > 100 }).Max(10)
 		}, &model{Age: 50}, 0},
 		{"struct when", func(c Configurator[model], m *model) {
-			c.When(func(_ context.Context, m *model) bool { return m.Age > 0 }).String(&m.Name).Required()
+			c.When(func(_ context.Context, m *model) bool { return m.Age > 0 }).Field(&m.Name).As(str.Of).Required()
 		}, &model{}, 0},
 		{"struct when chained", func(c Configurator[model], m *model) {
 			c.When(func(_ context.Context, m *model) bool { return m.Age > 0 }).
 				When(func(_ context.Context, m *model) bool { return m.ID > 0 }).
-				String(&m.Name).Required()
+				Field(&m.Name).As(str.Of).Required()
 		}, &model{Age: 1}, 0},
 		{"struct when does not affect parent", func(c Configurator[model], m *model) {
 			c.When(func(_ context.Context, m *model) bool { return false })
-			c.String(&m.Name).Required()
+			c.Field(&m.Name).As(str.Of).Required()
 		}, &model{}, 1},
 		{"field custom typed", func(c Configurator[model], m *model) {
-			c.Number(&m.Age).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v int) []shared.Error {
+			c.Field(&m.Age).As(num.Of).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v int) []shared.Error {
 				if v%2 != 0 {
 					return []shared.Error{h.ErrorT(ctx, v, "should be even")}
 				}
@@ -183,7 +197,7 @@ func TestConfiguratorRules(t *testing.T) {
 
 func TestErrorContent(t *testing.T) {
 	errs := validateModel(t, func(c Configurator[model], m *model) {
-		c.String(&m.Inner.City).MaxLen(3)
+		c.Field(&m.Inner.City).As(str.Of).MaxLen(3)
 		c.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *model) []shared.Error {
 			return []shared.Error{h.ErrorT(ctx, &obj.Age, obj.Age, "custom %d", 1)}
 		})
@@ -195,7 +209,7 @@ func TestErrorContent(t *testing.T) {
 
 func TestElementErrorLocation(t *testing.T) {
 	errs := validateModel(t, func(c Configurator[model], m *model) {
-		c.StringSlice(&m.Tags).MaxLen(2).Email()
+		c.Slice(&m.Tags).As(str.Slice).MaxLen(2).Email()
 	}, &model{Tags: []string{"a@b.cc", "x", "y"}})
 	require.Len(t, errs, 3)
 	assert.Equal(t, "Tags", errs[0].Location)
@@ -206,7 +220,7 @@ func TestElementErrorLocation(t *testing.T) {
 func TestReconfigureReplacesRules(t *testing.T) {
 	v := New()
 	for range 3 {
-		Configure[model](v, func(c Configurator[model], m *model) { c.String(&m.Name).Required() })
+		Configure[model](v, func(c Configurator[model], m *model) { c.Field(&m.Name).As(str.Of).Required() })
 	}
 	assert.Len(t, v.ValidateTyped(context.Background(), &model{}), 1)
 }
@@ -214,10 +228,10 @@ func TestReconfigureReplacesRules(t *testing.T) {
 func TestTrim(t *testing.T) {
 	obj := &model{Name: "  a  ", NamePtr: ptr(" b "), Tags: []string{" c ", "d "}, TagPtrs: []*string{ptr(" e"), nil}}
 	errs := validateModel(t, func(c Configurator[model], m *model) {
-		c.String(&m.Name).Trim().MaxLen(1)
-		c.String(&m.NamePtr).Trim().MaxLen(1)
-		c.StringSlice(&m.Tags).Trim().Each(func(e *str.BaseConfigurator) { e.MaxLen(1) })
-		c.StringSlice(&m.TagPtrs).Trim()
+		c.Field(&m.Name).As(str.Of).Trim().MaxLen(1)
+		c.Field(&m.NamePtr).As(str.Of).Trim().MaxLen(1)
+		c.Slice(&m.Tags).As(str.Slice).Trim().Each(func(e *str.BaseConfigurator) { e.MaxLen(1) })
+		c.Slice(&m.TagPtrs).As(str.Slice).Trim()
 	}, obj)
 	assert.Empty(t, errs)
 	assert.Equal(t, "a", obj.Name)
@@ -242,7 +256,7 @@ func TestSliceElemsValues(t *testing.T) {
 func TestValidate(t *testing.T) {
 	v := New()
 	Configure[model](v, func(c Configurator[model], m *model) {
-		c.String(&m.Name).Trim().Required()
+		c.Field(&m.Name).As(str.Of).Trim().Required()
 	})
 	ctx := context.Background()
 
@@ -262,7 +276,7 @@ func TestValidate(t *testing.T) {
 func TestConfigurePanics(t *testing.T) {
 	foreign := ""
 	assert.PanicsWithValue(t, "valigo: *string is not a pointer to a field of *valigo.model: field not found", func() {
-		Configure[model](New(), func(c Configurator[model], m *model) { c.String(&foreign) })
+		Configure[model](New(), func(c Configurator[model], m *model) { c.Field(&foreign).As(str.Of) })
 	})
 }
 
@@ -272,7 +286,7 @@ func TestConfigureWithUnexportedStructField(t *testing.T) {
 		Name string
 	}
 	v := New()
-	Configure[withMutex](v, func(c Configurator[withMutex], m *withMutex) { c.String(&m.Name).Required() })
+	Configure[withMutex](v, func(c Configurator[withMutex], m *withMutex) { c.Field(&m.Name).As(str.Of).Required() })
 	assert.Len(t, v.ValidateTyped(context.Background(), &withMutex{}), 1)
 }
 
@@ -282,13 +296,13 @@ func TestConfigureRecursiveType(t *testing.T) {
 		Next *node
 	}
 	v := New()
-	Configure[node](v, func(c Configurator[node], m *node) { c.String(&m.Name).Required() })
+	Configure[node](v, func(c Configurator[node], m *node) { c.Field(&m.Name).As(str.Of).Required() })
 	assert.Len(t, v.ValidateTyped(context.Background(), &node{Next: &node{}}), 1)
 }
 
 func TestNilWhen(t *testing.T) {
 	errs := validateModel(t, func(c Configurator[model], m *model) {
-		c.When(nil).String(&m.Name).Required()
+		c.When(nil).Field(&m.Name).As(str.Of).Required()
 	}, &model{})
 	assert.Len(t, errs, 1)
 }
@@ -318,15 +332,15 @@ func TestZeroAllocationsOnValid(t *testing.T) {
 	}
 	v := New()
 	Configure[model](v, func(c Configurator[model], m *model) {
-		c.String(&m.Name).Trim().Required().MaxLen(10).Email()
-		c.String(&m.NamePtr).MaxLen(5)
-		c.String(&m.Addr.City).Required()
-		c.Number(&m.Age).Min(0).Max(100).AnyOfInterval(0, 100)
-		c.NumberPtr(&m.AgePtr).Required().Max(10)
-		c.UUID(&m.UID).Required()
-		c.StringSlice(&m.Tags).Required().MaxLen(5).Each(func(e *str.BaseConfigurator) { e.Trim().MaxLen(3) })
-		c.UUIDSlice(&m.UIDs).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
-		c.When(func(_ context.Context, m *model) bool { return m.Age > 0 }).Number(&m.ID).Min(1)
+		c.Field(&m.Name).As(str.Of).Trim().Required().MaxLen(10).Email()
+		c.Field(&m.NamePtr).As(str.Of).MaxLen(5)
+		c.Field(&m.Addr.City).As(str.Of).Required()
+		c.Field(&m.Age).As(num.Of).Min(0).Max(100).AnyOfInterval(0, 100)
+		c.Field(&m.AgePtr).As(num.Ptr).Required().Max(10)
+		c.Field(&m.UID).As(vuuid.Of).Required()
+		c.Slice(&m.Tags).As(str.Slice).Required().MaxLen(5).Each(func(e *str.BaseConfigurator) { e.Trim().MaxLen(3) })
+		c.Slice(&m.UIDs).As(vuuid.Slice).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
+		c.When(func(_ context.Context, m *model) bool { return m.Age > 0 }).Field(&m.ID).As(num.Of).Min(1)
 		c.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *model) []shared.Error {
 			if obj.Age < 0 {
 				return []shared.Error{h.ErrorT(ctx, &obj.Age, obj.Age, "negative")}

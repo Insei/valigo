@@ -9,7 +9,9 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
+	"github.com/insei/valigo/str"
 )
 
 type Sender struct {
@@ -48,7 +50,7 @@ func benchValidateInit() {
 	}
 	initialized = true
 	Configure[Sender](validator, func(builder Configurator[Sender], temp *Sender) {
-		builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value string) []shared.Error {
+		builder.Field(&temp.HTTPDestParam).As(str.Of).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value string) []shared.Error {
 			v := value
 			if len(v) < 20 {
 				return []shared.Error{h.ErrorT(ctx, v, "Should be longer than 20 characters")}
@@ -65,18 +67,18 @@ func benchValidateInit() {
 		smtpValidator := builder.When(func(_ context.Context, obj *Sender) bool {
 			return obj.Type == "SMTP"
 		})
-		smtpValidator.String(&temp.SMTPHost).Trim().Required()
-		smtpValidator.String(&temp.SMTPPort).Trim().Required()
-		smtpValidator.Number(&temp.SMTPInt).Max(20)
-		builder.String(&temp.PtrString).Trim().Required()
+		smtpValidator.Field(&temp.SMTPHost).As(str.Of).Trim().Required()
+		smtpValidator.Field(&temp.SMTPPort).As(str.Of).Trim().Required()
+		smtpValidator.Field(&temp.SMTPInt).As(num.Of).Max(20)
+		builder.Field(&temp.PtrString).As(str.Of).Trim().Required()
 		//builder.Custom(func(ctx context.Context, h shared.StructCustomHelper, obj *Sender) []shared.Error {
 		//	h.ErrorT(ctx)
 		//})
 		httpValidator := builder.When(func(_ context.Context, temp *Sender) bool {
 			return temp.Type == "HTTP"
 		})
-		httpValidator.String(&temp.HTTPAddress).Trim().Required()
-		httpValidator.String(&temp.HTTPDestParam).Trim().Required()
+		httpValidator.Field(&temp.HTTPAddress).As(str.Of).Trim().Required()
+		httpValidator.Field(&temp.HTTPDestParam).As(str.Of).Trim().Required()
 	})
 }
 
@@ -244,8 +246,8 @@ func TestNewValidator(t *testing.T) {
 }
 
 func TestConfigure(t *testing.T) {
-	str := "ptr-string"
-	ptrString := &str
+	s := "ptr-string"
+	ptrString := &s
 	re := regexp.MustCompile(`SMTP`)
 	tests := []struct {
 		name          string
@@ -279,7 +281,7 @@ func TestConfigure(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			Configure[Sender](validator, func(builder Configurator[Sender], temp *Sender) {
-				builder.String(&temp.HTTPDestParam).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value string) []shared.Error {
+				builder.Field(&temp.HTTPDestParam).As(str.Of).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, value string) []shared.Error {
 					v := value
 					if len(v) < 20 {
 						return []shared.Error{h.ErrorT(ctx, v, "Should be longer than 20 characters")}
@@ -290,17 +292,17 @@ func TestConfigure(t *testing.T) {
 				smtpValidator := builder.When(func(_ context.Context, obj *Sender) bool {
 					return obj.Type == "SMTP"
 				})
-				smtpValidator.String(&temp.SMTPHost).Trim().Required()
-				smtpValidator.String(&temp.SMTPPort).Trim().Required()
+				smtpValidator.Field(&temp.SMTPHost).As(str.Of).Trim().Required()
+				smtpValidator.Field(&temp.SMTPPort).As(str.Of).Trim().Required()
 
-				builder.String(&temp.PtrString).Trim().Required()
+				builder.Field(&temp.PtrString).As(str.Of).Trim().Required()
 
 				httpValidator := builder.When(func(_ context.Context, temp *Sender) bool {
 					return temp.Type == "HTTP"
 				})
-				httpValidator.String(&temp.HTTPAddress).Trim().Required()
-				httpValidator.String(&temp.HTTPDestParam).Trim().Required()
-				httpValidator.String(&temp.Type).Trim().Regexp(re).MaxLen(5).MinLen(3)
+				httpValidator.Field(&temp.HTTPAddress).As(str.Of).Trim().Required()
+				httpValidator.Field(&temp.HTTPDestParam).As(str.Of).Trim().Required()
+				httpValidator.Field(&temp.Type).As(str.Of).Trim().Regexp(re).MaxLen(5).MinLen(3)
 			})
 			errs := validator.Validate(context.Background(), tt.sender)
 			if tt.expectedError && !(errs != nil && len(errs) > 0) {

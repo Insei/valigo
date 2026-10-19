@@ -6,13 +6,9 @@ import (
 	"reflect"
 	"sync"
 
-	guuid "github.com/google/uuid"
 	"github.com/insei/fmap/v3"
 
-	"github.com/insei/valigo/num"
 	"github.com/insei/valigo/shared"
-	"github.com/insei/valigo/str"
-	"github.com/insei/valigo/uuid"
 )
 
 // Configurator configures validation rules for the struct type T.
@@ -103,44 +99,17 @@ func (c Configurator[T]) Custom(fn func(ctx context.Context, h shared.StructCust
 	})
 }
 
-// String returns a configurator for a string or *string field.
-func (c Configurator[T]) String[F ~string | *string](fieldPtr *F) *str.BaseConfigurator {
+// Field returns the base configurator of the field, convert it to a typed one with As:
+// b.Field(&m.Name).As(str.Of), b.Field(&m.Discount).As(num.Ptr).
+func (c Configurator[T]) Field[F any](fieldPtr *F) *shared.Field[F] {
 	field := c.field(fieldPtr)
-	return str.NewBaseConfigurator(shared.NewValueField[string](field, c.b.v.helper, c.add))
+	return shared.NewValueField[F](field, c.b.v.helper, c.add)
 }
 
-// Number returns a configurator for a numeric field.
-func (c Configurator[T]) Number[N num.Number](fieldPtr *N) *num.BaseConfigurator[N] {
-	field := c.field(fieldPtr)
-	return num.NewBaseConfigurator(shared.NewValueField[N](field, c.b.v.helper, c.add), false)
-}
-
-// NumberPtr returns a configurator for a pointer to numeric field, nil values are skipped by all rules except Required.
-func (c Configurator[T]) NumberPtr[N num.Number](fieldPtr **N) *num.BaseConfigurator[N] {
-	field := c.field(fieldPtr)
-	return num.NewBaseConfigurator(shared.NewValueField[N](field, c.b.v.helper, c.add), true)
-}
-
-// UUID returns a configurator for an uuid.UUID or *uuid.UUID field.
-func (c Configurator[T]) UUID[F guuid.UUID | *guuid.UUID](fieldPtr *F) *uuid.BaseConfigurator {
-	field := c.field(fieldPtr)
-	return uuid.NewBaseConfigurator(shared.NewValueField[guuid.UUID](field, c.b.v.helper, c.add))
-}
-
-// Slice returns a configurator for a slice field.
+// Slice returns the configurator of the slice field with the rules of the slice itself,
+// convert it to a typed one with As for the rules of elements: b.Slice(&m.Tags).As(str.Slice).
+// A pointer to a slice field is converted from its field: b.Field(&m.Tags).As(shared.SlicePtr).
 func (c Configurator[T]) Slice[E any](sliceFieldPtr *[]E) *shared.SliceFieldConfigurator[E] {
 	field := c.field(sliceFieldPtr)
 	return shared.NewSliceFieldConfigurator[E](field, c.b.v.helper, c.add)
-}
-
-// StringSlice returns a configurator for a slice of strings field.
-func (c Configurator[T]) StringSlice[F []string | *[]string | []*string | *[]*string](sliceFieldPtr *F) *str.StringSliceFieldConfigurator {
-	field := c.field(sliceFieldPtr)
-	return str.NewStringSliceFieldConfigurator(shared.NewSliceFieldConfigurator[string](field, c.b.v.helper, c.add))
-}
-
-// UUIDSlice returns a configurator for a slice of uuids field.
-func (c Configurator[T]) UUIDSlice[F []guuid.UUID | *[]guuid.UUID | []*guuid.UUID | *[]*guuid.UUID](sliceFieldPtr *F) *uuid.UUIDSliceFieldConfigurator {
-	field := c.field(sliceFieldPtr)
-	return uuid.NewUUIDSliceFieldConfigurator(shared.NewSliceFieldConfigurator[guuid.UUID](field, c.b.v.helper, c.add))
 }

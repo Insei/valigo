@@ -42,36 +42,36 @@ func TestRules(t *testing.T) {
 	}{
 		{
 			name: "required nil uuid",
-			cfg:  func(c valigo.Configurator[ids], m *ids) { c.UUID(&m.ID).Required() },
+			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Field(&m.ID).As(vuuid.Of).Required() },
 			obj:  &ids{},
 			want: []shared.Error{{Location: "ID", Message: "Should be fulfilled", Value: uuid.Nil}},
 		},
 		{
 			name: "required ok",
-			cfg:  func(c valigo.Configurator[ids], m *ids) { c.UUID(&m.ID).Required() },
+			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Field(&m.ID).As(vuuid.Of).Required() },
 			obj:  &ids{ID: id1},
 		},
 		{
 			name: "required nil pointer",
-			cfg:  func(c valigo.Configurator[ids], m *ids) { c.UUID(&m.IDPtr).Required() },
+			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Field(&m.IDPtr).As(vuuid.Of).Required() },
 			obj:  &ids{},
 			want: []shared.Error{{Location: "IDPtr", Message: "Should be fulfilled"}},
 		},
 		{
 			name: "any of",
-			cfg:  func(c valigo.Configurator[ids], m *ids) { c.UUID(&m.ID).AnyOf(id1) },
+			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Field(&m.ID).As(vuuid.Of).AnyOf(id1) },
 			obj:  &ids{ID: id2},
 			want: []shared.Error{{Location: "ID", Message: "Only [" + id1.String() + "] values is allowed", Value: id2}},
 		},
 		{
 			name: "any of skips nil pointer",
-			cfg:  func(c valigo.Configurator[ids], m *ids) { c.UUID(&m.IDPtr).AnyOf(id1) },
+			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Field(&m.IDPtr).As(vuuid.Of).AnyOf(id1) },
 			obj:  &ids{},
 		},
 		{
 			name: "custom",
 			cfg: func(c valigo.Configurator[ids], m *ids) {
-				c.UUID(&m.ID).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v uuid.UUID) []shared.Error {
+				c.Field(&m.ID).As(vuuid.Of).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v uuid.UUID) []shared.Error {
 					if v.Version() != 7 {
 						return []shared.Error{h.ErrorT(ctx, v, "Should be v7")}
 					}
@@ -84,32 +84,34 @@ func TestRules(t *testing.T) {
 		{
 			name: "when",
 			cfg: func(c valigo.Configurator[ids], m *ids) {
-				c.UUID(&m.ID).When(func(_ context.Context, v uuid.UUID) bool { return v != id1 }).AnyOf(id2)
+				c.Field(&m.ID).As(vuuid.Of).When(func(_ context.Context, v uuid.UUID) bool { return v != id1 }).AnyOf(id2)
 			},
 			obj: &ids{ID: id1},
 		},
 		{
 			name: "slice length",
-			cfg:  func(c valigo.Configurator[ids], m *ids) { c.UUIDSlice(&m.IDs).MinLen(1).MaxLen(1) },
+			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Slice(&m.IDs).As(vuuid.Slice).MinLen(1).MaxLen(1) },
 			obj:  &ids{IDs: []uuid.UUID{id1, id2}},
 			want: []shared.Error{{Location: "IDs", Message: "Cannot contain more than 1 elements", Value: 2}},
 		},
 		{
 			name: "slice required",
-			cfg:  func(c valigo.Configurator[ids], m *ids) { c.UUIDSlice(&m.IDsPtr).Required() },
+			cfg: func(c valigo.Configurator[ids], m *ids) {
+				c.Field(&m.IDsPtr).As(shared.SlicePtr).As(vuuid.Slice).Required()
+			},
 			obj:  &ids{},
 			want: []shared.Error{{Location: "IDsPtr", Message: "Should be fulfilled"}},
 		},
 		{
 			name: "slice any of",
-			cfg:  func(c valigo.Configurator[ids], m *ids) { c.UUIDSlice(&m.IDPtrs).AnyOf(id1) },
+			cfg:  func(c valigo.Configurator[ids], m *ids) { c.Slice(&m.IDPtrs).As(vuuid.Slice).AnyOf(id1) },
 			obj:  &ids{IDPtrs: []*uuid.UUID{&id1, nil, &id2}},
 			want: []shared.Error{{Location: "IDPtrs[2]", Message: "Only [" + id1.String() + "] values is allowed", Value: id2}},
 		},
 		{
 			name: "slice each",
 			cfg: func(c valigo.Configurator[ids], m *ids) {
-				c.UUIDSlice(&m.Parents).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
+				c.Field(&m.Parents).As(shared.SlicePtr).As(vuuid.Slice).Each(func(e *vuuid.BaseConfigurator) { e.Required() })
 			},
 			obj:  &ids{Parents: &[]*uuid.UUID{nil, &id1}},
 			want: []shared.Error{{Location: "Parents[0]", Message: "Should be fulfilled"}},
@@ -117,7 +119,7 @@ func TestRules(t *testing.T) {
 		{
 			name: "slice custom",
 			cfg: func(c valigo.Configurator[ids], m *ids) {
-				c.UUIDSlice(&m.IDs).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v shared.Elems[uuid.UUID]) []shared.Error {
+				c.Slice(&m.IDs).As(vuuid.Slice).Custom(func(ctx context.Context, h *shared.FieldCustomHelper, v shared.Elems[uuid.UUID]) []shared.Error {
 					seen := map[uuid.UUID]bool{}
 					for _, id := range v.All() {
 						if seen[*id] {
@@ -134,7 +136,7 @@ func TestRules(t *testing.T) {
 		{
 			name: "slice when",
 			cfg: func(c valigo.Configurator[ids], m *ids) {
-				c.UUIDSlice(&m.IDs).When(func(_ context.Context, v shared.Elems[uuid.UUID]) bool { return v.Len() > 2 }).AnyOf(id1)
+				c.Slice(&m.IDs).As(vuuid.Slice).When(func(_ context.Context, v shared.Elems[uuid.UUID]) bool { return v.Len() > 2 }).AnyOf(id1)
 			},
 			obj: &ids{IDs: []uuid.UUID{id2}},
 		},
