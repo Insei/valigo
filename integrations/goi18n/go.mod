@@ -8,7 +8,7 @@ require (
 	github.com/insei/valigo v0.2.0
 	github.com/nicksnyder/go-i18n/v2 v2.7.0
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/text v0.43.0
+	golang.org/x/text v0.44.0
 )
 
 require (
