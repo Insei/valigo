@@ -6,7 +6,7 @@ replace github.com/insei/valigo => ../../
 
 require (
 	github.com/insei/valigo v0.1.0
-	github.com/labstack/echo/v4 v4.16.5
+	github.com/labstack/echo/v4 v4.16.6
 	github.com/stretchr/testify v1.12.1
 )
 
